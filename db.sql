@@ -53,6 +53,19 @@ CREATE TABLE Property
 );
 GO
 
+CREATE TABLE Admin
+(
+	ID int identity(1,1) PRIMARY KEY,
+	fullName varchar(50) NOT NULL,
+	userName varchar(50) NOT NULL UNIQUE,
+	Password varchar(30) NOT NULL,
+	email varchar(30) NOT NULL,
+	CNIC varchar(13) NOT NULL,
+	accountCreationDate Date NOT NULL
+);
+GO
+
+
 CREATE TABLE Payment
 (
 	paymentID INT IDENTITY(1,1) PRIMARY KEY,
@@ -139,6 +152,10 @@ INSERT INTO Tenant (fullName, userName, Password, email, CNIC, accountCreationDa
 ('Usman Tariq', 'usmant', 'tenantPass3', 'usmant@mail.com', '3520311122446', '2023-05-22'),
 ('Hira Naveed', 'hiran', 'tenantPass4', 'hiran@mail.com', '3520311122447', '2023-06-05'),
 ('Kashif Rana', 'kashifr', 'tenantPass5', 'kashifr@mail.com', '3520311122448', '2023-07-09');
+GO
+
+INSERT INTO Admin(fullName, userName, Password, email, CNIC, accountCreationDate)
+VALUES('Im Admin', 'imadmin', 'maAdminHoo', 'admin@gmail.com', '1234567890123', GETDATE());
 GO
 
 INSERT INTO Property (propertyName, location, fixedRent, ownerName, tenantName, numOfBedRooms, numOfRooms, numOfBaths) VALUES
