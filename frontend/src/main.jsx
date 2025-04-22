@@ -5,9 +5,11 @@ import './index.css'
 import Home from './pages/home';
 import AdminDashboard from './pages/adminDashboard';
 import AdminDetails from './pages/adminDetails';
-import AdminManageOwners from './pages/adminMngOwners';
+import AdminMngOwners from './pages/adminMngOwners';
 import AdminManageProperties from './pages/adminMngProperties';
 import AdminPayHistory from './pages/adminPayHistory';
+import AdminStats from './pages/adminStats';
+import AdminMngTenants from './pages/adminMngTenants';
 
 
 const router = createBrowserRouter([
@@ -35,14 +37,7 @@ const router = createBrowserRouter([
       </>
     ),
   },
-  { 
-    path: "/adminMngOwners",
-    element: (
-      <>
-        <AdminManageOwners />
-      </>
-    ),
-  },
+  
   { 
     path: "/adminMngProperties",
     element: (
@@ -56,6 +51,30 @@ const router = createBrowserRouter([
     element: (
       <>
         <AdminPayHistory />
+      </>
+    ),
+  },
+  { 
+    path: "/adminStatistics",
+    element: (
+      <>
+        <AdminStats />
+      </>
+    ),
+  },
+  { 
+    path: "/adminMngTenants",
+    element: (
+      <>
+        <AdminMngTenants />
+      </>
+    ),
+  },
+  { 
+    path: "/adminMngOwners",
+    element: (
+      <>
+        <AdminMngOwners />
       </>
     ),
   },

@@ -37,7 +37,7 @@ const Sidebar = (setPage) => {
                     <Link to="/adminMngOwners" className={linkClass("/adminMngOwners")}>
                         <Users className="w-5 h-5 mr-2" /> Owners
                     </Link>
-                    <Link to="/tenants" className={linkClass("/tenants")}>
+                    <Link to="/adminMngTenants" className={linkClass("/adminMngTenants")}>
                         <Users className="w-5 h-5 mr-2" /> Tenants
                     </Link>
                 </div>
@@ -48,7 +48,7 @@ const Sidebar = (setPage) => {
                     <Link to="/adminMngPayments" className={linkClass("/adminMngPayments")}>
                         <FileText className="w-5 h-5 mr-2" /> Payment History
                     </Link>
-                    <Link to="/statistics" className={linkClass("/statistics")}>
+                    <Link to="/adminStatistics" className={linkClass("/adminStatistics")}>
                         <BarChart2 className="w-5 h-5 mr-2" /> Statistics
                     </Link>
                 </div>
