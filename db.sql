@@ -165,6 +165,8 @@ INSERT INTO Property (propertyName, location, fixedRent, ownerName, tenantName, 
 ('Ocean Breeze Flat', 'Clifton Block 7, Karachi', 55000.00, 'fatiman', 'hiran', 2, 3, 2),
 ('Urban Nest', 'Johar Town, Lahore', 47000.00, 'zainsh', 'kashifr', 3, 4, 2);
 GO
+INSERT INTO Property (propertyName, location, fixedRent, ownerName, tenantName, numOfBedRooms, numOfRooms, numOfBaths) VALUES
+('Sunset Villa', 'DHA Phase 6, Lahore', 65000.00, 'amirq', 'hamzam', 3, 5, 3)
 
 INSERT INTO Payment (paymentStatus, paymentDate, amount, propertyID, tenantUserName, ownerUserName) VALUES
 ('Paid', '2024-02-01', 65000, 1, 'hamzam', 'amirq'),
@@ -205,3 +207,6 @@ INSERT INTO tenantNotifications (tenantID, subject, sentDate, propertyName, owne
 (2, 'Maintenance Scheduled', '2024-02-04', 'Blue Apartments', 'sarak', 'Plumbing maintenance is scheduled this week.'),
 (3, 'Payment Overdue', '2024-02-11', 'Hill View Residency', 'alirz', 'Your rent is overdue. Please clear it immediately.');
 GO
+
+INSERT INTO Payment (paymentStatus, paymentDate, amount, propertyID, tenantUserName, ownerUserName) VALUES
+('Paid', '2024-02-01', 65000, 6, 'hamzam', 'amirq')
