@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Sidebar from "../utility/adminSidebar";
+import Histogram from "../utility/Histogram";
 
 
 const AdminDashboard = () => {
@@ -20,7 +21,7 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* top 3 boxes */}
-                <div className="flex w-[100%] justify-between pl-[80px] pr-[50px] mt-[40px]">
+                <div className="flex w-[100%] justify-between pl-[80px] pr-[50px] mt-[20px]">
                     <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px]">
                         <div className="flex flex-col gap-[40px]">
                             <h1 className="text-[18px]">Welcome Back Haseeb Ahmad!</h1>
@@ -44,7 +45,7 @@ const AdminDashboard = () => {
                     </div>
                 </div>
                 {/* mid 4 boxes */}
-                <div className="flex w-[100%] justify-between pl-[80px] pr-[50px] mt-[50px]">
+                <div className="flex w-[100%] justify-between pl-[80px] pr-[50px] mt-[30px]">
                     <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[]">
                         <div>
                             <h1 className="text-[#343434] text-[20px]">Total Owners</h1>
@@ -80,6 +81,10 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* Histogram */}
+                <div className="pl-[80px] pr-[50px] mt-[30px]">
+                    <Histogram />
+                </div>
+
             </div>
 
 

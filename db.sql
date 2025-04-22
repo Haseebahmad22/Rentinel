@@ -70,7 +70,7 @@ CREATE TABLE Payment
 (
 	paymentID INT IDENTITY(1,1) PRIMARY KEY,
 	paymentStatus varchar(20),
-	paymentDate DATE,
+	paymentDate DATE NOT NULL,
 	amount INT NOT NULL,
 	propertyID INT NOT NULL,
 	tenantUserName varchar(50),
