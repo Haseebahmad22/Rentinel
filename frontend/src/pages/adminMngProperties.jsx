@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Sidebar from "../utility/adminSidebar";
 import axios from "axios";
 import { Pencil, Trash2, Eye, ChevronLeft } from "lucide-react";
@@ -6,6 +6,18 @@ import { Pencil, Trash2, Eye, ChevronLeft } from "lucide-react";
 const AdminMngProperties = () => {
     const [properties, setProperties] = useState([]);
     const [viewedProperty, setViewedProperty] = useState(null);
+    const [editMode, setEditMode] = useState(false);
+    const [activeField, setActiveField] = useState(null);
+    const inputRef = useRef(null);
+
+    useEffect(() => {
+        if (inputRef.current && activeField) {
+            inputRef.current.focus();
+            const length = inputRef.current.value.length;
+            inputRef.current.setSelectionRange(length, length); // place cursor at end
+        }
+    }, [viewedProperty, activeField]);
+    
 
     useEffect(() => {
         axios.get("http://localhost:8080/properties")
@@ -22,21 +34,57 @@ const AdminMngProperties = () => {
     };
 
     const handleView = (property) => {
-        setViewedProperty(property);
+        setViewedProperty({ ...property }); // Clone
+        setEditMode(false);
     };
+    
+    const handleEdit = (property) => {
+        setViewedProperty({ ...property }); // Clone
+        setEditMode(true);
+    };
+    
 
     const handleBack = () => {
         setViewedProperty(null);
     };
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setViewedProperty(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
 
-    const PropertyBox = ({ label, value }) => (
+
+    // const PropertyBox = ({ label, value }) => (
+    //     <div className="flex flex-col w-[230px]">
+    //         <label className="text-[14px] font-semibold text-gray-600 mb-1">{label}</label>
+    //         <div className="bg-[#E9E9E9] px-4 py-2 rounded w-full text-[15px] text-gray-800">
+    //             {value || "—"}
+    //         </div>
+    //     </div>
+    // );
+    const PropertyBox = ({ label, value, name, onChange }) => (
         <div className="flex flex-col w-[230px]">
             <label className="text-[14px] font-semibold text-gray-600 mb-1">{label}</label>
-            <div className="bg-[#E9E9E9] px-4 py-2 rounded w-full text-[15px] text-gray-800">
-                {value || "—"}
-            </div>
+            {editMode ? (
+                <input
+                    ref={activeField === name ? inputRef : null}
+                    name={name}
+                    value={value || ""}
+                    onFocus={() => setActiveField(name)}
+                    onChange={onChange}
+                    className="bg-[#F2F2F2] px-4 py-2 rounded w-full text-[15px] text-gray-800 border border-gray-300"
+                />
+            ) : (
+                <div className="bg-[#E9E9E9] px-4 py-2 rounded w-full text-[15px] text-gray-800">
+                    {value || "—"}
+                </div>
+            )}
         </div>
     );
+    
+
 
     return (
         <div className="flex font-[Lexend] relative">
@@ -69,30 +117,32 @@ const AdminMngProperties = () => {
                                 <div className="pt-12 flex flex-col space-y-8">
                                     {/* Row 1 */}
                                     <div className="flex flex-wrap justify-between ">
-                                        <PropertyBox label="PROPERTY ID" value={viewedProperty?.propertyID} />
-                                        <PropertyBox label="PROPERTY NAME" value={viewedProperty?.propertyName} />
-                                        <PropertyBox label="OWNER NAME" value={viewedProperty?.ownerName} />
-                                        <PropertyBox label="AREA" value={viewedProperty?.area} />
+                                        <PropertyBox label="PROPERTY ID" name="propertyID" value={viewedProperty?.propertyID} onChange={handleInputChange} />
+                                        <PropertyBox label="PROPERTY NAME" name="propertyName" value={viewedProperty?.propertyName} onChange={handleInputChange} />
+                                        <PropertyBox label="OWNER NAME" name="ownerName" value={viewedProperty?.ownerName} onChange={handleInputChange} />
+                                        <PropertyBox label="AREA" name="area" value={viewedProperty?.area} onChange={handleInputChange} />
                                     </div>
 
                                     {/* Row 2 */}
                                     <div className="flex flex-wrap justify-between ">
-                                        <PropertyBox label="LOCATION" value={viewedProperty?.location} />
-                                        <PropertyBox label="NO OF ROOMS" value={viewedProperty?.numOfRooms} />
-                                        <PropertyBox label="NO OF BED ROOMS" value={viewedProperty?.numOfBedRooms} />
-                                        <PropertyBox label="NO OF BATHS" value={viewedProperty?.numOfBaths} />
+                                        <PropertyBox label="LOCATION" name="location" value={viewedProperty?.location} onChange={handleInputChange} />
+                                        <PropertyBox label="NO OF ROOMS" name="numOfRooms" value={viewedProperty?.numOfRooms} onChange={handleInputChange} />
+                                        <PropertyBox label="NO OF BED ROOMS" name="numOfBedRooms" value={viewedProperty?.numOfBedRooms} onChange={handleInputChange} />
+                                        <PropertyBox label="NO OF BATHS" name="numOfBaths" value={viewedProperty?.numOfBaths} onChange={handleInputChange} />
                                     </div>
+
 
                                     {/* Divider */}
                                     <hr className="border-gray-300" />
 
                                     {/* Row 3 */}
                                     <div className="flex flex-wrap justify-between ">
-                                        <PropertyBox label="RENT START DATE" value={viewedProperty?.rentStartDate} />
-                                        <PropertyBox label="RENT END DATE" value={viewedProperty?.rentEndDate} />
-                                        <PropertyBox label="FIXED RENT AMOUNT" value={viewedProperty?.fixedRent} />
-                                        <PropertyBox label="ASSIGNED TENANT" value={viewedProperty?.tenantName} />
+                                        <PropertyBox label="RENT START DATE" name="rentStartDate" value={viewedProperty?.rentStartDate} onChange={handleInputChange} />
+                                        <PropertyBox label="RENT END DATE" name="rentEndDate" value={viewedProperty?.rentEndDate} onChange={handleInputChange} />
+                                        <PropertyBox label="FIXED RENT AMOUNT" name="fixedRent" value={viewedProperty?.fixedRent} onChange={handleInputChange} />
+                                        <PropertyBox label="ASSIGNED TENANT" name="tenantName" value={viewedProperty?.tenantName} onChange={handleInputChange} />
                                     </div>
+
                                 </div>
                             </div>
                         </div>
@@ -112,7 +162,7 @@ const AdminMngProperties = () => {
                     </div>
 
                     {/* Scrollable Body */}
-                    <div className={`overflow-y-auto max-h-[324px] ${viewedProperty ? ' pointer-events-none' : ''}`}>
+                    <div className={`overflow-y-auto max-h-[324px]`}>
                         {properties.map((property) => (
                             <div key={property.propertyID} className="grid grid-cols-12 p-4 border-b border-gray-200 items-center">
                                 <div className="col-span-2 font-medium">{property.propertyID}</div>
@@ -126,7 +176,11 @@ const AdminMngProperties = () => {
                                         <Eye className="w-4 h-4" />
                                         <span>View</span>
                                     </button>
-                                    <button className="text-white flex items-center justify-center gap-2 bg-[#1976D2] py-1 px-4 rounded w-[112px] cursor-pointer">
+                                    <button
+                                        className="text-white flex items-center justify-center gap-2 bg-[#1976D2] py-1 px-4 rounded w-[112px] cursor-pointer"
+                                        onClick={() => handleEdit(property)}
+                                    >
+
                                         <Pencil className="w-4 h-4" />
                                         <span>Edit</span>
                                     </button>

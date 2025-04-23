@@ -49,7 +49,7 @@ const AdminMngTenants = () => {
                 </div>
 
                 {/* Payments Table Container */}
-                <div className="mx-[80px] mt-8 bg-white rounded-lg shadow-md overflow-hidden relative">
+                <div className="mx-[80px] mt-8 bg-white rounded-lg shadow-md overflow-hidden relative w-[1060px]">
                     {/* overlay */}
                     {viewedTenant && (
                         <div className="absolute top-0 bg-white bg-opacity-90 z-50 flex rounded-lg items-center justify-center px-6 w-[1060px] h-[380px]">
