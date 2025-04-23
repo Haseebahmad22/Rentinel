@@ -6,6 +6,7 @@ import { Pencil, Trash2, Eye, ChevronLeft } from "lucide-react";
 const AdminMngOwners = () => {
     const [owners, setOwners] = useState([]);
     const [viewedOwner, setViewedOwner] = useState(null);
+    const [ownerToDelete, setOwnerToDelete] = useState(null); // Add state for tenant to delete
 
     useEffect(() => {
         axios.get("http://localhost:8080/owners")
@@ -42,7 +43,7 @@ const AdminMngOwners = () => {
     return (
         <div className="flex font-[Lexend]">
             <Sidebar />
-            <div className="w-[80vw] bg-[#E6E6E6]">
+            <div className="w-[80vw] bg-[#E6E6E6] relative">
                 <div className="pl-[80px] pr-[50px] mt-[10px]">
                     <h1 className="text-[#081E4A] text-[54px] font-bold">Manage Owners</h1>
                     <p className="text-[15px] text-[#4D4D4D] font-light">View, edit, or delete owners.</p>
@@ -124,7 +125,7 @@ const AdminMngOwners = () => {
                                     </button>
                                     <button
                                         className="text-white flex items-center justify-center gap-2 bg-[#C42211] py-1 px-3 rounded w-[112px] cursor-pointer"
-                                        onClick={() => handleDelete(owner.id)}
+                                        onClick={() => setOwnerToDelete(owner)}
                                     >
                                         <Trash2 className="w-4 h-4" />
                                         <span>Delete</span>
@@ -139,6 +140,30 @@ const AdminMngOwners = () => {
                     <h1 className="text-[36px]">Total Owners</h1>
                     <h1 className="text-[32px]">{owners.length}</h1>
                 </div>
+
+                  {/* Delete Confirmation Modal */}
+                  {ownerToDelete && (
+                    <div className="absolute top-0 left-0 w-full h-full bg-opacity-50 z-[999] flex items-center justify-center">
+                        <div className="bg-white p-8 rounded-xl w-[480px] flex flex-col gap-6 items-center shadow-lg relative">
+                            <h2 className="text-[24px] font-semibold text-[#081E4A]">Are you sure?</h2>
+                            <p className="text-gray-600 text-center">Do you really want to delete <strong>{ownerToDelete.userName}</strong>?</p>
+                            <div className="flex gap-4 mt-4">
+                                <button
+                                    onClick={() => handleDelete(ownerToDelete.id)}
+                                    className="bg-[#C42211] text-white px-6 py-2 cursor-pointer rounded hover:bg-red-700"
+                                >
+                                    Yes, Delete
+                                </button>
+                                <button
+                                    onClick={() => setOwnerToDelete(null)}
+                                    className="bg-gray-300 text-black px-6 py-2 cursor-pointer rounded hover:bg-gray-400"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

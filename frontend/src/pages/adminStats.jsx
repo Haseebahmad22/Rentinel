@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Sidebar from "../utility/adminSidebar";
+import Histogram from "../utility/Histogram";
 
 
 const AdminStats = () => {
@@ -15,8 +16,8 @@ const AdminStats = () => {
 
 
                 {/* mid 4 boxes */}
-                <div className="flex w-[100%] justify-between pl-[80px] pr-[50px] mt-[50px]">
-                <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[260px]">
+                <div className="flex w-[100%] justify-between h-fit gap-[10px] pl-[80px] pr-[50px] mt-[30px]">
+                    <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[33vw]">
                         <div>
                             <h1 className="text-[#343434] text-[20px]">Total Payments</h1>
                             <h1 className="text-[#232323] text-[24px] font-bold">0</h1>
@@ -24,7 +25,7 @@ const AdminStats = () => {
                         </div>
                         <img src="icons/User.svg" alt="" />
                     </div>
-                    <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[260px]">
+                    <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[33vw]">
                         <div>
                             <h1 className="text-[#343434] text-[20px]">Total Payments</h1>
                             <h1 className="text-[#232323] text-[24px] font-bold">0</h1>
@@ -32,7 +33,7 @@ const AdminStats = () => {
                         </div>
                         <img src="icons/User.svg" alt="" />
                     </div>
-                    <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[260px]">
+                    <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[33vw]">
                         <div>
                             <h1 className="text-[#343434] text-[20px]">Total Properties</h1>
                             <h1 className="text-[#232323] text-[24px] font-bold">0</h1>
@@ -40,7 +41,7 @@ const AdminStats = () => {
                         </div>
                         <img src="icons/Home-Icon.svg" alt="" />
                     </div>
-                    <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[260px]">
+                    <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[33vw]">
                         <div>
                             <h1 className="text-[#343434] text-[20px]">Total Payments</h1>
                             <h1 className="text-[#232323] text-[24px] font-bold">0</h1>
@@ -52,8 +53,8 @@ const AdminStats = () => {
 
 
                 {/* last 4 boxes */}
-                <div className="flex w-[100%] justify-between pl-[80px] pr-[50px] mt-[50px]">
-                <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[260px]">
+                <div className="flex w-[100%] justify-between h-fit gap-[10px] pl-[80px] pr-[50px] mt-[30px]">
+                    <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[33vw]">
                         <div>
                             <h1 className="text-[#343434] text-[20px]">Total Payments</h1>
                             <h1 className="text-[#232323] text-[24px] font-bold">0</h1>
@@ -61,7 +62,7 @@ const AdminStats = () => {
                         </div>
                         <img src="icons/heartrate.svg" alt="" />
                     </div>
-                    <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[260px]">
+                    <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[33vw]">
                         <div>
                             <h1 className="text-[#343434] text-[20px]">Total Tenants</h1>
                             <h1 className="text-[#232323] text-[24px] font-bold">0</h1>
@@ -69,7 +70,7 @@ const AdminStats = () => {
                         </div>
                         <img src="icons/Money-Bag.svg" alt="" />
                     </div>
-                    <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[260px]">
+                    <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[33vw]">
                         <div>
                             <h1 className="text-[#343434] text-[20px]">Total Properties</h1>
                             <h1 className="text-[#232323] text-[24px] font-bold">0</h1>
@@ -77,7 +78,7 @@ const AdminStats = () => {
                         </div>
                         <img src="icons/Money-Bag.svg" alt="" />
                     </div>
-                    <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[260px]">
+                    <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[33vw]">
                         <div>
                             <h1 className="text-[#343434] text-[20px]">Total Payments</h1>
                             <h1 className="text-[#232323] text-[24px] font-bold">0</h1>
@@ -87,6 +88,9 @@ const AdminStats = () => {
                     </div>
                 </div>
                 {/* Histogram */}
+                <div className="mt-[30px] w-[58.3vw] pl-[80px]">
+                    <Histogram />
+                </div>
             </div>
 
 
