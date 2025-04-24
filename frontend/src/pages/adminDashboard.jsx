@@ -81,8 +81,8 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* Histogram */}
-                <div className="pl-[80px] pr-[50px] mt-[30px]">
-                    <Histogram />
+                <div className="mt-[30px] w-[80vw] pl-[80px] pr-[50px]">
+                <Histogram />
                 </div>
 
             </div>

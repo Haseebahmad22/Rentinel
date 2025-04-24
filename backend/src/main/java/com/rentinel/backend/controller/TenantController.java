@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:5173")
-
 @RestController
 @RequestMapping("/tenants")
 public class TenantController {
@@ -20,6 +19,12 @@ public class TenantController {
     @GetMapping
     public List<Tenant> getAllTenants() {
         return tenantRepository.findAll();
+    }
+
+    // GET /tenants/exists/{username}
+    @GetMapping("/exists/{username}")
+    public boolean tenantExists(@PathVariable String userName) {
+        return tenantRepository.existsByUserName(userName);
     }
 
     // DELETE /tenants/{id}

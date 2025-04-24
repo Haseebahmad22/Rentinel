@@ -1,7 +1,6 @@
 import { useState } from "react";
 import Sidebar from "../utility/adminSidebar";
 import Histogram from "../utility/Histogram";
-import PropertyAreas from "../utility/PropertyAreas";
 
 
 const AdminStats = () => {
@@ -90,13 +89,13 @@ const AdminStats = () => {
                 </div>
                 <div className="flex">
 
-                {/* Histogram */}
-                <div className="mt-[30px] w-[58.3vw] pl-[80px]">
-                    <Histogram />
-                </div>
-                <div className="mt-[30px] w-[28.3vw] pl-[80px]">
-                    <PropertyAreas />
-                </div>
+                    {/* Histogram */}
+                    <div className="mt-[30px] w-[58.3vw] pl-[80px]">
+                        <Histogram />
+                    </div>
+                    {/* <div className="mt-[30px] w-[28.3vw] pl-[80px]">
+                        <PropertyAreas />
+                    </div> */}
                 </div>
             </div>
 

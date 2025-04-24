@@ -5,20 +5,14 @@ import { Pencil, Trash2, Eye, ChevronLeft, X } from "lucide-react";
 
 const AdminMngProperties = () => {
     const [properties, setProperties] = useState([]);
+    const [rentAssignments, setRentAssignments] = useState([]);
+
     const [viewedProperty, setViewedProperty] = useState(null);
     const [editMode, setEditMode] = useState(false);
-    const [activeField, setActiveField] = useState(null);
-    const inputRef = useRef(null);
     const [propertyToDelete, setPropertyToDelete] = useState(null);
+    const formRef = useRef(null);
 
-
-    useEffect(() => {
-        if (inputRef.current && activeField) {
-            inputRef.current.focus();
-            const length = inputRef.current.value.length;
-            inputRef.current.setSelectionRange(length, length); // place cursor at end
-        }
-    }, [viewedProperty, activeField]);
+    const [tenantExists, setTenantExists] = useState(null); // null = untouched, true = exists, false = doesn't
 
 
     useEffect(() => {
@@ -29,83 +23,178 @@ const AdminMngProperties = () => {
             .catch(error => {
                 console.error("Error fetching properties:", error);
             });
+
+            // Fetch rent assignments
+        axios.get("http://localhost:8080/rentAssignments")
+        .then(response => {
+            setRentAssignments(response.data);
+        })
+        .catch(error => {
+            console.error("Error fetching rent assignments:", error);
+        });
     }, []);
 
-    const handleDelete = (id) => {
-        console.log("Delete property with id:", id);
-    };
+    useEffect(() => {
+        console.log("Updated Rent Assignments:", rentAssignments);
+    }, [rentAssignments]);
+    
+        // Get rent assignment for a specific property
+        const getRentAssignment = (propertyId) => {
+            return rentAssignments.find(assignment => 
+                assignment.propertyID === propertyId
+            );
+        };
 
-    const handleView = (property) => {
-        setViewedProperty({ ...property }); // Clone
+        const formatDate = (dateStr) => {
+            if (!dateStr) return "—";
+            const date = new Date(dateStr);
+            return date.toISOString().split("T")[0]; // "2025-04-24"
+        };
+
+        
+     const handleView = (property) => {
+        const assignment = getRentAssignment(property.propertyID);
+        setViewedProperty({
+            ...property,
+            rentStartDate: formatDate(assignment?.startDate),
+            rentEndDate: formatDate(assignment?.dueDate)
+            
+        });
         setEditMode(false);
     };
 
     const handleEdit = (property) => {
-        setViewedProperty({ ...property }); // Clone
+        const assignment = getRentAssignment(property.propertyID);
+        setViewedProperty({
+            ...property,
+            rentStartDate: formatDate(assignment?.startDate),
+            rentEndDate: formatDate(assignment?.dueDate)
+        });
         setEditMode(true);
     };
-
 
     const handleBack = () => {
         setViewedProperty(null);
     };
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setViewedProperty(prev => ({
-            ...prev,
-            [name]: value
-        }));
+
+    // Validation functions
+    const validateNumberInput = (e) => {
+        const value = e.target.value;
+        if (value === '' || /^[0-9]+$/.test(value)) {
+            return true;
+        }
+        e.target.value = value.slice(0, -1);
+        return false;
     };
 
+    const validateAlphanumericInput = (e) => {
+        const value = e.target.value;
+        if (value === '' || /^[a-zA-Z0-9\s]+$/.test(value)) {
+            return true;
+        }
+        e.target.value = value.slice(0, -1);
+        return false;
+    };
 
-    // const PropertyBox = ({ label, value }) => (
-    //     <div className="flex flex-col w-[230px]">
-    //         <label className="text-[14px] font-semibold text-gray-600 mb-1">{label}</label>
-    //         <div className="bg-[#E9E9E9] px-4 py-2 rounded w-full text-[15px] text-gray-800">
-    //             {value || "—"}
-    //         </div>
-    //     </div>
-    // );
-    const PropertyBox = ({ label, value, name, onChange }) => (
-        <div className="flex flex-col w-[230px]">
-            <label className="text-[14px] font-semibold text-gray-600 mb-1">{label}</label>
-            {editMode ? (
-                <input
-                    ref={activeField === name ? inputRef : null}
-                    name={name}
-                    value={value || ""}
-                    onFocus={() => setActiveField(name)}
-                    onChange={onChange}
-                    className="bg-[#F2F2F2] px-4 py-2 rounded w-full text-[15px] text-gray-800 border border-gray-300"
-                />
-            ) : (
-                <div className="bg-[#E9E9E9] px-4 py-2 rounded w-full text-[15px] text-gray-800">
-                    {value || "—"}
-                </div>
-            )}
-        </div>
-    );
+    const handleSave = () => {
+        if (!formRef.current) return;
 
+        const formData = new FormData(formRef.current);
+        const updatedProperty = {
+            ...viewedProperty,
+            propertyName: formData.get('propertyName'),
+            ownerName: formData.get('ownerName'),
+            area: formData.get('area'),
+            location: formData.get('location'),
+            numOfRooms: formData.get('numOfRooms'),
+            numOfBedRooms: formData.get('numOfBedRooms'),
+            numOfBaths: formData.get('numOfBaths'),
+            rentStartDate: formData.get('rentStartDate'),
+            rentEndDate: formData.get('rentEndDate'),
+            fixedRent: formData.get('fixedRent'),
+            tenantName: formData.get('tenantName')
+        };
+
+        axios.put(`http://localhost:8080/properties/${viewedProperty.propertyID}`, updatedProperty)
+            .then(response => {
+                setProperties(prev => prev.map(p =>
+                    p.propertyID === viewedProperty.propertyID ? updatedProperty : p
+                ));
+                setViewedProperty(updatedProperty);
+                setEditMode(false);
+            })
+            .catch(error => {
+                console.error("Error updating property:", error);
+            });
+    };
+
+    console.log(properties);
+
+    const PropertyBox = ({ label, name, value, isFirstEditable = false, validationType = "text" }) => {
+        const isReadOnly = name === "propertyID";
+        const [inputValue, setInputValue] = useState(value || "");
+
+        const handleChange = async (e) => {
+            const newValue = e.target.value;
+            setInputValue(newValue);
+
+            if (name === "tenantName") {
+                try {
+                    const res = await axios.get(`http://localhost:8080/tenants/check/${newValue}`);
+                    setTenantExists(res.data.exists); // Assuming { exists: true/false }
+                } catch (err) {
+                    console.error("Tenant check failed", err);
+                    setTenantExists(false);
+                }
+            }
+        };
+
+        const getBorderColor = () => {
+            if (name !== "tenantName") return "border-gray-300";
+            if (tenantExists === true) return "border-green-500";
+            if (tenantExists === false) return "border-red-500";
+            return "border-gray-300";
+        };
+
+        return (
+            <div className="flex flex-col w-[230px]">
+                <label className="text-[14px] font-semibold text-gray-600 mb-1">{label}</label>
+                {editMode ? (
+                    <input
+                        name={name}
+                        type="text"
+                        value={inputValue}
+                        onChange={handleChange}
+                        className={`px-4 py-2 rounded w-full text-[15px] text-gray-800 bg-[#F2F2F2] focus:outline-none border ${getBorderColor()}`}
+                        readOnly={isReadOnly}
+                        tabIndex={isReadOnly ? -1 : 0}
+                    />
+                ) : (
+                    <div className="bg-[#E9E9E9] px-4 py-2 rounded w-full text-[15px] text-gray-800">
+                        {value || "—"}
+                    </div>
+                )}
+            </div>
+        );
+    };
 
 
     return (
         <div className="flex font-[Lexend] relative">
             <Sidebar />
-            <div className="w-[80vw] bg-[#E6E6E6] relative" >
+            <div className="w-[80vw] bg-[#E6E6E6] relative">
                 {/* Header */}
                 <div className="pl-[80px] pr-[50px] mt-[10px]">
                     <h1 className="text-[#081E4A] text-[54px] font-bold">Manage Properties</h1>
                     <p className="text-[15px] text-[#4D4D4D] font-light">View, edit, or delete properties.</p>
                 </div>
 
-
-
                 {/* Property Table Container */}
-                <div className="mx-[80px] mt-8 bg-white rounded-lg shadow-md relative w-[1060px] h-[380px] ">
+                <div className="mx-[80px] mt-8 bg-white rounded-lg shadow-md relative w-[1060px] h-[380px]">
                     {/* Overlay on Table Only */}
                     {viewedProperty && (
                         <div className="absolute top-0 bg-white bg-opacity-90 z-50 flex rounded-lg items-center justify-center px-6 w-[1060px]">
-                            <div className=" p-6 rounded-lg w-full max-w-[1000px] space-y-8 relative">
+                            <form ref={formRef} className="p-6 rounded-lg w-full max-w-[1000px] space-y-8 relative">
                                 {/* Back Button */}
                                 <div className="flex justify-between content-center items-center absolute top-4 left-4 w-full pr-[40px]">
                                     <div
@@ -115,46 +204,95 @@ const AdminMngProperties = () => {
                                         <ChevronLeft className="text-black" />
                                     </div>
                                     <div>
-                                        <button className={`bg-[#FFAE1A] cursor-pointer text-white text-[20px] font-medium rounded-[4.5px] px-[15px] py-[3px] ${editMode ? 'block' : 'hidden'}`}>SAVE</button>
+                                        {editMode && (
+                                            <button
+                                                type="button"
+                                                onClick={handleSave}
+                                                className="bg-[#FFAE1A] cursor-pointer text-white text-[20px] font-medium rounded-[4.5px] px-[15px] py-[3px]"
+                                            >
+                                                SAVE
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
 
                                 <div className="pt-12 flex flex-col space-y-8">
                                     {/* Row 1 */}
-                                    <div className="flex flex-wrap justify-between ">
-                                        <PropertyBox label="PROPERTY ID" name="propertyID" value={viewedProperty?.propertyID} onChange={handleInputChange} />
-                                        <PropertyBox label="PROPERTY NAME" name="propertyName" value={viewedProperty?.propertyName} onChange={handleInputChange} />
-                                        <PropertyBox label="OWNER NAME" name="ownerName" value={viewedProperty?.ownerName} onChange={handleInputChange} />
-                                        <PropertyBox label="AREA" name="area" value={viewedProperty?.area} onChange={handleInputChange} />
+                                    <div className="flex flex-wrap justify-between">
+                                        <PropertyBox label="PROPERTY ID" name="propertyID" value={viewedProperty.propertyID} />
+                                        <PropertyBox
+                                            label="PROPERTY NAME"
+                                            name="propertyName"
+                                            value={viewedProperty.propertyName}
+                                            isFirstEditable={editMode}
+                                            validationType="alphanumeric"
+                                        />
+                                        <PropertyBox
+                                            label="OWNER NAME"
+                                            name="ownerName"
+                                            value={viewedProperty.ownerName}
+                                            validationType="alphanumeric"
+                                        />
+                                        <PropertyBox
+                                            label="AREA"
+                                            name="area"
+                                            value={viewedProperty.area}
+                                            validationType="alphanumeric"
+                                        />
                                     </div>
 
                                     {/* Row 2 */}
-                                    <div className="flex flex-wrap justify-between ">
-                                        <PropertyBox label="LOCATION" name="location" value={viewedProperty?.location} onChange={handleInputChange} />
-                                        <PropertyBox label="NO OF ROOMS" name="numOfRooms" value={viewedProperty?.numOfRooms} onChange={handleInputChange} />
-                                        <PropertyBox label="NO OF BED ROOMS" name="numOfBedRooms" value={viewedProperty?.numOfBedRooms} onChange={handleInputChange} />
-                                        <PropertyBox label="NO OF BATHS" name="numOfBaths" value={viewedProperty?.numOfBaths} onChange={handleInputChange} />
+                                    <div className="flex flex-wrap justify-between">
+                                        <PropertyBox
+                                            label="LOCATION"
+                                            name="location"
+                                            value={viewedProperty.location}
+                                            validationType="alphanumeric"
+                                        />
+                                        <PropertyBox
+                                            label="NO OF ROOMS"
+                                            name="numOfRooms"
+                                            value={viewedProperty.numOfRooms}
+                                            validationType="number"
+                                        />
+                                        <PropertyBox
+                                            label="NO OF BED ROOMS"
+                                            name="numOfBedRooms"
+                                            value={viewedProperty.numOfBedRooms}
+                                            validationType="number"
+                                        />
+                                        <PropertyBox
+                                            label="NO OF BATHS"
+                                            name="numOfBaths"
+                                            value={viewedProperty.numOfBaths}
+                                            validationType="number"
+                                        />
                                     </div>
-
 
                                     {/* Divider */}
                                     <hr className="border-gray-300" />
 
                                     {/* Row 3 */}
-                                    <div className="flex flex-wrap justify-between ">
-                                        <PropertyBox label="RENT START DATE" name="rentStartDate" value={viewedProperty?.rentStartDate} onChange={handleInputChange} />
-                                        <PropertyBox label="RENT END DATE" name="rentEndDate" value={viewedProperty?.rentEndDate} onChange={handleInputChange} />
-                                        <PropertyBox label="FIXED RENT AMOUNT" name="fixedRent" value={viewedProperty?.fixedRent} onChange={handleInputChange} />
-                                        <PropertyBox label="ASSIGNED TENANT" name="tenantName" value={viewedProperty?.tenantName} onChange={handleInputChange} />
+                                    <div className="flex flex-wrap justify-between">
+                                        <PropertyBox label="RENT START DATE" name="rentStartDate" value={viewedProperty.rentStartDate} />
+                                        <PropertyBox label="RENT END DATE" name="rentEndDate" value={viewedProperty.rentEndDate} />
+                                        <PropertyBox
+                                            label="FIXED RENT AMOUNT"
+                                            name="fixedRent"
+                                            value={viewedProperty.fixedRent}
+                                            validationType="number"
+                                        />
+                                        <PropertyBox
+                                            label="ASSIGNED TENANT"
+                                            name="tenantName"
+                                            value={viewedProperty.tenantName}
+                                            validationType="alphanumeric"
+                                        />
                                     </div>
-
                                 </div>
-                            </div>
+                            </form>
                         </div>
                     )}
-
-
-
 
                     {/* Sticky Header */}
                     <div className="grid grid-cols-12 bg-gray-100 p-4 font-medium text-gray-700 sticky top-0 z-10 rounded-t-lg h-[56px]">
@@ -169,7 +307,7 @@ const AdminMngProperties = () => {
                     </div>
 
                     {/* Scrollable Body */}
-                    <div className={`overflow-y-auto max-h-[324px]`}>
+                    <div className="overflow-y-auto max-h-[324px]">
                         {properties.map((property) => (
                             <div key={property.propertyID} className="grid grid-cols-12 p-4 border-b border-gray-200 items-center">
                                 <div className="col-span-2 font-medium">{property.propertyID}</div>
@@ -187,7 +325,6 @@ const AdminMngProperties = () => {
                                         className="text-white flex items-center justify-center gap-2 bg-[#1976D2] py-1 px-4 rounded w-[112px] cursor-pointer"
                                         onClick={() => handleEdit(property)}
                                     >
-
                                         <Pencil className="w-4 h-4" />
                                         <span>Edit</span>
                                     </button>
@@ -204,12 +341,10 @@ const AdminMngProperties = () => {
                     </div>
                 </div>
 
-
                 <div className="w-[390px] flex flex-col items-center rounded-[16px] p-[10px] bg-white text-[#081E4A] font-medium ml-[80px] mt-[15px]">
                     <h1 className="text-[36px]">Total Properties</h1>
                     <h1 className="text-[32px]">{properties.length}</h1>
                 </div>
-
 
                 {propertyToDelete && (
                     <div className="absolute top-0 left-0 w-full h-full bg-opacity-50 z-[999] flex items-center justify-center">
@@ -217,15 +352,15 @@ const AdminMngProperties = () => {
                             <h2 className="text-[24px] font-semibold text-[#081E4A]">Confirm Deletion</h2>
                             <p className="text-gray-600 text-[18px]">Do you really want to delete <strong>{propertyToDelete.propertyName}</strong>?</p>
                             <div className="flex gap-4 mt-4 w-[100%] justify-end">
-                            <button
+                                <button
                                     onClick={() => setPropertyToDelete(null)}
-                                    className="bg-[#1976D2] hover:bg-[#125BA3] text-white px-[20px] py-2 cursor-pointer rounded-[4.5px] flex gap-[10px]"                                >
+                                    className="bg-[#1976D2] hover:bg-[#125BA3] text-white px-[20px] py-2 cursor-pointer rounded-[4.5px] flex gap-[10px]"
+                                >
                                     Cancel
-                                    <X/>
+                                    <X />
                                 </button>
                                 <button
                                     onClick={() => {
-                                        // Call delete API
                                         axios.delete(`http://localhost:8080/properties/${propertyToDelete.propertyID}`)
                                             .then(() => {
                                                 setProperties(prev => prev.filter(p => p.propertyID !== propertyToDelete.propertyID));
@@ -236,18 +371,15 @@ const AdminMngProperties = () => {
                                             });
                                     }}
                                     className="bg-[#C42211] text-white px-[20px] py-2 cursor-pointer rounded-[4.5px] hover:bg-[#A32012] flex gap-[10px]"
-                                    >
+                                >
                                     Delete
-                                    <Trash2/>
+                                    <Trash2 />
                                 </button>
-                                
                             </div>
                         </div>
                     </div>
                 )}
-
             </div>
-
         </div>
     );
 };

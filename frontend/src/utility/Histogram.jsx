@@ -76,7 +76,7 @@ export default function Histogram() {
         </div>
       </div>
 
-      <div className="w-full h-[220px]">
+      <div className="w-full h-[30vh]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={dataFromDB}

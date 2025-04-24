@@ -1,141 +1,130 @@
---For creating the login
---USE master;
---GO
---CREATE LOGIN RentinelUser WITH PASSWORD = 'StrongP@ss123';
---GO
---USE Rentinel;
---GO
---CREATE USER RentinelUser FOR LOGIN RentinelUser;
---GO
---EXEC sp_addrolemember 'db_owner', 'RentinelUser';
---GO
 
-USE Rentinel;
+Use Rentinel
 GO
-
 CREATE TABLE Owner
 (
-	ID int identity(1,1) PRIMARY KEY,
-	fullName varchar(50) NOT NULL,
-	userName varchar(50) NOT NULL UNIQUE,
-	Password varchar(30) NOT NULL,
-	email varchar(30) NOT NULL,
-	CNIC varchar(13) NOT NULL,
-	accountCreationDate Date NOT NULL
-);
+ID int identity(1,1) PRIMARY KEY,
+fullName varchar(50) NOT NULL,
+userName varchar(50) NOT NULL UNIQUE,
+Password varchar(30) NOT NULL,
+email varchar(30) NOT NULL,
+CNIC varchar(13) NOT NULL,
+accountCreationDate Date NOT NULL
+)
 GO
 
 CREATE TABLE Tenant
-(
-	ID int identity(1,1) PRIMARY KEY,
+ (
+ID int identity(1,1) PRIMARY KEY,
 	fullName varchar(50) NOT NULL,
 	userName varchar(50) NOT NULL UNIQUE,
 	Password varchar(30) NOT NULL,
 	email varchar(30) NOT NULL,
 	CNIC varchar(13) NOT NULL,
-	accountCreationDate Date NOT NULL
-);
+accountCreationDate Date NOT NULL
+)
+GO
+SELECT * FROM Tenant
+
+CREATE TABLE Admin
+ (
+ID int identity(1,1) PRIMARY KEY,
+	fullName varchar(50) NOT NULL,
+	userName varchar(50) NOT NULL UNIQUE,
+	Password varchar(30) NOT NULL,
+	email varchar(30) NOT NULL,
+	CNIC varchar(13) NOT NULL,
+accountCreationDate Date NOT NULL
+)
 GO
 
 CREATE TABLE Property 
 (
-	propertyName varchar(50),
-	propertyID int primary key IDENTITY(1,1),
-	location varchar(255) NOT NULL,
-	fixedRent Decimal(10,2) NOT NULL,
-	ownerName varchar(50),
-	Foreign key (ownerName) references Owner(userName),
-	tenantName varchar(50),
-	Foreign key (tenantName) references Tenant(userName),
-	numOfBedRooms int,
-	numOfRooms int,
-	numOfBaths int
-);
+propertyName varchar(50),
+propertyID int primary key IDENTITY(1,1),
+Area Varchar(50) NOT NULL,
+location varchar(255) NOT NULL,
+fixedRent Decimal(10,2) NOT NULL,
+ownerName varchar(50),
+Foreign key (ownerName) references Owner(userName) ON UPDATE CASCADE ON DELETE CASCADE,
+tenantName varchar(50),
+Foreign key (tenantName) references Tenant(userName) ON UPDATE CASCADE ON DELETE CASCADE,
+numOfBedRooms int,
+numOfRooms int,
+numOfBaths int
+)
 GO
-
-CREATE TABLE Admin
-(
-	ID int identity(1,1) PRIMARY KEY,
-	fullName varchar(50) NOT NULL,
-	userName varchar(50) NOT NULL UNIQUE,
-	Password varchar(30) NOT NULL,
-	email varchar(30) NOT NULL,
-	CNIC varchar(13) NOT NULL,
-	accountCreationDate Date NOT NULL
-);
-GO
-
 
 CREATE TABLE Payment
-(
+ (
 	paymentID INT IDENTITY(1,1) PRIMARY KEY,
 	paymentStatus varchar(20),
-	paymentDate DATE NOT NULL,
+	paymentDate DATE,
 	amount INT NOT NULL,
 	propertyID INT NOT NULL,
 	tenantUserName varchar(50),
 	ownerUserName varchar(50),
 	FOREIGN KEY (propertyID) references Property(propertyID),
-	FOREIGN KEY (tenantUserName) references Tenant(userName),
-	FOREIGN KEY (ownerUserName) references Owner(userName)
-);
+	FOREIGN KEY (tenantUserName) references Tenant(userName) ON UPDATE CASCADE ON DELETE CASCADE,
+FOREIGN KEY (ownerUserName) references Owner(userName) ON UPDATE CASCADE ON DELETE CASCADE
+)
 GO
-
+SELECT * FROM rentAssignment
 CREATE TABLE propertyAssignment 
 (
-	assignmentID INT  IDENTITY(1,1)  PRIMARY KEY,
+	assignmentID INT  IDENTITY(1,1)  PRIMARY KEY ,
 	propertyID INT NOT NULL,
 	ownerName varchar(50) NOT NULL,
 	tenantName varchar(50) NOT NULL,
 	assignmentDate Date NOT NULL,
 	FOREIGN KEY (propertyID) REFERENCES Property(propertyID),
-	FOREIGN KEY (tenantName) references Tenant(userName),
-	FOREIGN KEY (ownerName) references Owner(userName)
-);
+	FOREIGN KEY (tenantName) references Tenant(userName) ON UPDATE CASCADE ON DELETE CASCADE,
+	FOREIGN KEY (ownerName) references Owner(userName) ON UPDATE CASCADE ON DELETE CASCADE
+)
 GO
 
 CREATE TABLE rentAssignment
 (
 	assignmentID INT  IDENTITY(1,1)  PRIMARY KEY,
 	propertyID INT NOT NULL,
-	tenantName varchar(50) NOT NULL,
-	ownerName varchar(50) NOT NULL,
+	tenantID int NOT NULL,
 	startDate DATE NOT NULL,
 	dueDate DATE NOT NULL,
-	FOREIGN KEY (tenantName) REFERENCES Tenant(userName),
-	FOREIGN KEY (propertyID) REFERENCES Property(propertyID),	
-	FOREIGN KEY (ownerName) references Owner(userName)
-);
+	FOREIGN KEY (tenantID) REFERENCES Tenant(ID) ON UPDATE NO ACTION ON DELETE NO ACTION,
+	FOREIGN KEY (propertyID) REFERENCES Property(propertyID) ON UPDATE CASCADE ON DELETE CASCADE
+)
 GO
 
 CREATE TABLE blackListedUsers(
 	CNIC varchar(13) PRIMARY KEY
-);
+)
 GO
 
 CREATE TABLE ownerNotifications
 (
-	notificationID INT IDENTITY(1, 1) PRIMARY KEY,
+	notificationID INT IDENTITY(1, 1),
 	ownerID INT NOT NULL,
 	subject varchar(30),
 	sentDate Date NOT NULL,
-	propertyName varchar(50) NOT NULL,
-	tenantUserName varchar(30),
-	content varchar(255) NOT NULL
-);
+propertyName varchar(50) NOT NULL,
+tenantUserName varchar(30), --the notification does not implicitly come from the tenant basically it comes from the system but this field shows for which tenant
+content varchar(255) NOT NULL,
+)
 GO
 
 CREATE TABLE tenantNotifications
 (
-	notificationID INT IDENTITY(1, 1) PRIMARY KEY,
+	notificationID INT IDENTITY(1, 1),
 	tenantID INT NOT NULL,
 	subject varchar(30),
 	sentDate Date NOT NULL,
-	propertyName varchar(50) NOT NULL,
-	ownerUserName varchar(30),
-	content varchar(255) NOT NULL
-);
+propertyName varchar(50) NOT NULL,
+ownerUserName varchar(30), --the notification does not implicitly come from the owner basically it comes from the system but this field shows for which owner
+content varchar(255) NOT NULL,
+)
 GO
+
+
 
 -- DUMMY INSERTIONS
 INSERT INTO Owner (fullName, userName, Password, email, CNIC, accountCreationDate) VALUES
@@ -158,15 +147,15 @@ INSERT INTO Admin(fullName, userName, Password, email, CNIC, accountCreationDate
 VALUES('Im Admin', 'imadmin', 'maAdminHoo', 'admin@gmail.com', '1234567890123', GETDATE());
 GO
 
-INSERT INTO Property (propertyName, location, fixedRent, ownerName, tenantName, numOfBedRooms, numOfRooms, numOfBaths) VALUES
-('Sunset Villa', 'DHA Phase 6, Lahore', 65000.00, 'amirq', 'hamzam', 3, 5, 3),
-('Blue Apartments', 'Gulberg 3, Lahore', 40000.00, 'sarak', 'nidaf', 2, 4, 2),
-('Hill View Residency', 'F-11, Islamabad', 80000.00, 'alirz', 'usmant', 4, 6, 3),
-('Ocean Breeze Flat', 'Clifton Block 7, Karachi', 55000.00, 'fatiman', 'hiran', 2, 3, 2),
-('Urban Nest', 'Johar Town, Lahore', 47000.00, 'zainsh', 'kashifr', 3, 4, 2);
+INSERT INTO Property (propertyName,Area, location, fixedRent, ownerName, tenantName, numOfBedRooms, numOfRooms, numOfBaths) VALUES
+('Sunset Villa', '1 Kanal' ,'DHA Phase 6, Lahore', 65000.00, 'amirq', 'hamzam', 3, 5, 3),
+('Blue Apartments','2 Kanal' , 'Gulberg 3, Lahore', 40000.00, 'sarak', 'nidaf', 2, 4, 2),
+('Hill View Residency','3 Kanal' , 'F-11, Islamabad', 80000.00, 'alirz', 'usmant', 4, 6, 3),
+('Ocean Breeze Flat','3 Marla' ,'Clifton Block 7, Karachi', 55000.00, 'fatiman', 'hiran', 2, 3, 2),
+('Urban Nest', '1 Kanal' ,'Johar Town, Lahore', 47000.00, 'zainsh', 'kashifr', 3, 4, 2);
 GO
-INSERT INTO Property (propertyName, location, fixedRent, ownerName, tenantName, numOfBedRooms, numOfRooms, numOfBaths) VALUES
-('Sunset Villa', 'DHA Phase 6, Lahore', 65000.00, 'amirq', 'hamzam', 3, 5, 3)
+INSERT INTO Property (propertyName,Area , location, fixedRent, ownerName, tenantName, numOfBedRooms, numOfRooms, numOfBaths) VALUES
+('Sunset Villa','1 Kanal' , 'DHA Phase 6, Lahore', 65000.00, 'amirq', 'hamzam', 3, 5, 3)
 
 INSERT INTO Payment (paymentStatus, paymentDate, amount, propertyID, tenantUserName, ownerUserName) VALUES
 ('Paid', '2024-02-01', 65000, 1, 'hamzam', 'amirq'),
@@ -183,13 +172,14 @@ INSERT INTO propertyAssignment (propertyID, ownerName, tenantName, assignmentDat
 (4, 'fatiman', 'hiran', '2024-01-15'),
 (5, 'zainsh', 'kashifr', '2024-02-01');
 GO
-
-INSERT INTO rentAssignment (propertyID, tenantName, ownerName, startDate, dueDate) VALUES
-(1, 'hamzam', 'amirq', '2024-01-01', '2024-01-10'),
-(2, 'nidaf', 'sarak', '2024-01-01', '2024-01-10'),
-(3, 'usmant', 'alirz', '2024-01-01', '2024-01-10'),
-(4, 'hiran', 'fatiman', '2024-01-01', '2024-01-10'),
-(5, 'kashifr', 'zainsh', '2024-01-01', '2024-01-10');
+SELECT * FROM Property
+SELECT * FROM Tenant
+INSERT INTO rentAssignment (propertyID, tenantID, startDate, dueDate) VALUES
+(5, 1, '2024-01-01', '2024-01-10'),
+(6, 2, '2024-01-01', '2024-01-10'),
+(9, 3, '2024-01-01', '2024-01-10'),
+(10, 4, '2024-01-01', '2024-01-10'),
+(11, 5, '2024-01-01', '2024-01-10');
 GO
 
 INSERT INTO blackListedUsers (CNIC) VALUES
