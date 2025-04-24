@@ -23,7 +23,7 @@ public class RentAssignmentController {
 
     @GetMapping("/property/{propertyId}")
     public List<RentAssignment> getByPropertyId(@PathVariable Integer propertyId) {
-        return repository.findByPropertyId(propertyId);
+        return repository.findByPropertyID(propertyId);
     }
 
     @GetMapping("/{id}")
@@ -38,16 +38,6 @@ public class RentAssignmentController {
         return repository.save(rentAssignment);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<RentAssignment> update(@PathVariable Integer id,
-            @RequestBody RentAssignment updatedAssignment) {
-        return repository.findById(id).map(existing -> {
-            existing.setStartDate(updatedAssignment.getStartDate());
-            existing.setDueDate(updatedAssignment.getDueDate());
-            existing.setProperty(updatedAssignment.getProperty());
-            existing.setTenant(updatedAssignment.getTenant());
-            return ResponseEntity.ok(repository.save(existing));
-        }).orElse(ResponseEntity.notFound().build());
-    }
+  
 
 }

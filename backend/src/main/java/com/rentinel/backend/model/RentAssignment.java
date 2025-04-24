@@ -22,13 +22,9 @@ public class RentAssignment {
     @Column(name = "dueDate", nullable = false)
     private LocalDate dueDate;
 
-    @ManyToOne
-    @JoinColumn(name = "propertyID", nullable = false,
-                foreignKey = @ForeignKey(name = "FK_Property_Assignment"))
-    private Property property;
+    @Column(name = "propertyID", nullable = false)
+    private Integer propertyID;
 
-    @ManyToOne
-    @JoinColumn(name = "tenantID", nullable = false,
-                foreignKey = @ForeignKey(name = "FK_Tenant_Assignment"))
-    private Tenant tenant;
+    @Column(name = "tenantID", nullable = false)
+    private Integer tenantID;
 }

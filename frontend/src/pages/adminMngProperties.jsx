@@ -40,8 +40,10 @@ const AdminMngProperties = () => {
     
         // Get rent assignment for a specific property
         const getRentAssignment = (propertyId) => {
+            console.log(rentAssignments);
             return rentAssignments.find(assignment => 
                 assignment.propertyID === propertyId
+                
             );
         };
 
@@ -54,22 +56,13 @@ const AdminMngProperties = () => {
         
      const handleView = (property) => {
         const assignment = getRentAssignment(property.propertyID);
-        setViewedProperty({
-            ...property,
-            rentStartDate: formatDate(assignment?.startDate),
-            rentEndDate: formatDate(assignment?.dueDate)
-            
-        });
+        setViewedProperty(property);
         setEditMode(false);
     };
 
     const handleEdit = (property) => {
-        const assignment = getRentAssignment(property.propertyID);
-        setViewedProperty({
-            ...property,
-            rentStartDate: formatDate(assignment?.startDate),
-            rentEndDate: formatDate(assignment?.dueDate)
-        });
+    
+        setViewedProperty(property );
         setEditMode(true);
     };
 
@@ -274,8 +267,10 @@ const AdminMngProperties = () => {
 
                                     {/* Row 3 */}
                                     <div className="flex flex-wrap justify-between">
-                                        <PropertyBox label="RENT START DATE" name="rentStartDate" value={viewedProperty.rentStartDate} />
-                                        <PropertyBox label="RENT END DATE" name="rentEndDate" value={viewedProperty.rentEndDate} />
+                                        <PropertyBox label="RENT START DATE" name="rentStartDate" value={getRentAssignment(viewedProperty.propertyID)?.startDate}
+                                        />
+                                        <PropertyBox label="RENT END DATE" name="rentEndDate" value={getRentAssignment(viewedProperty.propertyID)?.dueDate}
+ />
                                         <PropertyBox
                                             label="FIXED RENT AMOUNT"
                                             name="fixedRent"
