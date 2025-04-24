@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import Sidebar from "../utility/adminSidebar";
 import axios from "axios";
-import { Pencil, Trash2, Eye, ChevronLeft } from "lucide-react";
+import { Pencil, Trash2, Eye, ChevronLeft, X } from "lucide-react";
 
 const AdminMngProperties = () => {
     const [properties, setProperties] = useState([]);
@@ -107,7 +107,7 @@ const AdminMngProperties = () => {
                         <div className="absolute top-0 bg-white bg-opacity-90 z-50 flex rounded-lg items-center justify-center px-6 w-[1060px]">
                             <div className=" p-6 rounded-lg w-full max-w-[1000px] space-y-8 relative">
                                 {/* Back Button */}
-                                <div className="flex justify-between absolute top-4 left-4 w-full pr-[40px]">
+                                <div className="flex justify-between content-center items-center absolute top-4 left-4 w-full pr-[40px]">
                                     <div
                                         onClick={handleBack}
                                         className="w-[43px] h-[43px] cursor-pointer rounded-full bg-[#D9D9D9] flex items-center justify-center"
@@ -115,7 +115,7 @@ const AdminMngProperties = () => {
                                         <ChevronLeft className="text-black" />
                                     </div>
                                     <div>
-                                        <button className="bg-[#FFAE1A] cursor-pointer text-white text-[20px] font-medium rounded-[4.5px] px-[15px] py-[3px]">SAVE</button>
+                                        <button className={`bg-[#FFAE1A] cursor-pointer text-white text-[20px] font-medium rounded-[4.5px] px-[15px] py-[3px] ${editMode ? 'block' : 'hidden'}`}>SAVE</button>
                                     </div>
                                 </div>
 
@@ -213,10 +213,16 @@ const AdminMngProperties = () => {
 
                 {propertyToDelete && (
                     <div className="absolute top-0 left-0 w-full h-full bg-opacity-50 z-[999] flex items-center justify-center">
-                        <div className="bg-white p-8 rounded-xl w-[480px] flex flex-col gap-6 items-center shadow-lg relative">
-                            <h2 className="text-[24px] font-semibold text-[#081E4A]">Are you sure?</h2>
-                            <p className="text-gray-600 text-center">Do you really want to delete <strong>{propertyToDelete.propertyName}</strong>?</p>
-                            <div className="flex gap-4 mt-4">
+                        <div className="bg-white p-8 rounded-xl w-[480px] flex flex-col gap-6 shadow-lg relative">
+                            <h2 className="text-[24px] font-semibold text-[#081E4A]">Confirm Deletion</h2>
+                            <p className="text-gray-600 text-[18px]">Do you really want to delete <strong>{propertyToDelete.propertyName}</strong>?</p>
+                            <div className="flex gap-4 mt-4 w-[100%] justify-end">
+                            <button
+                                    onClick={() => setPropertyToDelete(null)}
+                                    className="bg-[#1976D2] hover:bg-[#125BA3] text-white px-[20px] py-2 cursor-pointer rounded-[4.5px] flex gap-[10px]"                                >
+                                    Cancel
+                                    <X/>
+                                </button>
                                 <button
                                     onClick={() => {
                                         // Call delete API
@@ -229,16 +235,12 @@ const AdminMngProperties = () => {
                                                 console.error("Error deleting property:", err);
                                             });
                                     }}
-                                    className="bg-[#C42211] text-white px-6 py-2 cursor-pointer rounded hover:bg-red-700"
-                                >
-                                    Yes, Delete
+                                    className="bg-[#C42211] text-white px-[20px] py-2 cursor-pointer rounded-[4.5px] hover:bg-[#A32012] flex gap-[10px]"
+                                    >
+                                    Delete
+                                    <Trash2/>
                                 </button>
-                                <button
-                                    onClick={() => setPropertyToDelete(null)}
-                                    className="bg-gray-300 text-black px-6 py-2 cursor-pointer rounded hover:bg-gray-400"
-                                >
-                                    Cancel
-                                </button>
+                                
                             </div>
                         </div>
                     </div>

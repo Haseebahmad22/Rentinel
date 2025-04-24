@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Sidebar from "../utility/adminSidebar";
 import axios from "axios";
-import { Pencil, Trash2, Eye, ChevronLeft } from "lucide-react";
+import { Pencil, Trash2, Eye, ChevronLeft, X } from "lucide-react";
 
 const AdminMngTenants = () => {
     const [tenants, setTenants] = useState([]);
@@ -142,22 +142,23 @@ const AdminMngTenants = () => {
                  {/* Delete Confirmation Modal */}
                  {tenantToDelete && (
                     <div className="absolute top-0 left-0 w-full h-full bg-opacity-50 z-[999] flex items-center justify-center">
-                        <div className="bg-white p-8 rounded-xl w-[480px] flex flex-col gap-6 items-center shadow-lg relative">
-                            <h2 className="text-[24px] font-semibold text-[#081E4A]">Are you sure?</h2>
-                            <p className="text-gray-600 text-center">Do you really want to delete <strong>{tenantToDelete.userName}</strong>?</p>
-                            <div className="flex gap-4 mt-4">
+                        <div className="bg-white p-8 rounded-xl w-[480px] flex flex-col gap-6 shadow-lg relative">
+                            <h2 className="text-[24px] font-semibold text-[#081E4A]">Confirm Deletion</h2>
+                            <p className="text-gray-600 text-[18px]">Do you really want to delete <strong>{tenantToDelete.userName}</strong>?</p>
+                            <div className="flex gap-4 mt-4 w-[100%] justify-end">
+                            <button
+                                    onClick={() => setTenantToDelete(null)}
+                                    className="bg-[#1976D2] hover:bg-[#125BA3] text-white px-[20px] py-2 cursor-pointer rounded-[4.5px] flex gap-[10px]"                                >
+                                    Cancel
+                                    <X/>
+                                </button>
                                 <button
                                     onClick={() => handleDelete(tenantToDelete.tenantID)}
-                                    className="bg-[#C42211] text-white px-6 py-2 cursor-pointer rounded hover:bg-red-700"
-                                >
-                                    Yes, Delete
+                                    className="bg-[#C42211] text-white px-[20px] py-2 cursor-pointer rounded-[4.5px] hover:bg-[#A32012] flex gap-[10px]"                                >
+                                    Delete
+                                    <Trash2/>
                                 </button>
-                                <button
-                                    onClick={() => setTenantToDelete(null)}
-                                    className="bg-gray-300 text-black px-6 py-2 cursor-pointer rounded hover:bg-gray-400"
-                                >
-                                    Cancel
-                                </button>
+                                
                             </div>
                         </div>
                     </div>

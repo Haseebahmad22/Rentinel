@@ -21,5 +21,10 @@ public class PropertyController {
     public List<Property> getAllProperties() {
         return propertyRepository.findAll();
     }
+     // DELETE /properties/{id}
+     @DeleteMapping("/{id}")
+     public void deleteProperty(@PathVariable Integer id) {
+         propertyRepository.deleteById(id);
+     }
 }
 

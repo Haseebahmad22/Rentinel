@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
 @CrossOrigin(origins = "http://localhost:5173")
 
 @RestController
@@ -17,7 +18,13 @@ public class TenantController {
 
     // GET /api/owners
     @GetMapping
-    public List<Tenant> getAllOwners() {
+    public List<Tenant> getAllTenants() {
         return tenantRepository.findAll();
+    }
+
+    // DELETE /tenants/{id}
+    @DeleteMapping("/{id}")
+    public void deleteTenant(@PathVariable Integer id) {
+        tenantRepository.deleteById(id);
     }
 }

@@ -21,4 +21,10 @@ public class PaymentController {
     public List<Payment> getAllPayments() {
         return paymentRepository.findAll();
     }
+
+    // DELETE /payments/{id}
+    @DeleteMapping("/{id}")
+    public void deletePayment(@PathVariable Integer id) {
+        paymentRepository.deleteById(id);
+    }
 }
