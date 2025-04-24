@@ -4,6 +4,7 @@ import com.rentinel.backend.model.Tenant;
 import com.rentinel.backend.repository.TenantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import java.util.Optional;
 
 import java.util.List;
 
@@ -32,4 +33,15 @@ public class TenantController {
     public void deleteTenant(@PathVariable Integer id) {
         tenantRepository.deleteById(id);
     }
+
+      // GET /tenants/id/{name} - Fetch tenant ID by name
+      @GetMapping("/id/{userName}")
+      public Integer getTenantIdByName(@PathVariable String userName) {
+          Optional<Tenant> tenant = tenantRepository.findByUserName(userName);
+          if (tenant.isPresent()) {
+              return tenant.get().getID(); // Return the tenant ID
+          } else {
+              throw new RuntimeException("Tenant not found with name " + userName);
+          }
+      }
 }

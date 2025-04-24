@@ -6,7 +6,8 @@ import { Pencil, Trash2, Eye, ChevronLeft, X } from "lucide-react";
 const AdminMngOwners = () => {
     const [owners, setOwners] = useState([]);
     const [viewedOwner, setViewedOwner] = useState(null);
-    const [ownerToDelete, setOwnerToDelete] = useState(null); // Add state for tenant to delete
+    const [ownerToDelete, setOwnerToDelete] = useState(null);
+    const [ownerProperties, setOwnerProperties] = useState([]);
 
     useEffect(() => {
         axios.get("http://localhost:8080/owners")
@@ -19,13 +20,38 @@ const AdminMngOwners = () => {
     }, []);
 
     const handleDelete = (id) => {
-        console.log("Delete property with id:", id);
+        console.log("Delete owner with id:", id);
     };
-
 
     const handleView = (owner) => {
         setViewedOwner(owner);
+        // Fetch the properties assigned to this owner using their ownerId
+        axios.get(`http://localhost:8080/properties/owner/${owner.userName}`)
+            .then(response => {
+                const properties = response.data;
+                setOwnerProperties(properties);
+
+                // Fetch tenant ID for each property
+                const tenantRequests = properties.map((property) =>
+                    axios.get(`http://localhost:8080/tenants/id/${property.tenantName}`)
+                );
+
+                // Resolve all tenant ID requests
+                Promise.all(tenantRequests)
+                .then(tenantResponses => {
+                    const propertiesWithTenantDetails = properties.map((property, index) => ({
+                        ...property,
+                        tenantID: tenantResponses[index].data, // don't overwrite tenantID
+                    }));
+                    setOwnerProperties(propertiesWithTenantDetails);
+                })
+            
+            })
+            .catch(error => {
+                console.error("Error fetching owner properties:", error);
+            });
     };
+
 
     const handleBack = () => {
         setViewedOwner(null);
@@ -68,26 +94,54 @@ const AdminMngOwners = () => {
                                 <div className="pt-12 flex flex-col space-y-8">
                                     {/* Row 1 */}
                                     <div className="flex flex-wrap justify-between ">
-                                        <OwnerBox label="OWNER ID" value={owners?.ID} />
-                                        <OwnerBox label="FULL NAME" value={owners?.fullName} />
-                                        <OwnerBox label="USERNAME" value={owners?.userName} />
-                                        <OwnerBox label="CNIC" value={owners?.cnic} />
-                                        <OwnerBox label="EMAIL" value={owners?.email} />
+                                        <OwnerBox label="OWNER ID" value={viewedOwner?.id} />
+                                        <OwnerBox label="FULL NAME" value={viewedOwner?.fullName} />
+                                        <OwnerBox label="USERNAME" value={viewedOwner?.userName} />
+                                        <OwnerBox label="CNIC" value={viewedOwner?.cnic} />
+                                        <OwnerBox label="EMAIL" value={viewedOwner?.email} />
                                     </div>
-
 
                                     {/* Divider */}
                                     <hr className="border-gray-300" />
-                                <div>
 
-                                </div>
-                                    
+                                    {/* Owner Properties Section */}
+                                    <div className="space-y-2">
+                                        <h2 className="text-[20px] font-semibold text-[#081E4A]">Assigned Properties</h2>
+                                        <div className="bg-white rounded-lg shadow-md overflow-hidden w-full max-h-[150px]">
+                                            {/* Sticky Header */}
+                                            <div className="grid grid-cols-5 bg-gray-100 p-3 font-medium text-gray-700 sticky top-0 z-10">
+                                                <div className="col-span-1">Property ID</div>
+                                                <div className="col-span-1">Property Name</div>
+                                                <div className="col-span-1">Tenant ID</div>
+                                                <div className="col-span-1">Tenant Name</div>
+                                            </div>
+
+                                            {/* Scrollable Body */}
+                                            <div className="overflow-y-auto max-h-[100px]">
+                                                {ownerProperties.length > 0 ? (
+                                                    ownerProperties.map((property) => (
+                                                        <div
+                                                            key={property.propertyID}
+                                                            className="grid grid-cols-5 p-3 border-b border-gray-200 text-gray-700 text-[15px]"
+                                                        >
+                                                            <div>{property.propertyID}</div>
+                                                            <div>{property.propertyName}</div>
+                                                            <div>{property.tenantID}</div> {/* Tenant ID from the API */}
+                                                            {console.log(property)}
+                                                            <div>{property.tenantName}</div>
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <div className="p-3 text-gray-500 italic">No properties assigned.</div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
                                 </div>
                             </div>
                         </div>
                     )}
-
-
 
                     {/* Sticky Header */}
                     <div className="grid grid-cols-14 bg-gray-100 p-4 font-medium text-gray-700 sticky top-0 z-10 h-[56px]">
@@ -104,17 +158,15 @@ const AdminMngOwners = () => {
 
                     {/* Scrollable Body */}
                     <div className="overflow-y-auto max-h-[324px]">
-                        {owners.map((owner, index) => (
+                        {owners.map((owner) => (
                             <div key={owner.id} className="grid grid-cols-14 p-4 border-b border-gray-200 items-center">
                                 <div className="col-span-2 font-medium">{owner.id}</div>
                                 <div className="col-span-2">{owner.userName}</div>
-
                                 <div className="col-span-3">{owner.email}</div>
                                 <div className="col-span-3">{owner.cnic}</div>
-
                                 <div className="col-span-4 flex justify-end gap-2 pr-4">
                                     <button className="text-white flex items-center justify-center gap-2 bg-[#1245A8] py-1 px-3 rounded w-[112px] cursor-pointer"
-                                        onClick={() => handleView(owner.id)}
+                                        onClick={() => handleView(owner)}
                                     >
                                         <Eye className="w-4 h-4" />
                                         <span>View</span>
@@ -141,8 +193,8 @@ const AdminMngOwners = () => {
                     <h1 className="text-[32px]">{owners.length}</h1>
                 </div>
 
-                  {/* Delete Confirmation Modal */}
-                  {ownerToDelete && (
+                {/* Delete Confirmation Modal */}
+                {ownerToDelete && (
                     <div className="absolute top-0 left-0 w-full h-full bg-opacity-50 z-[999] flex items-center justify-center">
                         <div className="bg-white p-8 rounded-[] w-[580px] flex flex-col gap-6 shadow-lg relative">
                             <h2 className="text-[24px] font-semibold text-[#081E4A]">Confirm Deletion</h2>
@@ -153,14 +205,14 @@ const AdminMngOwners = () => {
                                     className="bg-[#1976D2] hover:bg-[#125BA3] text-white px-[20px] py-2 cursor-pointer rounded-[4.5px] flex gap-[10px]"
                                 >
                                     Cancel
-                                    <X/>
+                                    <X />
                                 </button>
                                 <button
                                     onClick={() => handleDelete(ownerToDelete.id)}
                                     className="bg-[#C42211] text-white px-[20px] py-2 cursor-pointer rounded-[4.5px] hover:bg-[#A32012] flex gap-[10px]"
                                 >
                                     Delete
-                                    <Trash2/>
+                                    <Trash2 />
                                 </button>
                             </div>
                         </div>
@@ -170,4 +222,5 @@ const AdminMngOwners = () => {
         </div>
     );
 };
+
 export default AdminMngOwners;

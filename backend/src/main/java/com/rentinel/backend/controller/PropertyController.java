@@ -1,4 +1,3 @@
-
 package com.rentinel.backend.controller;
 
 import com.rentinel.backend.model.Property;
@@ -7,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @CrossOrigin(origins = "http://localhost:5173")
 @RestController
@@ -16,22 +16,33 @@ public class PropertyController {
     @Autowired
     private PropertyRepository propertyRepository;
 
-    // GET /api/owners
+    // GET /properties
     @GetMapping
     public List<Property> getAllProperties() {
         return propertyRepository.findAll();
     }
 
-    // DELETE /properties/{id}
-    @DeleteMapping("/{id}")
-    public void deleteProperty(@PathVariable Integer id) {
-        propertyRepository.deleteById(id);
+    // GET /properties/{propertyID} - Fetch a single property by its propertyID
+    @GetMapping("/{propertyID}")
+    public Property getPropertyById(@PathVariable Integer propertyID) {
+        Optional<Property> property = propertyRepository.findById(propertyID);
+        if (property.isPresent()) {
+            return property.get();
+        } else {
+            throw new RuntimeException("Property not found with id " + propertyID);
+        }
     }
 
-    // PUT /properties/{id}
-    @PutMapping("/{id}")
-    public Property updateProperty(@PathVariable Integer id, @RequestBody Property updatedProperty) {
-        return propertyRepository.findById(id)
+    // DELETE /properties/{propertyID}
+    @DeleteMapping("/{propertyID}")
+    public void deleteProperty(@PathVariable Integer propertyID) {
+        propertyRepository.deleteById(propertyID);
+    }
+
+    // PUT /properties/{propertyID}
+    @PutMapping("/{propertyID}")
+    public Property updateProperty(@PathVariable Integer propertyID, @RequestBody Property updatedProperty) {
+        return propertyRepository.findById(propertyID)
                 .map(property -> {
                     property.setPropertyName(updatedProperty.getPropertyName());
                     property.setLocation(updatedProperty.getLocation());
@@ -43,7 +54,13 @@ public class PropertyController {
                     property.setNumOfBaths(updatedProperty.getNumOfBaths());
                     return propertyRepository.save(property);
                 })
-                .orElseThrow(() -> new RuntimeException("Property not found with id " + id));
+                .orElseThrow(() -> new RuntimeException("Property not found with id " + propertyID));
     }
 
+    
+    // GET /properties/owner/{ownerID} - Fetch properties by ownerID
+    @GetMapping("/owner/{ownerName}")
+    public List<Property> getPropertiesByOwnerName(@PathVariable String ownerName) {
+        return propertyRepository.findByOwnerName(ownerName);
+    }
 }

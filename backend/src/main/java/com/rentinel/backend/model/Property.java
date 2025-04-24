@@ -18,6 +18,9 @@ public class Property {
     @Column(name = "propertyName", length = 50)
     private String propertyName;
 
+    @Column(name = "Area", length = 50, nullable = false)
+    private String area;
+
     @Column(name = "location", nullable = false, length = 255)
     private String location;
 

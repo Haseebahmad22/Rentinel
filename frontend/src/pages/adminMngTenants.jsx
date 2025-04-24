@@ -7,7 +7,7 @@ const AdminMngTenants = () => {
     const [tenants, setTenants] = useState([]);
     const [viewedTenant, setViewedTenant] = useState(null);
     const [tenantToDelete, setTenantToDelete] = useState(null); // Add state for tenant to delete
-
+    const [tenantProperties, setTenantProperties] = useState([]);
 
     useEffect(() => {
         axios.get("http://localhost:8080/tenants")
@@ -25,6 +25,35 @@ const AdminMngTenants = () => {
 
     const handleView = (tenant) => {
         setViewedTenant(tenant);
+        // Fetch the properties assigned to this tenant using their tenantId (userName or id)
+        axios.get(`http://localhost:8080/propertyAssignments/tenant/${tenant.id}`)
+            .then(response => {
+                const propertyAssignments = response.data;
+
+                // Fetch details for each property (name and owner) by propertyID
+                const propertyRequests = propertyAssignments.map(property =>
+                    axios.get(`http://localhost:8080/properties/${property.propertyID}`)
+                );
+
+                Promise.all(propertyRequests)
+                    .then(responses => {
+                        const propertiesWithDetails = responses.map((response, index) => {
+                            const property = response.data;
+                            return {
+                                ...propertyAssignments[index],
+                                propertyName: property.propertyName,
+                                ownerName: property.ownerName
+                            };
+                        });
+                        setTenantProperties(propertiesWithDetails);
+                    })
+                    .catch(error => {
+                        console.error("Error fetching property details:", error);
+                    });
+            })
+            .catch(error => {
+                console.error("Error fetching tenant properties:", error);
+            });
     };
 
     const handleBack = () => {
@@ -68,25 +97,52 @@ const AdminMngTenants = () => {
                                 <div className="pt-12 flex flex-col space-y-8">
                                     {/* Row 1 */}
                                     <div className="flex flex-wrap justify-between ">
-                                        <TenantBox label="Tenant ID" value={viewedTenant?.ID} />
+                                        <TenantBox label="Tenant ID" value={viewedTenant?.id} />
                                         <TenantBox label="FULL NAME" value={viewedTenant?.fullName} />
                                         <TenantBox label="USERNAME" value={viewedTenant?.userName} />
                                         <TenantBox label="CNIC" value={viewedTenant?.cnic} />
                                         <TenantBox label="EMAIL" value={viewedTenant?.email} />
                                     </div>
 
-
                                     {/* Divider */}
                                     <hr className="border-gray-300" />
-                                    <div>
+                                    {/* Tenant Properties Section */}
+                                    <div className="space-y-2">
+                                        <h2 className="text-[20px] font-semibold text-[#081E4A]">Assigned Properties</h2>
+                                        <div className="bg-white rounded-lg shadow-md overflow-hidden w-full max-h-[150px]">
+                                            {/* Sticky Header */}
+                                            <div className="grid grid-cols-4 bg-gray-100 p-3 font-medium text-gray-700 sticky top-0 z-10">
+                                                <div className="col-span-1">Property ID</div>
+                                                <div className="col-span-1">Property Name</div>
+                                                <div className="col-span-1">Owner ID</div>
+                                                <div className="col-span-1">Owner Name</div>
+                                            </div>
 
+                                            {/* Scrollable Body */}
+                                            <div className="overflow-y-auto max-h-[100px]">
+                                                {tenantProperties.length > 0 ? (
+                                                    tenantProperties.map((property) => (
+                                                        <div
+                                                            key={property.assignmentID}
+                                                            className="grid grid-cols-4 p-3 border-b border-gray-200 text-gray-700 text-[15px]"
+                                                        >
+                                                            <div>{property.propertyID}</div>
+                                                            <div>{property.propertyName}</div>
+                                                            <div>{property.ownerID}</div>
+                                                            <div>{property.ownerName}</div>
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <div className="p-3 text-gray-500 italic">No properties assigned.</div>
+                                                )}
+                                            </div>
+                                        </div>
                                     </div>
 
                                 </div>
                             </div>
                         </div>
                     )}
-
 
                     {/* Sticky Header */}
                     <div className="grid grid-cols-14 bg-gray-100 p-4 font-medium text-gray-700 sticky top-0 z-10">
@@ -111,7 +167,7 @@ const AdminMngTenants = () => {
                                 <div className="col-span-3">{tenant.cnic}</div>
                                 <div className="col-span-4 flex justify-end gap-2 pr-4">
                                     <button className="text-white flex items-center justify-center gap-2 bg-[#1245A8] py-1 px-3 rounded cursor-pointer w-[112px]"
-                                        onClick={() => handleView(tenant.id)}
+                                        onClick={() => handleView(tenant)}
                                     >
                                         <Eye className="w-4 h-4" />
                                         <span>View</span>
@@ -139,26 +195,25 @@ const AdminMngTenants = () => {
                     <h1 className="text-[32px]">{tenants.length}</h1>
                 </div>
 
-                 {/* Delete Confirmation Modal */}
-                 {tenantToDelete && (
+                {/* Delete Confirmation Modal */}
+                {tenantToDelete && (
                     <div className="absolute top-0 left-0 w-full h-full bg-opacity-50 z-[999] flex items-center justify-center">
                         <div className="bg-white p-8 rounded-xl w-[480px] flex flex-col gap-6 shadow-lg relative">
                             <h2 className="text-[24px] font-semibold text-[#081E4A]">Confirm Deletion</h2>
                             <p className="text-gray-600 text-[18px]">Do you really want to delete <strong>{tenantToDelete.userName}</strong>?</p>
                             <div className="flex gap-4 mt-4 w-[100%] justify-end">
-                            <button
+                                <button
                                     onClick={() => setTenantToDelete(null)}
                                     className="bg-[#1976D2] hover:bg-[#125BA3] text-white px-[20px] py-2 cursor-pointer rounded-[4.5px] flex gap-[10px]"                                >
                                     Cancel
-                                    <X/>
+                                    <X />
                                 </button>
                                 <button
                                     onClick={() => handleDelete(tenantToDelete.tenantID)}
                                     className="bg-[#C42211] text-white px-[20px] py-2 cursor-pointer rounded-[4.5px] hover:bg-[#A32012] flex gap-[10px]"                                >
                                     Delete
-                                    <Trash2/>
+                                    <Trash2 />
                                 </button>
-                                
                             </div>
                         </div>
                     </div>
