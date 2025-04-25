@@ -1,13 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Sidebar from "../utility/adminSidebar";
 import axios from "axios";
-import { Pencil, Trash2, Eye, ChevronLeft, X } from "lucide-react";
+import { Pencil, Trash2, Eye, ChevronLeft, X, Check, XCircle } from "lucide-react";
 
 const AdminMngTenants = () => {
     const [tenants, setTenants] = useState([]);
     const [viewedTenant, setViewedTenant] = useState(null);
-    const [tenantToDelete, setTenantToDelete] = useState(null); // Add state for tenant to delete
+    const [tenantToDelete, setTenantToDelete] = useState(null);
     const [tenantProperties, setTenantProperties] = useState([]);
+    const [editMode, setEditMode] = useState(false);
+    const [formErrors, setFormErrors] = useState({});
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const formRef = useRef(null);
 
     useEffect(() => {
         axios.get("http://localhost:8080/tenants")
@@ -19,18 +23,32 @@ const AdminMngTenants = () => {
             });
     }, []);
 
-    const handleDelete = (id) => {
-        console.log("Delete property with id:", id);
+    const handleDelete = (tenant) => {
+        axios.delete(`http://localhost:8080/tenants/${tenant.id}`)
+            .then(() => {
+                setTenants(prev => prev.filter(t => t.id !== tenant.id));
+                setTenantToDelete(null);
+                if (viewedTenant?.id === tenant.id) {
+                    setViewedTenant(null);
+                }
+            })
+            .catch(error => {
+                console.error("Error deleting tenant:", error);
+            });
+    };
+
+    const handleEdit = (tenant) => {
+        setViewedTenant(tenant);
+        setEditMode(true);
     };
 
     const handleView = (tenant) => {
         setViewedTenant(tenant);
-        // Fetch the properties assigned to this tenant using their tenantId (userName or id)
+        setEditMode(false);
+
         axios.get(`http://localhost:8080/propertyAssignments/tenant/${tenant.id}`)
             .then(response => {
                 const propertyAssignments = response.data;
-
-                // Fetch details for each property (name and owner) by propertyID
                 const propertyRequests = propertyAssignments.map(property =>
                     axios.get(`http://localhost:8080/properties/${property.propertyID}`)
                 );
@@ -58,17 +76,99 @@ const AdminMngTenants = () => {
 
     const handleBack = () => {
         setViewedTenant(null);
+        setEditMode(false);
     };
 
-    const TenantBox = ({ label, value }) => (
-        <div className="flex flex-col w-[170px]">
-            <label className="text-[14px] font-semibold text-gray-600 mb-1">{label}</label>
-            <div className="bg-[#E9E9E9] px-4 py-2 rounded w-full text-[15px] text-gray-800">
-                {value || "—"}
-            </div>
-        </div>
-    );
+    const validateForm = () => {
+        const errors = {};
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const cnicRegex = /^[0-9]{13}$/;
 
+        if (!viewedTenant.fullName?.trim()) {
+            errors.fullName = "Full name is required";
+        }
+
+        if (!viewedTenant.cnic?.trim()) {
+            errors.cnic = "CNIC is required";
+        } else if (!cnicRegex.test(viewedTenant.cnic)) {
+            errors.cnic = "CNIC must be 13 digits without dashes";
+        }
+
+        if (!viewedTenant.email?.trim()) {
+            errors.email = "Email is required";
+        } else if (!emailRegex.test(viewedTenant.email)) {
+            errors.email = "Invalid email format";
+        }
+
+        setFormErrors(errors);
+        return Object.keys(errors).length === 0;
+    };
+
+    const handleSave = () => {
+        if (!validateForm()) return;
+
+        setIsSubmitting(true);
+        if (!formRef.current) return;
+
+        const formData = new FormData(formRef.current);
+        const updatedTenant = {
+            ...viewedTenant,
+            fullName: formData.get('fullName'),
+            cnic: formData.get('cnic'),
+            email: formData.get('email')
+        };
+        console.log(updatedTenant)
+        axios.put(`http://localhost:8080/tenants/${viewedTenant.id}`, updatedTenant)
+            .then(response => {
+                setTenants(prev => prev.map(p =>
+                    p.id === viewedTenant.id ? updatedTenant : p
+                ));
+                setViewedTenant(updatedTenant);
+                setEditMode(false);
+            })
+            .catch(error => {
+                console.error("Error updating property:", error);
+            })
+            .finally(() => {
+                setIsSubmitting(false);
+            });
+
+
+    };
+
+
+    const TenantBox = ({ label, name, value, isFirstEditable = false, validationType = "text" }) => {
+        const [inputValue, setInputValue] = useState(value || "");
+        const isReadOnly = name === "id" || name === "userName";
+
+        const handleChange = async (e) => {
+            const newValue = e.target.value;
+            setInputValue(newValue);
+        };
+    
+        return (
+            <div className="flex flex-col w-[170px]">
+                <label className="text-[14px] font-semibold text-gray-600 mb-1">{label}</label>
+                {editMode ? (
+                    <input
+                        name={name}
+                        type="text"
+                        value={inputValue || ""}
+                        onChange={handleChange}
+                        maxLength={validationType === "cnic" ? 13 : undefined}
+                        className="px-4 py-2 rounded w-full text-[15px] text-gray-800 bg-[#F2F2F2] focus:outline-none border border-gray-300"
+                        readOnly={isReadOnly}
+                        tabIndex={isReadOnly ? -1 : 0}
+                    />
+                ) : (
+                    <div className="bg-[#E9E9E9] px-4 py-2 rounded w-full text-[15px] text-gray-800">
+                        {value || "—"}
+                    </div>
+                )}
+            </div>
+        );
+    };
+    
     return (
         <div className="flex font-[Lexend]">
             <Sidebar />
@@ -78,39 +178,58 @@ const AdminMngTenants = () => {
                     <p className="text-[15px] text-[#4D4D4D] font-light">View, edit, or delete tenants.</p>
                 </div>
 
-                {/* Payments Table Container */}
                 <div className="mx-[80px] mt-8 bg-white rounded-lg shadow-md overflow-hidden relative w-[1060px]">
-                    {/* overlay */}
                     {viewedTenant && (
                         <div className="absolute top-0 bg-white bg-opacity-90 z-50 flex rounded-lg items-center justify-center px-6 w-[1060px] h-[380px]">
-                            <div className=" p-6 rounded-lg w-full max-w-[1000px] space-y-8 relative">
-                                {/* Back Button */}
-                                <div className="absolute top-4 left-4">
+                            <form ref={formRef} className="p-6 rounded-lg w-full max-w-[1000px] space-y-8 relative">
+                                <div className="flex justify-between items-center absolute top-4 left-4 w-full pr-[40px]">
                                     <div
                                         onClick={handleBack}
                                         className="w-[43px] h-[43px] cursor-pointer rounded-full bg-[#D9D9D9] flex items-center justify-center"
                                     >
                                         <ChevronLeft className="text-black" />
                                     </div>
+                                    <div>
+                                        {editMode && (
+                                            <button
+                                                type="button"
+                                                onClick={handleSave}
+                                                className="bg-[#FFAE1A] cursor-pointer text-white text-[20px] font-medium rounded-[4.5px] px-[15px] py-[3px]"
+                                            >
+                                                SAVE
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
 
                                 <div className="pt-12 flex flex-col space-y-8">
-                                    {/* Row 1 */}
-                                    <div className="flex flex-wrap justify-between ">
-                                        <TenantBox label="Tenant ID" value={viewedTenant?.id} />
-                                        <TenantBox label="FULL NAME" value={viewedTenant?.fullName} />
-                                        <TenantBox label="USERNAME" value={viewedTenant?.userName} />
-                                        <TenantBox label="CNIC" value={viewedTenant?.cnic} />
-                                        <TenantBox label="EMAIL" value={viewedTenant?.email} />
+                                    <div className="flex flex-wrap justify-between">
+                                        <TenantBox label="Tenant ID" name="id" value={viewedTenant?.id} />
+                                        <TenantBox
+                                            label="FULL NAME"
+                                            name="fullName"
+                                            value={viewedTenant?.fullName}
+                                            isFirstEditable={editMode}
+                                        />
+                                        <TenantBox label="USERNAME" name="userName" value={viewedTenant?.userName} />
+                                        <TenantBox
+                                            label="CNIC"
+                                            name="cnic"
+                                            value={viewedTenant?.cnic}                                            
+                                        />
+                                        <TenantBox
+                                            label="EMAIL"
+                                            name="email"
+                                            value={viewedTenant?.email}
+
+                                        />
                                     </div>
 
-                                    {/* Divider */}
                                     <hr className="border-gray-300" />
-                                    {/* Tenant Properties Section */}
+
                                     <div className="space-y-2">
                                         <h2 className="text-[20px] font-semibold text-[#081E4A]">Assigned Properties</h2>
                                         <div className="bg-white rounded-lg shadow-md overflow-hidden w-full max-h-[150px]">
-                                            {/* Sticky Header */}
                                             <div className="grid grid-cols-4 bg-gray-100 p-3 font-medium text-gray-700 sticky top-0 z-10">
                                                 <div className="col-span-1">Property ID</div>
                                                 <div className="col-span-1">Property Name</div>
@@ -118,7 +237,6 @@ const AdminMngTenants = () => {
                                                 <div className="col-span-1">Owner Name</div>
                                             </div>
 
-                                            {/* Scrollable Body */}
                                             <div className="overflow-y-auto max-h-[100px]">
                                                 {tenantProperties.length > 0 ? (
                                                     tenantProperties.map((property) => (
@@ -138,13 +256,11 @@ const AdminMngTenants = () => {
                                             </div>
                                         </div>
                                     </div>
-
                                 </div>
-                            </div>
+                            </form>
                         </div>
                     )}
 
-                    {/* Sticky Header */}
                     <div className="grid grid-cols-14 bg-gray-100 p-4 font-medium text-gray-700 sticky top-0 z-10">
                         <div className="col-span-2">TENANT ID</div>
                         <div className="col-span-2">USERNAME</div>
@@ -157,7 +273,6 @@ const AdminMngTenants = () => {
                         </div>
                     </div>
 
-                    {/* Scrollable Body */}
                     <div className="overflow-y-auto max-h-[322px]">
                         {tenants.map((tenant) => (
                             <div key={tenant.id} className="grid grid-cols-14 p-4 border-b border-gray-200 items-center">
@@ -166,13 +281,17 @@ const AdminMngTenants = () => {
                                 <div className="col-span-3">{tenant.email}</div>
                                 <div className="col-span-3">{tenant.cnic}</div>
                                 <div className="col-span-4 flex justify-end gap-2 pr-4">
-                                    <button className="text-white flex items-center justify-center gap-2 bg-[#1245A8] py-1 px-3 rounded cursor-pointer w-[112px]"
+                                    <button
+                                        className="text-white flex items-center justify-center gap-2 bg-[#1245A8] py-1 px-3 rounded cursor-pointer w-[112px]"
                                         onClick={() => handleView(tenant)}
                                     >
                                         <Eye className="w-4 h-4" />
                                         <span>View</span>
                                     </button>
-                                    <button className="text-white flex items-center justify-center gap-2 bg-[#1976D2] py-1 px-3 rounded w-[112px] cursor-pointer">
+                                    <button
+                                        className="text-white flex items-center justify-center gap-2 bg-[#1976D2] py-1 px-3 rounded w-[112px] cursor-pointer"
+                                        onClick={() => handleEdit(tenant)}
+                                    >
                                         <Pencil className="w-4 h-4" />
                                         <span>Edit</span>
                                     </button>
@@ -189,37 +308,39 @@ const AdminMngTenants = () => {
                     </div>
                 </div>
 
-                {/* Total Tenants */}
                 <div className="w-[390px] flex flex-col items-center rounded-[16px] p-[10px] bg-white text-[#081E4A] font-medium ml-[80px] mt-[15px]">
                     <h1 className="text-[36px]">Total Tenants</h1>
                     <h1 className="text-[32px]">{tenants.length}</h1>
                 </div>
 
-                {/* Delete Confirmation Modal */}
-                {tenantToDelete && (
-                    <div className="absolute top-0 left-0 w-full h-full bg-opacity-50 z-[999] flex items-center justify-center">
-                        <div className="bg-white p-8 rounded-xl w-[480px] flex flex-col gap-6 shadow-lg relative">
-                            <h2 className="text-[24px] font-semibold text-[#081E4A]">Confirm Deletion</h2>
-                            <p className="text-gray-600 text-[18px]">Do you really want to delete <strong>{tenantToDelete.userName}</strong>?</p>
-                            <div className="flex gap-4 mt-4 w-[100%] justify-end">
-                                <button
-                                    onClick={() => setTenantToDelete(null)}
-                                    className="bg-[#1976D2] hover:bg-[#125BA3] text-white px-[20px] py-2 cursor-pointer rounded-[4.5px] flex gap-[10px]"                                >
-                                    Cancel
-                                    <X />
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(tenantToDelete.tenantID)}
-                                    className="bg-[#C42211] text-white px-[20px] py-2 cursor-pointer rounded-[4.5px] hover:bg-[#A32012] flex gap-[10px]"                                >
-                                    Delete
-                                    <Trash2 />
-                                </button>
+                {
+                    tenantToDelete && (
+                        <div className="absolute top-0 left-0 w-full h-full bg-opacity-50 z-[999] flex items-center justify-center">
+                            <div className="bg-white p-8 rounded-xl w-[480px] flex flex-col gap-6 shadow-lg relative">
+                                <h2 className="text-[24px] font-semibold text-[#081E4A]">Confirm Deletion</h2>
+                                <p className="text-gray-600 text-[18px]">Do you really want to delete <strong>{tenantToDelete.userName}</strong>?</p>
+                                <div className="flex gap-4 mt-4 w-[100%] justify-end">
+                                    <button
+                                        onClick={() => setTenantToDelete(null)}
+                                        className="bg-[#1976D2] hover:bg-[#125BA3] text-white px-[20px] py-2 cursor-pointer rounded-[4.5px] flex gap-[10px]"
+                                    >
+                                        Cancel
+                                        <X />
+                                    </button>
+                                    <button
+                                        onClick={() => handleDelete(tenantToDelete)}
+                                        className="bg-[#C42211] text-white px-[20px] py-2 cursor-pointer rounded-[4.5px] hover:bg-[#A32012] flex gap-[10px]"
+                                    >
+                                        Delete
+                                        <Trash2 />
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                )}
-            </div>
-        </div>
+                    )
+                }
+            </div >
+        </div >
     );
 };
 

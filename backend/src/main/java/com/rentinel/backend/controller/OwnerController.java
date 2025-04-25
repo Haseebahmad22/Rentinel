@@ -2,6 +2,7 @@ package com.rentinel.backend.controller;
 
 import com.rentinel.backend.model.Owner;
 import com.rentinel.backend.model.Property;
+import com.rentinel.backend.model.Tenant;
 import com.rentinel.backend.repository.OwnerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -39,4 +40,23 @@ public class OwnerController {
     public void deleteOwner(@PathVariable Integer id) {
         ownerRepository.deleteById(id);
     }
+
+     // PUT /tenants/{id} - Update tenant details
+      @PutMapping("/{id}")
+      public Owner updateOwner (@PathVariable Integer id, @RequestBody Owner ownerDetails) {
+          Optional<Owner> owner = ownerRepository.findById(id);
+      
+          if (!owner.isPresent()) {
+              throw new RuntimeException("Owner not found with ID " + id);
+          }
+      
+          Owner existingOwner = owner.get();
+          
+          // Update the tenant details, skipping password update for security reasons
+          existingOwner.setFullName(ownerDetails.getFullName());
+          existingOwner.setUserName(ownerDetails.getUserName());
+          existingOwner.setEmail(ownerDetails.getEmail());
+          existingOwner.setCNIC(ownerDetails.getCNIC());
+          return ownerRepository.save(existingOwner);
+      }
 }

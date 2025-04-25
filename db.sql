@@ -1,3 +1,25 @@
+--Create database Rentinel
+
+--DROP TABLE IF EXISTS tenantNotifications;
+--GO
+--DROP TABLE IF EXISTS ownerNotifications;
+--GO
+--DROP TABLE IF EXISTS blackListedUsers;
+--GO
+--DROP TABLE IF EXISTS Payment;
+--GO
+--DROP TABLE IF EXISTS rentAssignment;
+--GO
+--DROP TABLE IF EXISTS propertyAssignment;
+--GO
+--DROP TABLE IF EXISTS Property;
+--GO
+--DROP TABLE IF EXISTS Tenant;
+--GO
+--DROP TABLE IF EXISTS Owner;
+--GO
+--DROP TABLE IF EXISTS Admin;
+--GO
 
 Use Rentinel
 GO
@@ -74,12 +96,12 @@ CREATE TABLE propertyAssignment
 (
 	assignmentID INT  IDENTITY(1,1)  PRIMARY KEY ,
 	propertyID INT NOT NULL,
-	ownerName varchar(50) NOT NULL,
-	tenantName varchar(50) NOT NULL,
+	ownerID int NOT NULL,
+	tenantID INT NOT NULL,
 	assignmentDate Date NOT NULL,
 	FOREIGN KEY (propertyID) REFERENCES Property(propertyID),
-	FOREIGN KEY (tenantName) references Tenant(userName) ON UPDATE CASCADE ON DELETE CASCADE,
-	FOREIGN KEY (ownerName) references Owner(userName) ON UPDATE CASCADE ON DELETE CASCADE
+	FOREIGN KEY (tenantID) references Tenant(ID) ON UPDATE CASCADE ON DELETE CASCADE,
+	FOREIGN KEY (ownerID) references Owner(ID) ON UPDATE CASCADE ON DELETE CASCADE
 )
 GO
 
@@ -109,9 +131,9 @@ CREATE TABLE ownerNotifications
 propertyName varchar(50) NOT NULL,
 tenantUserName varchar(30), --the notification does not implicitly come from the tenant basically it comes from the system but this field shows for which tenant
 content varchar(255) NOT NULL,
+FOREIGN KEY (ownerID) references Owner(ID) ON UPDATE CASCADE ON DELETE CASCADE
 )
-GO
-
+go
 CREATE TABLE tenantNotifications
 (
 	notificationID INT IDENTITY(1, 1),
@@ -121,10 +143,10 @@ CREATE TABLE tenantNotifications
 propertyName varchar(50) NOT NULL,
 ownerUserName varchar(30), --the notification does not implicitly come from the owner basically it comes from the system but this field shows for which owner
 content varchar(255) NOT NULL,
+FOREIGN KEY (tenantID) references Tenant(ID) ON UPDATE CASCADE ON DELETE CASCADE
 )
-GO
 
-
+go
 
 -- DUMMY INSERTIONS
 INSERT INTO Owner (fullName, userName, Password, email, CNIC, accountCreationDate) VALUES
@@ -164,22 +186,23 @@ INSERT INTO Payment (paymentStatus, paymentDate, amount, propertyID, tenantUserN
 ('Paid', '2024-02-01', 55000, 4, 'hiran', 'fatiman'),
 ('Pending', '2024-02-01', 47000, 5, 'kashifr', 'zainsh');
 GO
-
-INSERT INTO propertyAssignment (propertyID, ownerName, tenantName, assignmentDate) VALUES
-(1, 'amirq', 'hamzam', '2023-12-01'),
-(2, 'sarak', 'nidaf', '2023-12-10'),
-(3, 'alirz', 'usmant', '2024-01-01'),
-(4, 'fatiman', 'hiran', '2024-01-15'),
-(5, 'zainsh', 'kashifr', '2024-02-01');
+select * from Owner
+select * from Tenant
+INSERT INTO propertyAssignment (propertyID, ownerID, tenantID, assignmentDate) VALUES
+(1, 5, 1, '2023-12-01'),
+(2, 4, 2, '2023-12-10'),
+(3, 3, 3, '2024-01-01'),
+(4, 2,4, '2024-01-15'),
+(5, 1, 5, '2024-02-01');
 GO
 SELECT * FROM Property
 SELECT * FROM Tenant
 INSERT INTO rentAssignment (propertyID, tenantID, startDate, dueDate) VALUES
-(5, 1, '2024-01-01', '2024-01-10'),
-(6, 2, '2024-01-01', '2024-01-10'),
-(9, 3, '2024-01-01', '2024-01-10'),
-(10, 4, '2024-01-01', '2024-01-10'),
-(11, 5, '2024-01-01', '2024-01-10');
+(1, 1, '2024-01-01', '2024-01-10'),
+(2, 2, '2024-01-01', '2024-01-10'),
+(3, 3, '2024-01-01', '2024-01-10'),
+(4, 4, '2024-01-01', '2024-01-10'),
+(6, 5, '2024-01-01', '2024-01-10');
 GO
 
 INSERT INTO blackListedUsers (CNIC) VALUES
@@ -191,7 +214,7 @@ INSERT INTO ownerNotifications (ownerID, subject, sentDate, propertyName, tenant
 (2, 'Tenant Complaint', '2024-02-05', 'Blue Apartments', 'nidaf', 'Tenant reported water leakage.'),
 (3, 'Unpaid Rent Alert', '2024-02-10', 'Hill View Residency', 'usmant', 'Tenant has missed the rent due date.');
 GO
-
+select * from rentAssignment
 INSERT INTO tenantNotifications (tenantID, subject, sentDate, propertyName, ownerUserName, content) VALUES
 (1, 'Rent Reminder', '2024-01-28', 'Sunset Villa', 'amirq', 'Your rent is due on Feb 1st.'),
 (2, 'Maintenance Scheduled', '2024-02-04', 'Blue Apartments', 'sarak', 'Plumbing maintenance is scheduled this week.'),

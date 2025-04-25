@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Sidebar from "../utility/adminSidebar";
 import axios from "axios";
 import { Pencil, Trash2, Eye, ChevronLeft, X } from "lucide-react";
@@ -8,6 +8,8 @@ const AdminMngOwners = () => {
     const [viewedOwner, setViewedOwner] = useState(null);
     const [ownerToDelete, setOwnerToDelete] = useState(null);
     const [ownerProperties, setOwnerProperties] = useState([]);
+    const formRef = useRef(null);
+    const [editMode, setEditMode] = useState(false);
 
     useEffect(() => {
         axios.get("http://localhost:8080/owners")
@@ -19,12 +21,25 @@ const AdminMngOwners = () => {
             });
     }, []);
 
-    const handleDelete = (id) => {
-        console.log("Delete owner with id:", id);
+
+
+    const handleDelete = (owner) => {
+        axios.delete(`http://localhost:8080/owners/${owner.id}`)
+            .then(() => {
+                setOwners(prev => prev.filter(o => o.id !== owner.id));
+                setOwnerToDelete(null);
+                if (viewedOwner?.id === owner.id) {
+                    setViewedOwner(null);
+                }
+            })
+            .catch(error => {
+                console.error("Error deleting owner:", error);
+            });
     };
 
     const handleView = (owner) => {
         setViewedOwner(owner);
+        setEditMode(false);
         // Fetch the properties assigned to this owner using their ownerId
         axios.get(`http://localhost:8080/properties/owner/${owner.userName}`)
             .then(response => {
@@ -52,20 +67,72 @@ const AdminMngOwners = () => {
             });
     };
 
+    const handleEdit = (owner) => {
+        setViewedOwner(owner );
+        setEditMode(true);
+    };
 
     const handleBack = () => {
         setViewedOwner(null);
     };
 
-    const OwnerBox = ({ label, value }) => (
-        <div className="flex flex-col w-[170px]">
-            <label className="text-[14px] font-semibold text-gray-600 mb-1">{label}</label>
-            <div className="bg-[#E9E9E9] px-4 py-2 rounded w-full text-[15px] text-gray-800">
+    const handleSave = () => {
+        if (!formRef.current) return;
+
+        const formData = new FormData(formRef.current);
+        const updatedOwner = {
+            ...viewedOwner,
+            fullName: formData.get("fullName"),
+            email: formData.get("email"),
+            cnic: formData.get("cnic"),
+        };  
+
+       axios.put(`http://localhost:8080/owners/${viewedOwner.id}`, updatedOwner)
+            .then(response => {
+                setOwners(prev => prev.map(p =>
+                    p.id === viewedOwner.id ? updatedOwner : p
+                ));
+                setViewedOwner(updatedOwner);
+                setEditMode(false);
+            })
+            .catch(error => {
+                console.error("Error updating owner:", error);
+            });
+            console.log(updatedOwner)
+    };
+
+
+    const OwnerBox = ({ label, name, value, isFirstEditable = false, validationType = "text" }) => {
+        const [inputValue, setInputValue] = useState(value || "");
+        const isReadOnly = name === "id" || name === "userName";
+
+            const handleChange = async (e) => {
+                    const newValue = e.target.value;
+                    setInputValue(newValue);
+                };
+                return (
+                    <div className="flex flex-col w-[230px]">
+                        <label className="text-[14px] font-semibold text-gray-600 mb-1">{label}</label>
+                        {editMode ? (
+                            <input
+                                name={name}
+                                type="text"
+                                value={inputValue}
+                                onChange={handleChange}
+                                className="px-4 py-2 rounded w-full text-[15px] text-gray-800 bg-[#F2F2F2] focus:outline-none border"
+                                readOnly={isReadOnly}
+                                tabIndex={isReadOnly ? -1 : 0}
+                            />
+                        ) : (
+                            <div className="bg-[#E9E9E9] px-4 py-2 rounded w-full text-[15px] text-gray-800">
                 {value || "—"}
             </div>
-        </div>
-    );
+                        )}
+                    </div>
+                );
 
+       
+            }
     return (
         <div className="flex font-[Lexend]">
             <Sidebar />
@@ -80,27 +147,38 @@ const AdminMngOwners = () => {
                     {/* overlay */}
                     {viewedOwner && (
                         <div className="absolute top-0 bg-white bg-opacity-90 z-50 flex rounded-lg items-center justify-center px-6 w-[1060px] h-[380px]">
-                            <div className=" p-6 rounded-lg w-full max-w-[1000px] space-y-8 relative">
+                            <form ref={formRef} className=" p-6 rounded-lg w-full max-w-[1000px] space-y-8 relative">
                                 {/* Back Button */}
-                                <div className="absolute top-4 left-4">
+                                <div className="flex justify-between content-center items-center absolute top-4 left-4 w-full pr-[40px]">
                                     <div
                                         onClick={handleBack}
                                         className="w-[43px] h-[43px] cursor-pointer rounded-full bg-[#D9D9D9] flex items-center justify-center"
                                     >
                                         <ChevronLeft className="text-black" />
                                     </div>
+                                    <div>
+                                        {editMode && (
+                                            <button
+                                                type="button"
+                                                onClick={handleSave}
+                                                className="bg-[#FFAE1A] cursor-pointer text-white text-[20px] font-medium rounded-[4.5px] px-[15px] py-[3px]"
+                                            >
+                                                SAVE
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
 
                                 <div className="pt-12 flex flex-col space-y-8">
                                     {/* Row 1 */}
                                     <div className="flex flex-wrap justify-between ">
-                                        <OwnerBox label="OWNER ID" value={viewedOwner?.id} />
-                                        <OwnerBox label="FULL NAME" value={viewedOwner?.fullName} />
-                                        <OwnerBox label="USERNAME" value={viewedOwner?.userName} />
-                                        <OwnerBox label="CNIC" value={viewedOwner?.cnic} />
-                                        <OwnerBox label="EMAIL" value={viewedOwner?.email} />
+                                        <OwnerBox label="OWNER ID" name="id" value={viewedOwner?.id}  isFirstEditable={editMode}/>
+                                        <OwnerBox label="FULL NAME" name="fullName" value={viewedOwner?.fullName } />
+                                        <OwnerBox label="USERNAME" name="userName" value={viewedOwner?.userName} />
+                                        <OwnerBox label="CNIC" name="cnic" value={viewedOwner?.cnic} />
+                                        <OwnerBox label="EMAIL" name="email" value={viewedOwner?.email} />
                                     </div>
-
+                                   
                                     {/* Divider */}
                                     <hr className="border-gray-300" />
 
@@ -139,7 +217,7 @@ const AdminMngOwners = () => {
                                     </div>
 
                                 </div>
-                            </div>
+                            </form>
                         </div>
                     )}
 
@@ -171,7 +249,9 @@ const AdminMngOwners = () => {
                                         <Eye className="w-4 h-4" />
                                         <span>View</span>
                                     </button>
-                                    <button className="text-white flex items-center justify-center gap-2 bg-[#1976D2] py-1 px-3 rounded w-[112px] cursor-pointer">
+                                    <button className="text-white flex items-center justify-center gap-2 bg-[#1976D2] py-1 px-3 rounded w-[112px] cursor-pointer"
+                                        onClick={() => handleEdit(owner)}
+                                        >
                                         <Pencil className="w-4 h-4" />
                                         <span>Edit</span>
                                     </button>
@@ -208,7 +288,7 @@ const AdminMngOwners = () => {
                                     <X />
                                 </button>
                                 <button
-                                    onClick={() => handleDelete(ownerToDelete.id)}
+                                    onClick={() => handleDelete(ownerToDelete)}
                                     className="bg-[#C42211] text-white px-[20px] py-2 cursor-pointer rounded-[4.5px] hover:bg-[#A32012] flex gap-[10px]"
                                 >
                                     Delete

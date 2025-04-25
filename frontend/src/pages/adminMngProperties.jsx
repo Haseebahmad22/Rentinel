@@ -55,13 +55,11 @@ const AdminMngProperties = () => {
 
         
      const handleView = (property) => {
-        const assignment = getRentAssignment(property.propertyID);
         setViewedProperty(property);
         setEditMode(false);
     };
 
     const handleEdit = (property) => {
-    
         setViewedProperty(property );
         setEditMode(true);
     };
@@ -106,7 +104,7 @@ const AdminMngProperties = () => {
             rentEndDate: formData.get('rentEndDate'),
             fixedRent: formData.get('fixedRent'),
             tenantName: formData.get('tenantName')
-        };
+        };  
 
         axios.put(`http://localhost:8080/properties/${viewedProperty.propertyID}`, updatedProperty)
             .then(response => {

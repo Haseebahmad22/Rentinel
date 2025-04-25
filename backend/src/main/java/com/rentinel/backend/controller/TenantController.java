@@ -44,4 +44,24 @@ public class TenantController {
               throw new RuntimeException("Tenant not found with name " + userName);
           }
       }
+
+      // PUT /tenants/{id} - Update tenant details
+      @PutMapping("/{id}")
+      public Tenant updateTenant(@PathVariable Integer id, @RequestBody Tenant tenantDetails) {
+          Optional<Tenant> tenant = tenantRepository.findById(id);
+      
+          if (!tenant.isPresent()) {
+              throw new RuntimeException("Tenant not found with ID " + id);
+          }
+      
+          Tenant existingTenant = tenant.get();
+          
+          // Update the tenant details, skipping password update for security reasons
+          existingTenant.setFullName(tenantDetails.getFullName());
+          existingTenant.setUserName(tenantDetails.getUserName());
+          existingTenant.setEmail(tenantDetails.getEmail());
+          existingTenant.setCNIC(tenantDetails.getCNIC());
+          return tenantRepository.save(existingTenant);
+      }
+      
 }
