@@ -178,7 +178,7 @@ const AdminMngTenants = () => {
                     <p className="text-[15px] text-[#4D4D4D] font-light">View, edit, or delete tenants.</p>
                 </div>
 
-                <div className="mx-[80px] mt-8 bg-white rounded-lg shadow-md overflow-hidden relative w-[1060px]">
+                <div className="mx-[80px] mt-8 bg-white rounded-lg shadow-md overflow-hidden relative w-[1060px] h-[380px]">
                     {viewedTenant && (
                         <div className="absolute top-0 bg-white bg-opacity-90 z-50 flex rounded-lg items-center justify-center px-6 w-[1060px] h-[380px]">
                             <form ref={formRef} className="p-6 rounded-lg w-full max-w-[1000px] space-y-8 relative">

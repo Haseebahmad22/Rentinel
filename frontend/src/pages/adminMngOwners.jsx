@@ -195,7 +195,7 @@ const AdminMngOwners = () => {
                                             </div>
 
                                             {/* Scrollable Body */}
-                                            <div className="overflow-y-auto max-h-[100px]">
+                                            <div className="overflow-y-auto max-h-[50px]">
                                                 {ownerProperties.length > 0 ? (
                                                     ownerProperties.map((property) => (
                                                         <div
