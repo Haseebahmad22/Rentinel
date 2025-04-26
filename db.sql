@@ -3,6 +3,17 @@
 Use Rentinel
 go
 
+--DROP TABLE tenantNotifications;
+--DROP TABLE ownerNotifications;
+--DROP TABLE blackListedUsers;
+--DROP TABLE rentAssignment;
+--DROP TABLE propertyAssignment;
+--DROP TABLE Payment;
+--DROP TABLE Property;
+--DROP TABLE Admin;
+--DROP TABLE Tenant;
+--DROP TABLE Owner;
+
 CREATE TABLE Owner
 (
 ID int identity(1,1) PRIMARY KEY,
