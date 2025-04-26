@@ -100,7 +100,7 @@ const AdminStats = () => {
                             <h1 className="text-[#343434] text-[20px]  mb-[5px]">Occupancy Rate</h1>
                             <div className="flex justify-between  mb-[5px]">
                                 <div>
-                                    <h1 className="text-[#232323] text-[24px] font-bold">{occupancyRate}%</h1>
+                                    <h1 className="text-[#232323] text-[24px] font-bold">{occupancyRate ? occupancyRate.toFixed(2) : "0.00"}%</h1>
                                     <p className="text-[#949494] text-[12px]">Properties</p>
                                 </div>
                                 <img width={40} src="icons/heartrate.svg" alt="" />
@@ -141,7 +141,9 @@ const AdminStats = () => {
                             <h1 className="text-[#343434] text-[20px]">Average Rent Amount</h1>
                             <div className="flex justify-between">
                                 <div>
-                                    <h1 className="text-[#232323] text-[24px] font-bold">{avgRent ? avgRent.toLocaleString() : "0"}</h1>
+                                    <h1 className="text-[#232323] text-[24px] font-bold">
+                                        {avgRent ? Number(avgRent).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "0.00"}
+                                    </h1>
                                     <p className="text-[#949494] text-[12px]">PKR</p>
                                 </div>
                                 <img width={40} src="icons/Money-Bag.svg" alt="" />
