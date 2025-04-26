@@ -165,6 +165,25 @@ INSERT INTO Tenant (fullName, userName, Password, email, CNIC, accountCreationDa
 ('Kashif Rana', 'kashifr', 'tenantPass5', 'kashifr@mail.com', '3520311122448', '2023-07-09');
 GO
 
+--2025 year
+INSERT INTO Owner (fullName, userName, Password, email, CNIC, accountCreationDate) VALUES
+('Omer Aslam', 'omeras', 'securePass6', 'omeras@mail.com', '3520211122339', '2025-01-05'),
+('Nadia Ali', 'nadiaa', 'strongPass7', 'nadiaa@mail.com', '3520211122340', '2025-02-11'),
+('Rashid Mehmood', 'rashidm', 'alphaPass8', 'rashidm@mail.com', '3520211122341', '2025-03-13'),
+('Ayesha Iqbal', 'ayeshai', 'deltaPass9', 'ayeshai@mail.com', '3520211122342', '2025-04-20'),
+('Hassan Khan', 'hassank', 'omegaPass10', 'hassank@mail.com', '3520211122343', '2025-05-02');
+GO
+
+-- Inserting new records into the Tenant table
+INSERT INTO Tenant (fullName, userName, Password, email, CNIC, accountCreationDate) VALUES
+('Muneeb Shah', 'muneebs', 'tenantPass6', 'muneebs@mail.com', '3520311122449', '2025-01-15'),
+('Fatima Zahra', 'fatimaz', 'tenantPass7', 'fatimaz@mail.com', '3520311122450', '2025-02-19'),
+('Tariq Jamil', 'tariqj', 'tenantPass8', 'tariqj@mail.com', '3520311122451', '2025-03-25'),
+('Amina Siddiqui', 'aminas', 'tenantPass9', 'aminas@mail.com', '3520311122452', '2025-04-30'),
+('Zara Gul', 'zarag', 'tenantPass10', 'zarag@mail.com', '3520311122453', '2025-05-08');
+GO
+
+
 INSERT INTO Admin(fullName, userName, Password, email, CNIC, accountCreationDate)
 VALUES('Im Admin', 'imadmin', 'maAdminHoo', 'admin@gmail.com', '1234567890123', GETDATE());
 GO

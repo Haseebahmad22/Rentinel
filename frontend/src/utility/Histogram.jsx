@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   BarChart,
   Bar,
@@ -9,20 +9,21 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { ChevronDown } from "lucide-react";
+import axios from "axios";
 
-const dataFromDB = [
-  { month: "Jan", rent: 52 },
-  { month: "Feb", rent: 63 },
-  { month: "Mar", rent: 70 },
-  { month: "Apr", rent: 57 },
-  { month: "May", rent: 44 },
-  { month: "Jun", rent: 56 },
-  { month: "Jul", rent: 61 },
-  { month: "Aug", rent: 77 },
-  { month: "Sep", rent: 66 },
-  { month: "Oct", rent: 58 },
-  { month: "Nov", rent: 50 },
-  { month: "Dec", rent: 72 },
+const monthsTemplate = [
+  { month: "Jan", rent: 0 },
+  { month: "Feb", rent: 0 },
+  { month: "Mar", rent: 0 },
+  { month: "Apr", rent: 0 },
+  { month: "May", rent: 0 },
+  { month: "Jun", rent: 0 },
+  { month: "Jul", rent: 0 },
+  { month: "Aug", rent: 0 },
+  { month: "Sep", rent: 0 },
+  { month: "Oct", rent: 0 },
+  { month: "Nov", rent: 0 },
+  { month: "Dec", rent: 0 },
 ];
 
 const CustomTooltip = ({ active, payload }) => {
@@ -37,14 +38,30 @@ const CustomTooltip = ({ active, payload }) => {
 };
 
 export default function Histogram() {
+  const [data, setData] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState("Aug");
   const [open, setOpen] = useState(false);
 
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const response = await axios.get("http://localhost:8080/owners/userRegistrations");
+        const updatedData = monthsTemplate.map((item) => {
+          const match = response.data.find((dbItem) => dbItem.month === item.month);
+          return match ? { ...item, rent: match.userCount } : item;
+        });
+        setData(updatedData);
+      } catch (error) {
+        console.error("Error fetching user registrations:", error);
+      }
+    }
+    fetchData();
+  }, []);
   return (
     
     <div className="bg-white p-5 rounded-xl shadow-md">
       <div className="flex justify-between items-center mb-[10px]">
-        <h2 className="text-3xl font-bold text-gray-900">Monthly Rents</h2>
+        <h2 className="text-3xl font-bold text-gray-900">User Registrations</h2>
         <div className="relative inline-block text-left">
           <button
             onClick={() => setOpen(!open)}
@@ -56,7 +73,7 @@ export default function Histogram() {
           {open && (
             <div className="absolute right-0 mt-2 w-32 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
               <div className="py-1 text-sm max-h-[230px] overflow-y-scroll">
-                {dataFromDB.map((entry) => (
+                {data.map((entry) => (
                   <div
                     key={entry.month}
                     onClick={() => {
@@ -79,7 +96,7 @@ export default function Histogram() {
       <div className="w-full h-[30vh]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
-            data={dataFromDB}
+            data={data}
             barSize={55}
             margin={{ top: 30, right: 20, left: 0, bottom: 0 }}
           >
@@ -89,7 +106,7 @@ export default function Histogram() {
               tick={{ fontSize: 16, fill: "#1f2937" }}
             />
             <YAxis
-              tickFormatter={(value) => `${value}k`}
+              tickFormatter={(value) => `${value}`}
               tick={{ fontSize: 16, fill: "#1f2937" }}
             />
             <Tooltip content={<CustomTooltip />} cursor={{ fill: "transparent" }} />
@@ -98,7 +115,7 @@ export default function Histogram() {
               radius={[8, 8, 8, 8]}
               fill="#5932EA"
               label={({ x, y, width, value, index }) =>
-                dataFromDB[index].month === selectedMonth ? (
+                data[index].month === selectedMonth ? (
                     <>
                     {/* Background Rect for Label */}
                     <rect

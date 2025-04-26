@@ -131,7 +131,7 @@ const AdminStats = () => {
                                     <h1 className="text-[#232323] text-[24px] font-bold">{yearlyRent ? yearlyRent.toLocaleString() : "0"}</h1>
                                     <p className="text-[#949494] text-[12px]">PKR</p>
                                 </div>
-                                <img width={40} src="icons/User.svg" alt="" />
+                                <img width={40} src="icons/Money-Bag.svg" alt="" />
                             </div>
                         </div>
                     </div>
@@ -143,7 +143,7 @@ const AdminStats = () => {
                                     <h1 className="text-[#232323] text-[24px] font-bold">{avgRent ? avgRent.toLocaleString() : "0"}</h1>
                                     <p className="text-[#949494] text-[12px]">PKR</p>
                                 </div>
-                                <img width={40} src="icons/Home-Icon.svg" alt="" />
+                                <img width={40} src="icons/Money-Bag.svg" alt="" />
                             </div>
                         </div>
                     </div>
@@ -155,7 +155,7 @@ const AdminStats = () => {
                                     <h1 className="text-[#232323] text-[24px] font-bold">{totalPaymentAmount ? totalPaymentAmount.toLocaleString() : "0"}</h1>
                                     <p className="text-[#949494] text-[12px]">PKR</p>
                                 </div>
-                                <img width={40} src="icons/heartrate.svg" alt="" />
+                                <img width={40} src="icons/Money-Bag.svg" alt="" />
                             </div>
                         </div>
                     </div>
