@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Sidebar from "../utility/adminSidebar";
 import Histogram from "../utility/AdminHistogram";
 import axios from "axios";
+import AdminPieChart from "../utility/AdminPieChart";
 
 
 const AdminStats = () => {
@@ -160,16 +161,19 @@ const AdminStats = () => {
                         </div>
                     </div>
                 </div>
-                <div className="flex">
-
+                <div className="flex w-[80vw] pl-[80px] pr-[50px] gap-[10px] mt-10 items-center justify-start content-center">
                     {/* Histogram */}
-                    <div className="mt-[30px] w-[58.3vw] pl-[80px] h-[30vh]">
+                    <div className="flex flex-col rounded-[15px] w-[75%] h-[40vh] items-center justify-center">
                         <Histogram />
                     </div>
-                    {/* <div className="mt-[30px] w-[28.3vw] pl-[80px]">
-                        <PropertyAreas />
-                    </div> */}
+
+                    {/* Pie Chart */}
+                    <div className="flex flex-col bg-white rounded-[15px] w-[24%] h-[40vh] items-center justify-center">
+                        <p className="text-[20px] font-bold">Property Areas</p>
+                        <AdminPieChart />
+                    </div>
                 </div>
+
             </div>
 
 

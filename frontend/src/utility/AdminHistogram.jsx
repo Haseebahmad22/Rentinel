@@ -59,7 +59,7 @@ export default function Histogram() {
   }, []);
   return (
     
-    <div className="bg-white p-5 rounded-xl shadow-md">
+    <div className="bg-white rounded-xl p-5 shadow-md w-full">
       <div className="flex justify-between items-center mb-[10px]">
         <h2 className="text-3xl font-bold text-gray-900">User Registrations</h2>
         <div className="relative inline-block text-left">
@@ -93,12 +93,12 @@ export default function Histogram() {
         </div>
       </div>
 
-      <div className="w-full h-[30vh]">
-        <ResponsiveContainer width="100%" height="100%">
+      <div className="w-full h-[210px]">
+      <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={data}
             barSize={55}
-            margin={{ top: 30, right: 20, left: 0, bottom: 0 }}
+            margin={{ top: 30, right: 10, left: 0, bottom: 0 }}
           >
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis

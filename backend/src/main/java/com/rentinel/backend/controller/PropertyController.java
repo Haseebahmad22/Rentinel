@@ -1,5 +1,6 @@
 package com.rentinel.backend.controller;
 
+import com.rentinel.backend.model.AreaCount;
 import com.rentinel.backend.model.Property;
 import com.rentinel.backend.repository.PropertyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "http://localhost:5173")
 @RestController
@@ -78,4 +80,11 @@ public class PropertyController {
         return propertyRepository.getOccupancyRate();
     }
 
+     @GetMapping("/areacount")
+    public List<AreaCount> getAreaCount() {
+        return propertyRepository.getAreaCount()
+                .stream()
+                .map(row -> new AreaCount((String) row[0], ((Number) row[1]).intValue()))
+                .collect(Collectors.toList());
+    }
 }

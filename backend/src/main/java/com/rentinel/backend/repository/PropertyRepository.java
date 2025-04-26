@@ -19,4 +19,33 @@ public interface PropertyRepository extends JpaRepository<Property, Integer> {
 
     @Query("SELECT (COUNT(pa.propertyID) * 100.0) / COUNT(p.propertyID) FROM Property p LEFT JOIN PropertyAssignment pa ON pa.propertyID = p.propertyID")
     Double getOccupancyRate();
+
+    
+    @Query(value = """
+        WITH AreaCount AS (
+            SELECT 
+                CASE 
+                    WHEN area = '1 Kanal' THEN '1 Kanal'
+                    WHEN area = '2 Kanal' THEN '2 Kanal'
+                    ELSE 'Other'
+                END AS Area,
+                COUNT(*) AS Count
+            FROM property
+            GROUP BY 
+                CASE 
+                    WHEN area = '1 Kanal' THEN '1 Kanal'
+                    WHEN area = '2 Kanal' THEN '2 Kanal'
+                    ELSE 'Other'
+                END
+        )
+        SELECT Area, Count
+        FROM AreaCount
+        ORDER BY 
+            CASE 
+                WHEN Area = '1 Kanal' THEN 1
+                WHEN Area = '2 Kanal' THEN 2
+                ELSE 3
+            END
+    """, nativeQuery = true)
+    List<Object[]> getAreaCount();
 }
