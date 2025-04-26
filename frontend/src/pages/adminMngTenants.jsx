@@ -130,20 +130,30 @@ const AdminMngTenants = () => {
             });
     };
 
-    const TenantBox = ({ label, name, value, isFirstEditable = false }) => {
+    const TenantBox = ({ label, name, value }) => {
         const isReadOnly = name === "id" || name === "userName";
         const isError = formErrors[name];
-
+        const [localValue, setLocalValue] = useState(value || "");
+    
+        // Sync local value when prop changes
+        useEffect(() => {
+            setLocalValue(value || "");
+        }, [value]);
+    
         const handleChange = (e) => {
             const newValue = e.target.value;
-            // Update the viewed tenant state
+            setLocalValue(newValue);
+        };
+    
+        const handleBlur = () => {
+            // Update parent state only when leaving the field
             setViewedTenant(prev => ({
                 ...prev,
-                [name]: newValue
+                [name]: localValue
             }));
-            
+    
             // Clear error if user starts typing
-            if (isError && newValue.trim()) {
+            if (isError && localValue.trim()) {
                 setFormErrors(prev => {
                     const newErrors = { ...prev };
                     delete newErrors[name];
@@ -151,7 +161,7 @@ const AdminMngTenants = () => {
                 });
             }
         };
-
+    
         return (
             <div className="flex flex-col w-[170px]">
                 <label className="text-[14px] font-semibold text-gray-600 mb-1">{label}</label>
@@ -159,8 +169,9 @@ const AdminMngTenants = () => {
                     <input
                         name={name}
                         type={name === "cnic" ? "number" : "text"}
-                        value={viewedTenant[name] || ""}
+                        value={localValue}
                         onChange={handleChange}
+                        onBlur={handleBlur}
                         maxLength={name === "cnic" ? 13 : undefined}
                         className={`px-4 py-2 rounded w-full text-[15px] text-gray-800 bg-[#F2F2F2] focus:outline-none border ${isError ? 'border-red-500' : 'border-gray-300'}`}
                         readOnly={isReadOnly}
@@ -171,7 +182,6 @@ const AdminMngTenants = () => {
                         {value || "—"}
                     </div>
                 )}
-                
             </div>
         );
     };

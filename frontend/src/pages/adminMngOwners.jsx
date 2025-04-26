@@ -131,15 +131,27 @@ const AdminMngOwners = () => {
     const OwnerBox = ({ label, name, value }) => {
         const isReadOnly = name === "id" || name === "userName";
         const isError = formErrors[name];
-
+        const [localValue, setLocalValue] = useState(value || "");
+    
+        // Sync local value when prop changes
+        useEffect(() => {
+            setLocalValue(value || "");
+        }, [value]);
+    
         const handleChange = (e) => {
             const newValue = e.target.value;
+            setLocalValue(newValue);
+        };
+    
+        const handleBlur = () => {
+            // Update parent state only when leaving the field
             setViewedOwner(prev => ({
                 ...prev,
-                [name]: newValue
+                [name]: localValue
             }));
-            
-            if (isError && newValue.trim()) {
+    
+            // Clear error if user starts typing
+            if (isError && localValue.trim()) {
                 setFormErrors(prev => {
                     const newErrors = { ...prev };
                     delete newErrors[name];
@@ -147,7 +159,7 @@ const AdminMngOwners = () => {
                 });
             }
         };
-
+    
         return (
             <div className="flex flex-col w-[170px]">
                 <label className="text-[14px] font-semibold text-gray-600 mb-1">{label}</label>
@@ -155,8 +167,9 @@ const AdminMngOwners = () => {
                     <input
                         name={name}
                         type={name === "cnic" ? "number" : "text"}
-                        value={viewedOwner[name] || ""}
+                        value={localValue}
                         onChange={handleChange}
+                        onBlur={handleBlur}
                         maxLength={name === "cnic" ? 13 : undefined}
                         className={`px-4 py-2 rounded w-full text-[15px] text-gray-800 bg-[#F2F2F2] focus:outline-none border ${isError ? 'border-red-500' : 'border-gray-300'}`}
                         readOnly={isReadOnly}
@@ -170,7 +183,6 @@ const AdminMngOwners = () => {
             </div>
         );
     };
-
     return (
         <div className="flex font-[Lexend]">
             <Sidebar />

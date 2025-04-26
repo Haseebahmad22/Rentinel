@@ -86,19 +86,13 @@ const AdminMngProperties = () => {
         numericFields.forEach(field => {
             const value = formData.get(field);
             if (!value) {
-                errors[field] = `${field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())} is required`;
+                errors[field] = "This field is required";
             } else if (!/^\d+$/.test(value)) {
                 errors[field] = "Must be a number";
+            } else if (parseInt(value) <= 0) {
+                errors[field] = "Must be greater than 0";
             }
         });
-
-        // Date validation if dates exist
-        const startDate = formData.get('rentStartDate');
-        const endDate = formData.get('rentEndDate');
-        
-        if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
-            errors.rentDates = "End date must be after start date";
-        }
 
         setFormErrors(errors);
         return Object.keys(errors).length === 0;
@@ -130,6 +124,7 @@ const AdminMngProperties = () => {
                 ));
                 setViewedProperty(updatedProperty);
                 setEditMode(false);
+                setFormErrors({});
             })
             .catch(error => {
                 console.error("Error updating property:", error);
@@ -143,22 +138,21 @@ const AdminMngProperties = () => {
         const isReadOnly = name === "propertyID" || name.includes("rentDate");
         const isError = formErrors[name];
         const isNumeric = ['numOfRooms', 'numOfBedRooms', 'numOfBaths', 'fixedRent'].includes(name);
-
+        const [localValue, setLocalValue] = useState(value || "");
+    
+        useEffect(() => {
+            setLocalValue(value || "");
+        }, [value]);
+    
         const handleChange = (e) => {
             const newValue = e.target.value;
             
-            // For numeric fields, only allow numbers
             if (isNumeric && newValue !== '' && !/^\d*$/.test(newValue)) {
                 return;
             }
-
-            // Update the viewed property state
-            setViewedProperty(prev => ({
-                ...prev,
-                [name]: newValue
-            }));
-
-            // Clear error if user starts typing
+    
+            setLocalValue(newValue);
+            
             if (isError && newValue.trim()) {
                 setFormErrors(prev => {
                     const newErrors = { ...prev };
@@ -167,7 +161,14 @@ const AdminMngProperties = () => {
                 });
             }
         };
-
+    
+        const handleBlur = () => {
+            setViewedProperty(prev => ({
+                ...prev,
+                [name]: localValue
+            }));
+        };
+    
         return (
             <div className="flex flex-col w-[230px]">
                 <label className="text-[14px] font-semibold text-gray-600 mb-1">{label}</label>
@@ -175,8 +176,9 @@ const AdminMngProperties = () => {
                     <input
                         name={name}
                         type={isNumeric ? "number" : "text"}
-                        value={viewedProperty[name] || ""}
+                        value={localValue}
                         onChange={handleChange}
+                        onBlur={handleBlur}
                         className={`px-4 py-2 rounded w-full text-[15px] text-gray-800 bg-[#F2F2F2] focus:outline-none border ${isError ? 'border-red-500' : 'border-gray-300'}`}
                         readOnly={isReadOnly}
                         tabIndex={isReadOnly ? -1 : 0}
