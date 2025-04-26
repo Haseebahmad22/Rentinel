@@ -1,9 +1,30 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Sidebar from "../utility/adminSidebar";
 import Histogram from "../utility/Histogram";
-
+import axios from "axios";
+import { Link } from "react-router-dom";
 
 const AdminDashboard = () => {
+    const [tenantCount, setTenantCount] = useState(0);
+    const [ownerCount, setOwnerCount] = useState(0);
+    const [propertyCount, setPropertyCount] = useState(0);
+    const [paymentCount, setPaymentCount] = useState(0);
+
+    useEffect(() => {
+        axios.get("http://localhost:8080/properties/count")
+            .then(res => setPropertyCount(res.data))
+            .catch(err => console.error(err));
+        axios.get("http://localhost:8080/owners/count")
+            .then(res => setOwnerCount(res.data))
+            .catch(err => console.error(err));
+        axios.get("http://localhost:8080/tenants/count")
+            .then(res => setTenantCount(res.data))
+            .catch(err => console.error(err));
+        axios.get("http://localhost:8080/payments/count")
+            .then(res => setPaymentCount(res.data))
+            .catch(err => console.error(err));
+    }, []);
+
     return (
         <div className="flex font-[Lexend]">
             <Sidebar />
@@ -11,18 +32,18 @@ const AdminDashboard = () => {
                 {/* top bar showing dashboard and profile */}
                 <div className="flex w-[100%] content-center justify-between pl-[80px] pr-[50px] mt-[10px]">
                     <h1 className="text-[#081E4A] text-[54px] font-bold">Dashboard</h1>
-                    <div className="flex justify-center items-center gap-3 cursor-pointer">
+                    <Link to = "/adminDetails" className="flex justify-center items-center gap-3 cursor-pointer">
                         <img className="rounded-[50%]" width={50} src="https://lh3.googleusercontent.com/a/ACg8ocJhIQkzBe0Q1lgF3dFOUXbOOylZzEBgRm2dujZb4OGx=s96-c" alt="" />
                         <div>
                             <h3 className="text-[18px] text-[#292D32] font-medium">Haseeb Ahmad</h3>
                             <p className="text-[12px] text-[#292D32]">Admin</p>
                         </div>
-                    </div>
+                    </Link>
                 </div>
 
                 {/* top 3 boxes */}
                 <div className="flex w-[100%] justify-between pl-[80px] pr-[50px] mt-[20px]">
-                    <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px]">
+                    <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px]"                    >
                         <div className="flex flex-col gap-[40px]">
                             <h1 className="text-[18px]">Welcome Back Haseeb Ahmad!</h1>
                             <p className="text-[15px] text-[#949494]">Its good to see you again</p>
@@ -49,7 +70,7 @@ const AdminDashboard = () => {
                     <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[]">
                         <div>
                             <h1 className="text-[#343434] text-[20px]">Total Owners</h1>
-                            <h1 className="text-[#232323] text-[24px] font-bold">0</h1>
+                            <h1 className="text-[#232323] text-[24px] font-bold">{ownerCount ? ownerCount.toLocaleString() : "0"}</h1>
                             <p className="text-[#949494] text-[12px]">Owners</p>
                         </div>
                         <img src="icons/User.svg" alt="" />
@@ -57,7 +78,7 @@ const AdminDashboard = () => {
                     <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[]">
                         <div>
                             <h1 className="text-[#343434] text-[20px]">Total Tenants</h1>
-                            <h1 className="text-[#232323] text-[24px] font-bold">0</h1>
+                            <h1 className="text-[#232323] text-[24px] font-bold">{tenantCount ? tenantCount.toLocaleString() : "0"}</h1>
                             <p className="text-[#949494] text-[12px]">Tenants</p>
                         </div>
                         <img src="icons/User.svg" alt="" />
@@ -65,7 +86,7 @@ const AdminDashboard = () => {
                     <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[]">
                         <div>
                             <h1 className="text-[#343434] text-[20px]">Total Properties</h1>
-                            <h1 className="text-[#232323] text-[24px] font-bold">0</h1>
+                            <h1 className="text-[#232323] text-[24px] font-bold">{propertyCount ? propertyCount.toLocaleString() : "0"}</h1>
                             <p className="text-[#949494] text-[12px]">Properties</p>
                         </div>
                         <img src="icons/Home-Icon.svg" alt="" />
@@ -73,7 +94,7 @@ const AdminDashboard = () => {
                     <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[]">
                         <div>
                             <h1 className="text-[#343434] text-[20px]">Total Payments</h1>
-                            <h1 className="text-[#232323] text-[24px] font-bold">0</h1>
+                            <h1 className="text-[#232323] text-[24px] font-bold">{paymentCount ? paymentCount.toLocaleString() : "0"}</h1>
                             <p className="text-[#949494] text-[12px]">PKR</p>
                         </div>
                         <img src="icons/Money-Bag.svg" alt="" />
@@ -82,7 +103,7 @@ const AdminDashboard = () => {
 
                 {/* Histogram */}
                 <div className="mt-[30px] w-[80vw] pl-[80px] pr-[50px]">
-                <Histogram />
+                    <Histogram />
                 </div>
 
             </div>
