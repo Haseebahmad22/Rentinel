@@ -27,4 +27,17 @@ public class PaymentController {
     public void deletePayment(@PathVariable Integer id) {
         paymentRepository.deleteById(id);
     }
-}
+
+    @GetMapping("/count")
+    public long getPaymentCount() {
+        return paymentRepository.count();
+    }
+    @GetMapping("/totalPaymentAmount")
+    public Double getTotalPaymentAmount() {
+        return paymentRepository.getTotalPaymentAmount();
+    }
+    @GetMapping("/yearlyRent")
+    public Double getYearlyRent() {
+        return paymentRepository.getYearlyRent();
+    }
+ }

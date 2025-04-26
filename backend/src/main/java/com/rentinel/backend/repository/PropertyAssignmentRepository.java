@@ -9,4 +9,5 @@ public interface PropertyAssignmentRepository extends JpaRepository<PropertyAssi
 
     // Custom query to find property assignments by tenant ID (tenantName)
     List<PropertyAssignment> findByTenantID(Integer ID);
+
 }

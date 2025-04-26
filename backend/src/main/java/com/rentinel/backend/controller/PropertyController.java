@@ -63,4 +63,19 @@ public class PropertyController {
     public List<Property> getPropertiesByOwnerName(@PathVariable String ownerName) {
         return propertyRepository.findByOwnerName(ownerName);
     }
+
+    @GetMapping("/count")
+    public long getPropertyCount() {
+        return propertyRepository.count();
+    }
+    @GetMapping("/averageRent")
+    public Double getAverageRent() {
+        return propertyRepository.getAverageRent();
+    }
+
+    @GetMapping("/occupancyRate")
+    public Double getOccupancyRate() {
+        return propertyRepository.getOccupancyRate();
+    }
+
 }

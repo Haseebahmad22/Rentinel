@@ -1,8 +1,6 @@
 package com.rentinel.backend.controller;
 
 import com.rentinel.backend.model.Owner;
-import com.rentinel.backend.model.Property;
-import com.rentinel.backend.model.Tenant;
 import com.rentinel.backend.repository.OwnerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -58,5 +56,9 @@ public class OwnerController {
           existingOwner.setEmail(ownerDetails.getEmail());
           existingOwner.setCNIC(ownerDetails.getCNIC());
           return ownerRepository.save(existingOwner);
+      }
+      @GetMapping("/count")
+      public long getOwnerCount() {
+          return ownerRepository.count();
       }
 }

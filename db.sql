@@ -180,11 +180,11 @@ INSERT INTO Property (propertyName,Area , location, fixedRent, ownerName, tenant
 ('Sunset Villa','1 Kanal' , 'DHA Phase 6, Lahore', 65000.00, 'amirq', 'hamzam', 3, 5, 3)
 
 INSERT INTO Payment (paymentStatus, paymentDate, amount, propertyID, tenantUserName, ownerUserName) VALUES
-('Paid', '2024-02-01', 65000, 1, 'hamzam', 'amirq'),
-('Paid', '2024-02-01', 40000, 2, 'nidaf', 'sarak'),
-('Unpaid', '2024-02-01', 80000, 3, 'usmant', 'alirz'),
-('Paid', '2024-02-01', 55000, 4, 'hiran', 'fatiman'),
-('Pending', '2024-02-01', 47000, 5, 'kashifr', 'zainsh');
+('Paid', '2025-02-01', 65000, 1, 'hamzam', 'amirq'),
+('Paid', '2025-02-01', 40000, 2, 'nidaf', 'sarak'),
+('Unpaid', '2025-02-01', 80000, 3, 'usmant', 'alirz'),
+('Paid', '2025-02-01', 55000, 4, 'hiran', 'fatiman'),
+('Pending', '2025-02-01', 47000, 5, 'kashifr', 'zainsh');
 GO
 select * from Owner
 select * from Tenant

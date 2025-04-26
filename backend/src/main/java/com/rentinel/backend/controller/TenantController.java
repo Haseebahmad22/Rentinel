@@ -63,5 +63,8 @@ public class TenantController {
           existingTenant.setCNIC(tenantDetails.getCNIC());
           return tenantRepository.save(existingTenant);
       }
-      
+      @GetMapping("/count")
+      public long gettenantCount() {
+          return tenantRepository.count();
+      }
 }
