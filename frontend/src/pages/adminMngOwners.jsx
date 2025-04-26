@@ -10,6 +10,8 @@ const AdminMngOwners = () => {
     const [ownerProperties, setOwnerProperties] = useState([]);
     const formRef = useRef(null);
     const [editMode, setEditMode] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [formErrors, setFormErrors] = useState({});
 
     useEffect(() => {
         axios.get("http://localhost:8080/owners")
@@ -76,63 +78,105 @@ const AdminMngOwners = () => {
         setViewedOwner(null);
     };
 
-    const handleSave = () => {
-        if (!formRef.current) return;
+    
+    const validateForm = () => {
+        const errors = {};
+                const cnicRegex = /^[0-9]{13}$/;
+                const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
+
+    
+        if (!viewedOwner.fullName?.trim()) {
+            errors.fullName = "Full name is required";
+        }
+    
+        if (!viewedOwner.cnic?.trim()) {
+            errors.cnic = "CNIC is required";
+        } else if (!cnicRegex.test(viewedOwner.cnic)) {
+            errors.cnic = "CNIC must be exactly 13 digits without dashes";
+        }
+    
+        if (!viewedOwner.email?.trim()) {
+            errors.email = "Email is required";
+        } else if (!emailRegex.test(viewedOwner.email)) {
+            errors.email = "Invalid email format";
+        }
+    
+        setFormErrors(errors);
+        return Object.keys(errors).length === 0;
+    };
+    
+    const handleSave = () => {
+        if (!validateForm()) return; // Stop if validation fails
+    
+        setIsSubmitting(true);
+        if (!formRef.current) return;
+    
         const formData = new FormData(formRef.current);
         const updatedOwner = {
             ...viewedOwner,
-            fullName: formData.get("fullName"),
-            email: formData.get("email"),
-            cnic: formData.get("cnic"),
-        };  
-
-       axios.put(`http://localhost:8080/owners/${viewedOwner.id}`, updatedOwner)
+            fullName: formData.get('fullName'),
+            cnic: formData.get('cnic'),
+            email: formData.get('email')
+        };
+    
+        axios.put(`http://localhost:8080/owners/${viewedOwner.id}`, updatedOwner)
             .then(response => {
-                setOwners(prev => prev.map(p =>
-                    p.id === viewedOwner.id ? updatedOwner : p
-                ));
+                setOwners(prev => prev.map(o => o.id === viewedOwner.id ? updatedOwner : o));
                 setViewedOwner(updatedOwner);
                 setEditMode(false);
             })
             .catch(error => {
                 console.error("Error updating owner:", error);
+            })
+            .finally(() => {
+                setIsSubmitting(false);
             });
-            console.log(updatedOwner)
     };
-
+    
 
     const OwnerBox = ({ label, name, value, isFirstEditable = false, validationType = "text" }) => {
         const [inputValue, setInputValue] = useState(value || "");
         const isReadOnly = name === "id" || name === "userName";
-
-            const handleChange = async (e) => {
-                    const newValue = e.target.value;
-                    setInputValue(newValue);
-                };
-                return (
-                    <div className="flex flex-col w-[230px]">
-                        <label className="text-[14px] font-semibold text-gray-600 mb-1">{label}</label>
-                        {editMode ? (
-                            <input
-                                name={name}
-                                type="text"
-                                value={inputValue}
-                                onChange={handleChange}
-                                className="px-4 py-2 rounded w-full text-[15px] text-gray-800 bg-[#F2F2F2] focus:outline-none border"
-                                readOnly={isReadOnly}
-                                tabIndex={isReadOnly ? -1 : 0}
-                            />
-                        ) : (
-                            <div className="bg-[#E9E9E9] px-4 py-2 rounded w-full text-[15px] text-gray-800">
-                {value || "—"}
-            </div>
-                        )}
-                    </div>
-                );
-
-       
+    
+        const isError = formErrors[name];
+    
+        const handleChange = (e) => {
+            const newValue = e.target.value;
+            setInputValue(newValue);
+            if (isError) {
+                setFormErrors((prevErrors) => {
+                    const updatedErrors = { ...prevErrors };
+                    delete updatedErrors[name];
+                    return updatedErrors;
+                });
             }
+        };
+    
+        return (
+            <div className="flex flex-col w-[170px]">
+                <label className="text-[14px] font-semibold text-gray-600 mb-1">{label}</label>
+                {editMode ? (
+                    <input
+                        name={name}
+                        type="text"
+                        value={inputValue || ""}
+                        onChange={handleChange}
+                        maxLength={validationType === "cnic" ? 13 : undefined}
+                        className={`px-4 py-2 rounded w-full text-[15px] text-gray-800 bg-[#F2F2F2] focus:outline-none border ${isError ? 'border-red-500' : 'border-gray-300'}`}
+                        readOnly={isReadOnly}
+                        tabIndex={isReadOnly ? -1 : 0}
+                    />
+                ) : (
+                    <div className="bg-[#E9E9E9] px-4 py-2 rounded w-full text-[15px] text-gray-800">
+                        {value || "—"}
+                    </div>
+                )}
+                {isError && <div className="text-red-500 text-sm mt-1">{formErrors[name]}</div>}
+            </div>
+        );
+    };
+    
     return (
         <div className="flex font-[Lexend]">
             <Sidebar />

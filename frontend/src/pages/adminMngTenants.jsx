@@ -81,35 +81,37 @@ const AdminMngTenants = () => {
 
     const validateForm = () => {
         const errors = {};
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         const cnicRegex = /^[0-9]{13}$/;
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
+
+    
         if (!viewedTenant.fullName?.trim()) {
             errors.fullName = "Full name is required";
         }
-
+    
         if (!viewedTenant.cnic?.trim()) {
             errors.cnic = "CNIC is required";
         } else if (!cnicRegex.test(viewedTenant.cnic)) {
-            errors.cnic = "CNIC must be 13 digits without dashes";
+            errors.cnic = "CNIC must be exactly 13 digits without dashes";
         }
-
+    
         if (!viewedTenant.email?.trim()) {
             errors.email = "Email is required";
         } else if (!emailRegex.test(viewedTenant.email)) {
             errors.email = "Invalid email format";
         }
-
+    
         setFormErrors(errors);
         return Object.keys(errors).length === 0;
     };
-
+    
     const handleSave = () => {
-        if (!validateForm()) return;
-
+        if (!validateForm()) return; // Don't proceed if there are validation errors
+        
         setIsSubmitting(true);
         if (!formRef.current) return;
-
+    
         const formData = new FormData(formRef.current);
         const updatedTenant = {
             ...viewedTenant,
@@ -117,33 +119,42 @@ const AdminMngTenants = () => {
             cnic: formData.get('cnic'),
             email: formData.get('email')
         };
-        console.log(updatedTenant)
+    
+        // Make sure the correct tenant is being updated
         axios.put(`http://localhost:8080/tenants/${viewedTenant.id}`, updatedTenant)
             .then(response => {
-                setTenants(prev => prev.map(p =>
-                    p.id === viewedTenant.id ? updatedTenant : p
-                ));
+                setTenants(prev => prev.map(t => t.id === viewedTenant.id ? updatedTenant : t));
                 setViewedTenant(updatedTenant);
                 setEditMode(false);
             })
             .catch(error => {
-                console.error("Error updating property:", error);
+                console.error("Error updating tenant:", error);
             })
             .finally(() => {
                 setIsSubmitting(false);
             });
-
-
     };
-
+    
+    
 
     const TenantBox = ({ label, name, value, isFirstEditable = false, validationType = "text" }) => {
         const [inputValue, setInputValue] = useState(value || "");
         const isReadOnly = name === "id" || name === "userName";
-
-        const handleChange = async (e) => {
+    
+        // Add a condition to check for form errors for this input
+        const isError = formErrors[name];
+    
+        const handleChange = (e) => {
             const newValue = e.target.value;
             setInputValue(newValue);
+            if (isError) {
+                // Reset the error if the user starts typing again
+                setFormErrors((prevErrors) => {
+                    const updatedErrors = { ...prevErrors };
+                    delete updatedErrors[name];
+                    return updatedErrors;
+                });
+            }
         };
     
         return (
@@ -156,7 +167,7 @@ const AdminMngTenants = () => {
                         value={inputValue || ""}
                         onChange={handleChange}
                         maxLength={validationType === "cnic" ? 13 : undefined}
-                        className="px-4 py-2 rounded w-full text-[15px] text-gray-800 bg-[#F2F2F2] focus:outline-none border border-gray-300"
+                        className={`px-4 py-2 rounded w-full text-[15px] text-gray-800 bg-[#F2F2F2] focus:outline-none border ${isError ? 'border-red-500' : 'border-gray-300'}`}
                         readOnly={isReadOnly}
                         tabIndex={isReadOnly ? -1 : 0}
                     />
@@ -165,9 +176,12 @@ const AdminMngTenants = () => {
                         {value || "—"}
                     </div>
                 )}
+                {/* Display error message below input */}
+                {isError && <div className="text-red-500 text-sm mt-1">{formErrors[name]}</div>}
             </div>
         );
     };
+    
     
     return (
         <div className="flex font-[Lexend]">
