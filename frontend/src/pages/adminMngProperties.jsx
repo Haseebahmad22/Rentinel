@@ -6,14 +6,12 @@ import { Pencil, Trash2, Eye, ChevronLeft, X } from "lucide-react";
 const AdminMngProperties = () => {
     const [properties, setProperties] = useState([]);
     const [rentAssignments, setRentAssignments] = useState([]);
-
     const [viewedProperty, setViewedProperty] = useState(null);
     const [editMode, setEditMode] = useState(false);
     const [propertyToDelete, setPropertyToDelete] = useState(null);
+    const [formErrors, setFormErrors] = useState({});
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const formRef = useRef(null);
-
-    const [tenantExists, setTenantExists] = useState(null); // null = untouched, true = exists, false = doesn't
-
 
     useEffect(() => {
         axios.get("http://localhost:8080/properties")
@@ -24,87 +22,106 @@ const AdminMngProperties = () => {
                 console.error("Error fetching properties:", error);
             });
 
-            // Fetch rent assignments
         axios.get("http://localhost:8080/rentAssignments")
-        .then(response => {
-            setRentAssignments(response.data);
-        })
-        .catch(error => {
-            console.error("Error fetching rent assignments:", error);
-        });
+            .then(response => {
+                setRentAssignments(response.data);
+            })
+            .catch(error => {
+                console.error("Error fetching rent assignments:", error);
+            });
     }, []);
 
-    useEffect(() => {
-        console.log("Updated Rent Assignments:", rentAssignments);
-    }, [rentAssignments]);
-    
-        // Get rent assignment for a specific property
-        const getRentAssignment = (propertyId) => {
-            console.log(rentAssignments);
-            return rentAssignments.find(assignment => 
-                assignment.propertyID === propertyId
-                
-            );
-        };
+    const getRentAssignment = (propertyId) => {
+        return rentAssignments.find(assignment => 
+            assignment.propertyID === propertyId
+        );
+    };
 
-        const formatDate = (dateStr) => {
-            if (!dateStr) return "—";
-            const date = new Date(dateStr);
-            return date.toISOString().split("T")[0]; // "2025-04-24"
-        };
+    const formatDate = (dateStr) => {
+        if (!dateStr) return "—";
+        const date = new Date(dateStr);
+        return date.toISOString().split("T")[0];
+    };
 
-        
-     const handleView = (property) => {
+    const handleView = (property) => {
         setViewedProperty(property);
         setEditMode(false);
+        setFormErrors({});
     };
 
     const handleEdit = (property) => {
-        setViewedProperty(property );
+        setViewedProperty(property);
         setEditMode(true);
+        setFormErrors({});
     };
 
     const handleBack = () => {
         setViewedProperty(null);
+        setEditMode(false);
     };
 
-    // Validation functions
-    const validateNumberInput = (e) => {
-        const value = e.target.value;
-        if (value === '' || /^[0-9]+$/.test(value)) {
-            return true;
-        }
-        e.target.value = value.slice(0, -1);
-        return false;
-    };
+    const validateForm = () => {
+        const errors = {};
+        const formData = new FormData(formRef.current);
 
-    const validateAlphanumericInput = (e) => {
-        const value = e.target.value;
-        if (value === '' || /^[a-zA-Z0-9\s]+$/.test(value)) {
-            return true;
+        // Required fields validation
+        if (!formData.get('propertyName')?.trim()) {
+            errors.propertyName = "Property name is required";
         }
-        e.target.value = value.slice(0, -1);
-        return false;
+
+        if (!formData.get('ownerName')?.trim()) {
+            errors.ownerName = "Owner name is required";
+        }
+
+        if (!formData.get('area')?.trim()) {
+            errors.area = "Area is required";
+        }
+
+        if (!formData.get('location')?.trim()) {
+            errors.location = "Location is required";
+        }
+
+        // Numeric fields validation
+        const numericFields = ['numOfRooms', 'numOfBedRooms', 'numOfBaths', 'fixedRent'];
+        numericFields.forEach(field => {
+            const value = formData.get(field);
+            if (!value) {
+                errors[field] = `${field.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())} is required`;
+            } else if (!/^\d+$/.test(value)) {
+                errors[field] = "Must be a number";
+            }
+        });
+
+        // Date validation if dates exist
+        const startDate = formData.get('rentStartDate');
+        const endDate = formData.get('rentEndDate');
+        
+        if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+            errors.rentDates = "End date must be after start date";
+        }
+
+        setFormErrors(errors);
+        return Object.keys(errors).length === 0;
     };
 
     const handleSave = () => {
-        if (!formRef.current) return;
+        if (!validateForm()) return;
 
+        setIsSubmitting(true);
         const formData = new FormData(formRef.current);
+        
         const updatedProperty = {
             ...viewedProperty,
             propertyName: formData.get('propertyName'),
             ownerName: formData.get('ownerName'),
             area: formData.get('area'),
             location: formData.get('location'),
-            numOfRooms: formData.get('numOfRooms'),
-            numOfBedRooms: formData.get('numOfBedRooms'),
-            numOfBaths: formData.get('numOfBaths'),
-            rentStartDate: formData.get('rentStartDate'),
-            rentEndDate: formData.get('rentEndDate'),
-            fixedRent: formData.get('fixedRent'),
+            numOfRooms: parseInt(formData.get('numOfRooms')),
+            numOfBedRooms: parseInt(formData.get('numOfBedRooms')),
+            numOfBaths: parseInt(formData.get('numOfBaths')),
+            fixedRent: parseInt(formData.get('fixedRent')),
             tenantName: formData.get('tenantName')
-        };  
+        };
 
         axios.put(`http://localhost:8080/properties/${viewedProperty.propertyID}`, updatedProperty)
             .then(response => {
@@ -116,35 +133,39 @@ const AdminMngProperties = () => {
             })
             .catch(error => {
                 console.error("Error updating property:", error);
+            })
+            .finally(() => {
+                setIsSubmitting(false);
             });
     };
 
-    console.log(properties);
+    const PropertyBox = ({ label, name, value }) => {
+        const isReadOnly = name === "propertyID" || name.includes("rentDate");
+        const isError = formErrors[name];
+        const isNumeric = ['numOfRooms', 'numOfBedRooms', 'numOfBaths', 'fixedRent'].includes(name);
 
-    const PropertyBox = ({ label, name, value, isFirstEditable = false, validationType = "text" }) => {
-        const isReadOnly = name === "propertyID";
-        const [inputValue, setInputValue] = useState(value || "");
-
-        const handleChange = async (e) => {
+        const handleChange = (e) => {
             const newValue = e.target.value;
-            setInputValue(newValue);
-
-            if (name === "tenantName") {
-                try {
-                    const res = await axios.get(`http://localhost:8080/tenants/check/${newValue}`);
-                    setTenantExists(res.data.exists); // Assuming { exists: true/false }
-                } catch (err) {
-                    console.error("Tenant check failed", err);
-                    setTenantExists(false);
-                }
+            
+            // For numeric fields, only allow numbers
+            if (isNumeric && newValue !== '' && !/^\d*$/.test(newValue)) {
+                return;
             }
-        };
 
-        const getBorderColor = () => {
-            if (name !== "tenantName") return "border-gray-300";
-            if (tenantExists === true) return "border-green-500";
-            if (tenantExists === false) return "border-red-500";
-            return "border-gray-300";
+            // Update the viewed property state
+            setViewedProperty(prev => ({
+                ...prev,
+                [name]: newValue
+            }));
+
+            // Clear error if user starts typing
+            if (isError && newValue.trim()) {
+                setFormErrors(prev => {
+                    const newErrors = { ...prev };
+                    delete newErrors[name];
+                    return newErrors;
+                });
+            }
         };
 
         return (
@@ -153,41 +174,37 @@ const AdminMngProperties = () => {
                 {editMode ? (
                     <input
                         name={name}
-                        type="text"
-                        value={inputValue}
+                        type={isNumeric ? "number" : "text"}
+                        value={viewedProperty[name] || ""}
                         onChange={handleChange}
-                        className={`px-4 py-2 rounded w-full text-[15px] text-gray-800 bg-[#F2F2F2] focus:outline-none border ${getBorderColor()}`}
+                        className={`px-4 py-2 rounded w-full text-[15px] text-gray-800 bg-[#F2F2F2] focus:outline-none border ${isError ? 'border-red-500' : 'border-gray-300'}`}
                         readOnly={isReadOnly}
                         tabIndex={isReadOnly ? -1 : 0}
+                        min={isNumeric ? "1" : undefined}
                     />
                 ) : (
                     <div className="bg-[#E9E9E9] px-4 py-2 rounded w-full text-[15px] text-gray-800">
-                        {value || "—"}
+                        {name.includes("rentDate") ? formatDate(value) : value || "—"}
                     </div>
                 )}
             </div>
         );
     };
 
-
     return (
         <div className="flex font-[Lexend] relative">
             <Sidebar />
             <div className="w-[80vw] bg-[#E6E6E6] relative">
-                {/* Header */}
                 <div className="pl-[80px] pr-[50px] mt-[10px]">
                     <h1 className="text-[#081E4A] text-[54px] font-bold">Manage Properties</h1>
                     <p className="text-[15px] text-[#4D4D4D] font-light">View, edit, or delete properties.</p>
                 </div>
 
-                {/* Property Table Container */}
                 <div className="mx-[80px] mt-8 bg-white rounded-lg shadow-md relative w-[1060px] h-[380px]">
-                    {/* Overlay on Table Only */}
                     {viewedProperty && (
                         <div className="absolute top-0 bg-white bg-opacity-90 z-50 flex rounded-lg items-center justify-center px-6 w-[1060px]">
                             <form ref={formRef} className="p-6 rounded-lg w-full max-w-[1000px] space-y-8 relative">
-                                {/* Back Button */}
-                                <div className="flex justify-between content-center items-center absolute top-4 left-4 w-full pr-[40px]">
+                                <div className="flex justify-between items-center absolute top-4 left-4 w-full pr-[40px]">
                                     <div
                                         onClick={handleBack}
                                         className="w-[43px] h-[43px] cursor-pointer rounded-full bg-[#D9D9D9] flex items-center justify-center"
@@ -199,95 +216,51 @@ const AdminMngProperties = () => {
                                             <button
                                                 type="button"
                                                 onClick={handleSave}
+                                                disabled={isSubmitting}
                                                 className="bg-[#FFAE1A] cursor-pointer text-white text-[20px] font-medium rounded-[4.5px] px-[15px] py-[3px]"
                                             >
-                                                SAVE
+                                                {isSubmitting ? "Saving..." : "SAVE"}
                                             </button>
                                         )}
                                     </div>
                                 </div>
 
                                 <div className="pt-12 flex flex-col space-y-8">
-                                    {/* Row 1 */}
                                     <div className="flex flex-wrap justify-between">
                                         <PropertyBox label="PROPERTY ID" name="propertyID" value={viewedProperty.propertyID} />
-                                        <PropertyBox
-                                            label="PROPERTY NAME"
-                                            name="propertyName"
-                                            value={viewedProperty.propertyName}
-                                            isFirstEditable={editMode}
-                                            validationType="alphanumeric"
-                                        />
-                                        <PropertyBox
-                                            label="OWNER NAME"
-                                            name="ownerName"
-                                            value={viewedProperty.ownerName}
-                                            validationType="alphanumeric"
-                                        />
-                                        <PropertyBox
-                                            label="AREA"
-                                            name="area"
-                                            value={viewedProperty.area}
-                                            validationType="alphanumeric"
-                                        />
+                                        <PropertyBox label="PROPERTY NAME" name="propertyName" value={viewedProperty.propertyName} />
+                                        <PropertyBox label="OWNER NAME" name="ownerName" value={viewedProperty.ownerName} />
+                                        <PropertyBox label="AREA" name="area" value={viewedProperty.area} />
                                     </div>
 
-                                    {/* Row 2 */}
                                     <div className="flex flex-wrap justify-between">
-                                        <PropertyBox
-                                            label="LOCATION"
-                                            name="location"
-                                            value={viewedProperty.location}
-                                            validationType="alphanumeric"
-                                        />
-                                        <PropertyBox
-                                            label="NO OF ROOMS"
-                                            name="numOfRooms"
-                                            value={viewedProperty.numOfRooms}
-                                            validationType="number"
-                                        />
-                                        <PropertyBox
-                                            label="NO OF BED ROOMS"
-                                            name="numOfBedRooms"
-                                            value={viewedProperty.numOfBedRooms}
-                                            validationType="number"
-                                        />
-                                        <PropertyBox
-                                            label="NO OF BATHS"
-                                            name="numOfBaths"
-                                            value={viewedProperty.numOfBaths}
-                                            validationType="number"
-                                        />
+                                        <PropertyBox label="LOCATION" name="location" value={viewedProperty.location} />
+                                        <PropertyBox label="NO OF ROOMS" name="numOfRooms" value={viewedProperty.numOfRooms} />
+                                        <PropertyBox label="NO OF BED ROOMS" name="numOfBedRooms" value={viewedProperty.numOfBedRooms} />
+                                        <PropertyBox label="NO OF BATHS" name="numOfBaths" value={viewedProperty.numOfBaths} />
                                     </div>
 
-                                    {/* Divider */}
                                     <hr className="border-gray-300" />
 
-                                    {/* Row 3 */}
                                     <div className="flex flex-wrap justify-between">
-                                        <PropertyBox label="RENT START DATE" name="rentStartDate" value={getRentAssignment(viewedProperty.propertyID)?.startDate}
+                                        <PropertyBox 
+                                            label="RENT START DATE" 
+                                            name="rentStartDate" 
+                                            value={getRentAssignment(viewedProperty.propertyID)?.startDate} 
                                         />
-                                        <PropertyBox label="RENT END DATE" name="rentEndDate" value={getRentAssignment(viewedProperty.propertyID)?.dueDate}
- />
-                                        <PropertyBox
-                                            label="FIXED RENT AMOUNT"
-                                            name="fixedRent"
-                                            value={viewedProperty.fixedRent}
-                                            validationType="number"
+                                        <PropertyBox 
+                                            label="RENT END DATE" 
+                                            name="rentEndDate" 
+                                            value={getRentAssignment(viewedProperty.propertyID)?.dueDate} 
                                         />
-                                        <PropertyBox
-                                            label="ASSIGNED TENANT"
-                                            name="tenantName"
-                                            value={viewedProperty.tenantName}
-                                            validationType="alphanumeric"
-                                        />
+                                        <PropertyBox label="FIXED RENT AMOUNT" name="fixedRent" value={viewedProperty.fixedRent} />
+                                        <PropertyBox label="ASSIGNED TENANT" name="tenantName" value={viewedProperty.tenantName} />
                                     </div>
                                 </div>
                             </form>
                         </div>
                     )}
 
-                    {/* Sticky Header */}
                     <div className="grid grid-cols-12 bg-gray-100 p-4 font-medium text-gray-700 sticky top-0 z-10 rounded-t-lg h-[56px]">
                         <div className="col-span-2">PROPERTY ID</div>
                         <div className="col-span-3">PROPERTY NAME</div>
@@ -299,7 +272,6 @@ const AdminMngProperties = () => {
                         </div>
                     </div>
 
-                    {/* Scrollable Body */}
                     <div className="overflow-y-auto max-h-[324px]">
                         {properties.map((property) => (
                             <div key={property.propertyID} className="grid grid-cols-12 p-4 border-b border-gray-200 items-center">

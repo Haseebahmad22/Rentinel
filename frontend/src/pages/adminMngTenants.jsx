@@ -40,6 +40,7 @@ const AdminMngTenants = () => {
     const handleEdit = (tenant) => {
         setViewedTenant(tenant);
         setEditMode(true);
+        setFormErrors({}); // Clear previous errors when entering edit mode
     };
 
     const handleView = (tenant) => {
@@ -82,36 +83,31 @@ const AdminMngTenants = () => {
     const validateForm = () => {
         const errors = {};
         const cnicRegex = /^[0-9]{13}$/;
-        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-
-    
-        if (!viewedTenant.fullName?.trim()) {
-            errors.fullName = "Full name is required";
-        }
-    
         if (!viewedTenant.cnic?.trim()) {
             errors.cnic = "CNIC is required";
         } else if (!cnicRegex.test(viewedTenant.cnic)) {
-            errors.cnic = "CNIC must be exactly 13 digits without dashes";
+            errors.cnic = "CNIC must be exactly 13 digits";
         }
-    
+
         if (!viewedTenant.email?.trim()) {
             errors.email = "Email is required";
         } else if (!emailRegex.test(viewedTenant.email)) {
             errors.email = "Invalid email format";
         }
-    
+
         setFormErrors(errors);
         return Object.keys(errors).length === 0;
     };
-    
+
     const handleSave = () => {
-        if (!validateForm()) return; // Don't proceed if there are validation errors
-        
+        if (!validateForm()) {
+            return; // Don't proceed if validation fails
+        }
+
         setIsSubmitting(true);
-        if (!formRef.current) return;
-    
+        
         const formData = new FormData(formRef.current);
         const updatedTenant = {
             ...viewedTenant,
@@ -119,8 +115,7 @@ const AdminMngTenants = () => {
             cnic: formData.get('cnic'),
             email: formData.get('email')
         };
-    
-        // Make sure the correct tenant is being updated
+
         axios.put(`http://localhost:8080/tenants/${viewedTenant.id}`, updatedTenant)
             .then(response => {
                 setTenants(prev => prev.map(t => t.id === viewedTenant.id ? updatedTenant : t));
@@ -134,39 +129,39 @@ const AdminMngTenants = () => {
                 setIsSubmitting(false);
             });
     };
-    
-    
 
-    const TenantBox = ({ label, name, value, isFirstEditable = false, validationType = "text" }) => {
-        const [inputValue, setInputValue] = useState(value || "");
+    const TenantBox = ({ label, name, value, isFirstEditable = false }) => {
         const isReadOnly = name === "id" || name === "userName";
-    
-        // Add a condition to check for form errors for this input
         const isError = formErrors[name];
-    
+
         const handleChange = (e) => {
             const newValue = e.target.value;
-            setInputValue(newValue);
-            if (isError) {
-                // Reset the error if the user starts typing again
-                setFormErrors((prevErrors) => {
-                    const updatedErrors = { ...prevErrors };
-                    delete updatedErrors[name];
-                    return updatedErrors;
+            // Update the viewed tenant state
+            setViewedTenant(prev => ({
+                ...prev,
+                [name]: newValue
+            }));
+            
+            // Clear error if user starts typing
+            if (isError && newValue.trim()) {
+                setFormErrors(prev => {
+                    const newErrors = { ...prev };
+                    delete newErrors[name];
+                    return newErrors;
                 });
             }
         };
-    
+
         return (
             <div className="flex flex-col w-[170px]">
                 <label className="text-[14px] font-semibold text-gray-600 mb-1">{label}</label>
                 {editMode ? (
                     <input
                         name={name}
-                        type="text"
-                        value={inputValue || ""}
+                        type={name === "cnic" ? "number" : "text"}
+                        value={viewedTenant[name] || ""}
                         onChange={handleChange}
-                        maxLength={validationType === "cnic" ? 13 : undefined}
+                        maxLength={name === "cnic" ? 13 : undefined}
                         className={`px-4 py-2 rounded w-full text-[15px] text-gray-800 bg-[#F2F2F2] focus:outline-none border ${isError ? 'border-red-500' : 'border-gray-300'}`}
                         readOnly={isReadOnly}
                         tabIndex={isReadOnly ? -1 : 0}
@@ -176,13 +171,12 @@ const AdminMngTenants = () => {
                         {value || "—"}
                     </div>
                 )}
-                {/* Display error message below input */}
-                {isError && <div className="text-red-500 text-sm mt-1">{formErrors[name]}</div>}
+                
             </div>
         );
     };
-    
-    
+
+    // Rest of your component remains exactly the same
     return (
         <div className="flex font-[Lexend]">
             <Sidebar />
@@ -208,9 +202,10 @@ const AdminMngTenants = () => {
                                             <button
                                                 type="button"
                                                 onClick={handleSave}
+                                                disabled={isSubmitting}
                                                 className="bg-[#FFAE1A] cursor-pointer text-white text-[20px] font-medium rounded-[4.5px] px-[15px] py-[3px]"
                                             >
-                                                SAVE
+                                                {isSubmitting ? "Saving..." : "SAVE"}
                                             </button>
                                         )}
                                     </div>
@@ -235,7 +230,6 @@ const AdminMngTenants = () => {
                                             label="EMAIL"
                                             name="email"
                                             value={viewedTenant?.email}
-
                                         />
                                     </div>
 
@@ -328,32 +322,31 @@ const AdminMngTenants = () => {
                 </div>
 
                 {tenantToDelete && (
-                        <div className="absolute top-0 left-0 w-full h-full bg-opacity-50 z-[999] flex items-center justify-center">
-                            <div className="bg-white p-8 rounded-xl w-[480px] flex flex-col gap-6 shadow-lg relative">
-                                <h2 className="text-[24px] font-semibold text-[#081E4A]">Confirm Deletion</h2>
-                                <p className="text-gray-600 text-[18px]">Do you really want to delete <strong>{tenantToDelete.userName}</strong>?</p>
-                                <div className="flex gap-4 mt-4 w-[100%] justify-end">
-                                    <button
-                                        onClick={() => setTenantToDelete(null)}
-                                        className="bg-[#1976D2] hover:bg-[#125BA3] text-white px-[20px] py-2 cursor-pointer rounded-[4.5px] flex gap-[10px]"
-                                    >
-                                        Cancel
-                                        <X />
-                                    </button>
-                                    <button
-                                        onClick={() => handleDelete(tenantToDelete)}
-                                        className="bg-[#C42211] text-white px-[20px] py-2 cursor-pointer rounded-[4.5px] hover:bg-[#A32012] flex gap-[10px]"
-                                    >
-                                        Delete
-                                        <Trash2 />
-                                    </button>
-                                </div>
+                    <div className="absolute top-0 left-0 w-full h-full bg-opacity-50 z-[999] flex items-center justify-center">
+                        <div className="bg-white p-8 rounded-xl w-[480px] flex flex-col gap-6 shadow-lg relative">
+                            <h2 className="text-[24px] font-semibold text-[#081E4A]">Confirm Deletion</h2>
+                            <p className="text-gray-600 text-[18px]">Do you really want to delete <strong>{tenantToDelete.userName}</strong>?</p>
+                            <div className="flex gap-4 mt-4 w-[100%] justify-end">
+                                <button
+                                    onClick={() => setTenantToDelete(null)}
+                                    className="bg-[#1976D2] hover:bg-[#125BA3] text-white px-[20px] py-2 cursor-pointer rounded-[4.5px] flex gap-[10px]"
+                                >
+                                    Cancel
+                                    <X />
+                                </button>
+                                <button
+                                    onClick={() => handleDelete(tenantToDelete)}
+                                    className="bg-[#C42211] text-white px-[20px] py-2 cursor-pointer rounded-[4.5px] hover:bg-[#A32012] flex gap-[10px]"
+                                >
+                                    Delete
+                                    <Trash2 />
+                                </button>
                             </div>
                         </div>
-                    )
-                }
-            </div >
-        </div >
+                    </div>
+                )}
+            </div>
+        </div>
     );
 };
 
