@@ -88,18 +88,4 @@ public class OwnerController {
             throw new RuntimeException("Error fetching user registration stats", e);
         }
     }
-    
-
-    @GetMapping("/test")
-public String testQuery() {
-    try {
-        List<Object[]> results = ownerRepository.getUserRegistrationStats();
-        return "Query executed successfully: " + results.size() + " records found.";
-    } catch (Exception e) {
-        e.printStackTrace();
-        return "Error: " + e.getMessage();
-    }
-}
-
-
 }

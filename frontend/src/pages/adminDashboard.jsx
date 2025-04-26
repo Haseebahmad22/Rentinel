@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import Sidebar from "../utility/adminSidebar";
-import Histogram from "../utility/Histogram";
+import Histogram from "../utility/AdminHistogram";
 import axios from "axios";
 import { Link } from "react-router-dom";
 

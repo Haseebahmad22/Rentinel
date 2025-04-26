@@ -32,12 +32,24 @@ public class PaymentController {
     public long getPaymentCount() {
         return paymentRepository.count();
     }
+
     @GetMapping("/totalPaymentAmount")
     public Double getTotalPaymentAmount() {
         return paymentRepository.getTotalPaymentAmount();
     }
+
     @GetMapping("/yearlyRent")
     public Double getYearlyRent() {
         return paymentRepository.getYearlyRent();
     }
- }
+
+    @PutMapping("/updateStatus")
+    public Payment updatePaymentStatus(@RequestBody Payment updatedPayment) {
+        Payment existingPayment = paymentRepository.findById(updatedPayment.getPaymentID())
+                .orElseThrow(() -> new RuntimeException("Payment not found"));
+
+        existingPayment.setPaymentStatus(updatedPayment.getPaymentStatus());
+
+        return paymentRepository.save(existingPayment);
+    }
+}

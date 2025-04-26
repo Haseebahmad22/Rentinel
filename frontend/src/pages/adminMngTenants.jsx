@@ -10,8 +10,8 @@ const AdminMngTenants = () => {
     const [tenantProperties, setTenantProperties] = useState([]);
     const [editMode, setEditMode] = useState(false);
     const [formErrors, setFormErrors] = useState({});
-    const [isSubmitting, setIsSubmitting] = useState(false);
     const formRef = useRef(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         axios.get("http://localhost:8080/tenants")
@@ -327,8 +327,7 @@ const AdminMngTenants = () => {
                     <h1 className="text-[32px]">{tenants.length}</h1>
                 </div>
 
-                {
-                    tenantToDelete && (
+                {tenantToDelete && (
                         <div className="absolute top-0 left-0 w-full h-full bg-opacity-50 z-[999] flex items-center justify-center">
                             <div className="bg-white p-8 rounded-xl w-[480px] flex flex-col gap-6 shadow-lg relative">
                                 <h2 className="text-[24px] font-semibold text-[#081E4A]">Confirm Deletion</h2>
