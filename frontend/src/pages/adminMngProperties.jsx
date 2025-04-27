@@ -94,9 +94,23 @@ const AdminMngProperties = () => {
             }
         });
 
+        // Date validation
+        const startDate = formData.get('rentStartDate');
+        const endDate = formData.get('rentEndDate');
+        
+        if (startDate && endDate) {
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            
+            if (start > end) {
+                errors.rentDates = "End date must be after start date";
+            }
+        }
+
         setFormErrors(errors);
         return Object.keys(errors).length === 0;
     };
+
     const handleDelete = async (propertyID) => {
         try {
             // Try deleting rentAssignment blindly
@@ -116,8 +130,6 @@ const AdminMngProperties = () => {
                     console.error("Error deleting payments:", error.response);
                 });
 
-
-
             // Now delete property
             await axios.delete(`http://localhost:8080/properties/${propertyID}`);
 
@@ -130,8 +142,6 @@ const AdminMngProperties = () => {
             console.error("Error deleting:", error.response || error.message);
         }
     };
-
-
 
     const handleSave = () => {
         if (!validateForm()) return;
@@ -152,17 +162,41 @@ const AdminMngProperties = () => {
             tenantName: formData.get('tenantName')
         };
 
+        // Prepare rent assignment update if dates were modified
+        const rentAssignment = getRentAssignment(viewedProperty.propertyID);
+        const updatedRentAssignment = {
+            ...rentAssignment,
+            startDate: formData.get('rentStartDate'),
+            dueDate: formData.get('rentEndDate')
+        };
+
+        // First update the property
         axios.put(`http://localhost:8080/properties/${viewedProperty.propertyID}`, updatedProperty)
-            .then(response => {
+            .then(() => {
+                // Then update the rent assignment if it exists
+                if (rentAssignment) {
+                    return axios.put(`http://localhost:8080/rentAssignments/${rentAssignment.rentAssignmentID}`, updatedRentAssignment);
+                }
+                return Promise.resolve();
+            })
+            .then(() => {
+                // Update state
                 setProperties(prev => prev.map(p =>
                     p.propertyID === viewedProperty.propertyID ? updatedProperty : p
                 ));
+                
+                if (rentAssignment) {
+                    setRentAssignments(prev => prev.map(r =>
+                        r.rentAssignmentID === rentAssignment.rentAssignmentID ? updatedRentAssignment : r
+                    ));
+                }
+                
                 setViewedProperty(updatedProperty);
                 setEditMode(false);
                 setFormErrors({});
             })
             .catch(error => {
-                console.error("Error updating property:", error);
+                console.error("Error updating:", error);
             })
             .finally(() => {
                 setIsSubmitting(false);
@@ -170,9 +204,10 @@ const AdminMngProperties = () => {
     };
 
     const PropertyBox = ({ label, name, value }) => {
-        const isReadOnly = name === "propertyID" || name.includes("rentDate");
-        const isError = formErrors[name];
+        const isReadOnly = name === "propertyID";
+        const isError = formErrors[name] || (name === 'rentEndDate' && formErrors.rentDates);
         const isNumeric = ['numOfRooms', 'numOfBedRooms', 'numOfBaths', 'fixedRent'].includes(name);
+        const isDateField = ['rentStartDate', 'rentEndDate'].includes(name);
         const [localValue, setLocalValue] = useState(value || "");
 
         useEffect(() => {
@@ -181,17 +216,13 @@ const AdminMngProperties = () => {
 
         const handleChange = (e) => {
             const newValue = e.target.value;
-
-            if (isNumeric && newValue !== '' && !/^\d*$/.test(newValue)) {
-                return;
-            }
-
             setLocalValue(newValue);
 
-            if (isError && newValue.trim()) {
+            if (isError) {
                 setFormErrors(prev => {
                     const newErrors = { ...prev };
                     delete newErrors[name];
+                    if (newErrors.rentDates) delete newErrors.rentDates;
                     return newErrors;
                 });
             }
@@ -208,20 +239,25 @@ const AdminMngProperties = () => {
             <div className="flex flex-col w-[230px]">
                 <label className="text-[14px] font-semibold text-gray-600 mb-1">{label}</label>
                 {editMode ? (
-                    <input
-                        name={name}
-                        type={isNumeric ? "number" : "text"}
-                        value={localValue}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        className={`px-4 py-2 rounded w-full text-[15px] text-gray-800 bg-[#F2F2F2] focus:outline-none border ${isError ? 'border-red-500' : 'border-gray-300'}`}
-                        readOnly={isReadOnly}
-                        tabIndex={isReadOnly ? -1 : 0}
-                        min={isNumeric ? "1" : undefined}
-                    />
+                    <>
+                        <input
+                            name={name}
+                            type={isDateField ? "date" : (isNumeric ? "number" : "text")}
+                            value={localValue}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            className={`px-4 py-2 rounded w-full text-[15px] text-gray-800 bg-[#F2F2F2] focus:outline-none border ${isError ? 'border-red-500' : 'border-gray-300'}`}
+                            readOnly={isReadOnly}
+                            tabIndex={isReadOnly ? -1 : 0}
+                            min={isNumeric ? "1" : undefined}
+                        />
+                        {isError && (
+                            <p className="text-red-500 text-xs mt-1">{formErrors[name] || formErrors.rentDates}</p>
+                        )}
+                    </>
                 ) : (
                     <div className="bg-[#E9E9E9] px-4 py-2 rounded w-full text-[15px] text-gray-800">
-                        {name.includes("rentDate") ? formatDate(value) : value || "—"}
+                        {isDateField ? formatDate(value) : value || "—"}
                     </div>
                 )}
             </div>
@@ -304,7 +340,6 @@ const AdminMngProperties = () => {
                         </div>
                     ) : (
                         <>
-
                             <div className="grid grid-cols-12 bg-gray-100 p-4 font-medium text-gray-700 sticky top-0 z-10 rounded-t-lg h-[56px]">
                                 <div className="col-span-2">PROPERTY ID</div>
                                 <div className="col-span-3">PROPERTY NAME</div>
