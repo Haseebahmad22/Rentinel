@@ -10,5 +10,8 @@ import org.springframework.stereotype.Repository;
 public interface RentAssignmentRepository extends JpaRepository<RentAssignment, Integer> {
     List<RentAssignment> findByPropertyID(Integer propertyID);
 
+    List<RentAssignment> findByTenantID(Integer tenantID);
 
+    void deleteAllByPropertyID(Integer propertyID);
+    void deleteAllByTenantID(Integer tenantID);
 }

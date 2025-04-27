@@ -38,6 +38,25 @@ public class RentAssignmentController {
         return repository.save(rentAssignment);
     }
 
-  
+
+//delete by propetty id
+@DeleteMapping("/property/{propertyID}")
+public ResponseEntity<Void> deleteByPropertyID(@PathVariable Integer propertyID) {
+    List<RentAssignment> rentAssignments = repository.findByPropertyID(propertyID);
+    if (!rentAssignments.isEmpty()) {
+        repository.deleteAll(rentAssignments);
+    }
+    return ResponseEntity.noContent().build();
+}
+
+//delete by propetty id
+@DeleteMapping("/tenant/{tenantID}")
+public ResponseEntity<Void> deleteByTenantID(@PathVariable Integer tenantID) {
+    List<RentAssignment> rentAssignments = repository.findByTenantID(tenantID);
+    if (!rentAssignments.isEmpty()) {
+        repository.deleteAll(rentAssignments);
+    }
+    return ResponseEntity.noContent().build();
+}
 
 }

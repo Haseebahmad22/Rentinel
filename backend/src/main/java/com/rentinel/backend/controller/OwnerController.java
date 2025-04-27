@@ -1,8 +1,16 @@
 package com.rentinel.backend.controller;
 
 import com.rentinel.backend.model.Owner;
+import com.rentinel.backend.model.Property;
 import com.rentinel.backend.model.UserRegistrationStats;
 import com.rentinel.backend.repository.OwnerRepository;
+import com.rentinel.backend.repository.PaymentRepository;
+import com.rentinel.backend.repository.PropertyAssignmentRepository;
+import com.rentinel.backend.repository.PropertyRepository;
+import com.rentinel.backend.repository.RentAssignmentRepository;
+
+import jakarta.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,8 +24,20 @@ import java.util.Optional;
 @RequestMapping("/owners")
 public class OwnerController {
 
+    private final PaymentRepository paymentRepository;
+
     @Autowired
     private OwnerRepository ownerRepository;
+    @Autowired
+    private PropertyRepository propertyRepository;
+    @Autowired
+    private RentAssignmentRepository rentAssignmentRepository;
+    @Autowired
+    private PropertyAssignmentRepository propertyAssignmentRepository;
+
+    OwnerController(PaymentRepository paymentRepository) {
+        this.paymentRepository = paymentRepository;
+    }
 
     // GET /api/owners
     @GetMapping
@@ -36,10 +56,30 @@ public class OwnerController {
         }
     }
 
-    // DELETE /owners/{id}
-    @DeleteMapping("/{id}")
-    public void deleteOwner(@PathVariable Integer id) {
-        ownerRepository.deleteById(id);
+    @DeleteMapping("/{ownerName}")
+    @Transactional
+    public void deleteOwner(@PathVariable String ownerName) {
+        // First, get all the properties of the owner
+        List<Property> properties = propertyRepository.findByOwnerName(ownerName);
+        System.out.println(ownerName);
+        // For each property, delete related Payment, RentAssignment, PropertyAssignment
+        // records and then the property itself
+        for (Property property : properties) {
+            // Delete payments related to the property
+            paymentRepository.deleteAllByPropertyID(property.getPropertyID());
+
+            // Delete rent assignments related to the property
+            rentAssignmentRepository.deleteAllByPropertyID(property.getPropertyID());
+
+            // Delete property assignments related to the property
+            propertyAssignmentRepository.deleteByPropertyID(property.getPropertyID());
+
+            // Now, delete the property
+            propertyRepository.deleteById(property.getPropertyID());
+        }
+
+        // Finally, delete the owner
+        ownerRepository.deleteByUserName(ownerName);
     }
 
     // PUT /tenants/{id} - Update tenant details
@@ -65,15 +105,16 @@ public class OwnerController {
     public long getOwnerCount() {
         return ownerRepository.count();
     }
+
     @GetMapping("/userRegistrations")
     public List<UserRegistrationStats> getUserRegistrationStats() {
         try {
             List<Object[]> results = ownerRepository.getUserRegistrationStats();
             List<UserRegistrationStats> statsList = new ArrayList<>();
-            
+
             // Debugging: Print the results first to check the data structure
             System.out.println("Query Results: " + results);
-    
+
             // Now process the results
             for (Object[] result : results) {
                 if (result != null && result.length == 2) {

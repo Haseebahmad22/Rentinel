@@ -1,6 +1,7 @@
 package com.rentinel.backend.controller;
 
 import com.rentinel.backend.model.Tenant;
+import com.rentinel.backend.repository.RentAssignmentRepository;
 import com.rentinel.backend.repository.TenantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +16,9 @@ public class TenantController {
 
     @Autowired
     private TenantRepository tenantRepository;
+
+    @Autowired
+    private RentAssignmentRepository rentAssignmentRepository;
 
     // GET /api/owners
     @GetMapping
@@ -31,6 +35,7 @@ public class TenantController {
     // DELETE /tenants/{id}
     @DeleteMapping("/{id}")
     public void deleteTenant(@PathVariable Integer id) {
+        rentAssignmentRepository.deleteAllByTenantID(id);
         tenantRepository.deleteById(id);
     }
 

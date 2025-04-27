@@ -16,7 +16,6 @@ public class PaymentController {
     @Autowired
     private PaymentRepository paymentRepository;
 
-    // GET /api/owners
     @GetMapping
     public List<Payment> getAllPayments() {
         return paymentRepository.findAll();
@@ -52,4 +51,17 @@ public class PaymentController {
 
         return paymentRepository.save(existingPayment);
     }
+
+     // DELETE /payments/property/{propertyID}
+     @DeleteMapping("/property/{propertyID}")
+     public void deletePaymentsByPropertyID(@PathVariable Integer propertyID) {
+         try {
+             paymentRepository.deleteAllByPropertyID(propertyID);
+             System.out.println("Deleted payments for property ID: " + propertyID);
+         } catch (Exception e) {
+             System.out.println("Error deleting payments: " + e.getMessage());
+             throw e;
+         }
+     }
+     
 }
