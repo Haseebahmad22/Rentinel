@@ -5,7 +5,7 @@ import { Pencil, Trash2, Eye, ChevronLeft, X } from "lucide-react";
 
 const AdminMngPayments = () => {
     const [payments, setPayments] = useState([]);
-    const [viewedPayment, setviewedPayment] = useState(null);
+    const [viewedPayment, setViewedPayment] = useState(null);
     const [editMode, setEditMode] = useState(false);
     const [formErrors, setFormErrors] = useState({});
     const formRef = useRef(null);
@@ -21,15 +21,17 @@ const AdminMngPayments = () => {
                 console.error("Error fetching payments:", error);
             });
     }, []);
+
     const handleView = (payment) => {
-        setviewedPayment(payment);
+        setViewedPayment(payment);
         setEditMode(false);
+        setFormErrors({});
     };
 
     const handleBack = () => {
-        setviewedPayment(null);
+        setViewedPayment(null);
+        setEditMode(false);
     };
-
 
     const handleDelete = (payment) => {
         axios.delete(`http://localhost:8080/payments/${payment.paymentID}`)
@@ -37,7 +39,7 @@ const AdminMngPayments = () => {
                 setPayments(prev => prev.filter(p => p.paymentID !== payment.paymentID));
                 setPaymentToDelete(null);
                 if (viewedPayment?.paymentID === payment.paymentID) {
-                    setviewedPayment(null);
+                    setViewedPayment(null);
                 }
             })
             .catch(error => {
@@ -46,32 +48,41 @@ const AdminMngPayments = () => {
     };
 
     const handleEdit = (payment) => {
-        setviewedPayment(payment);
+        setViewedPayment(payment);
         setEditMode(true);
+        setFormErrors({});
     };
+
     const validateForm = () => {
         const formData = new FormData(formRef.current);
-        const status = formData.get('paymentStatus');
-        return status === "Pending" || status === "Paid";
+        const status = formData.get('paymentStatus')?.toLowerCase();
+        const isValid = status === "pending" || status === "paid";
+        
+        if (!isValid) {
+            setFormErrors({ paymentStatus: "Status must be either 'Pending' or 'Paid'" });
+        } else {
+            setFormErrors({});
+        }
+        
+        return isValid;
     };
 
     const handleSave = () => {
-        if (!validateForm()) return; // Don't proceed if there are validation errors
+        if (!validateForm()) return;
 
         setIsSubmitting(true);
-        if (!formRef.current) return;
-
         const formData = new FormData(formRef.current);
         const updatedPayment = {
             ...viewedPayment,
             paymentStatus: formData.get('paymentStatus'),
         };
 
-        // Make sure the correct tenant is being updated
         axios.put("http://localhost:8080/payments/updateStatus", updatedPayment)
             .then(response => {
-                setPayments(prev => prev.map(t => t.paymentID === viewedPayment.paymentID ? updatedPayment : t));
-                setviewedPayment(updatedPayment);
+                setPayments(prev => prev.map(p => 
+                    p.paymentID === viewedPayment.paymentID ? updatedPayment : p
+                ));
+                setViewedPayment(updatedPayment);
                 setEditMode(false);
             })
             .catch(error => {
@@ -81,8 +92,8 @@ const AdminMngPayments = () => {
                 setIsSubmitting(false);
             });
     };
-    const PaymentBox = ({ label, name, value, isFirstEditable = false, validationType = "text" }) => {
-        const [inputValue, setInputValue] = useState(value || "");
+
+    const PaymentBox = ({ label, name, value }) => {
         const isReadOnly = [
             "userName",
             "paymentID",
@@ -93,21 +104,35 @@ const AdminMngPayments = () => {
             "tenantUserName",
             "ownerUserName",
         ].includes(name);
-
-        // Add a condition to check for form errors for this input
+        
         const isError = formErrors[name];
+        const [localValue, setLocalValue] = useState(value || "");
+
+        // Sync local value when prop changes
+        useEffect(() => {
+            setLocalValue(value || "");
+        }, [value]);
 
         const handleChange = (e) => {
             const newValue = e.target.value;
-            setInputValue(newValue);
-            if (isError) {
-                // Reset the error if the user starts typing again
-                setFormErrors((prevErrors) => {
-                    const updatedErrors = { ...prevErrors };
-                    delete updatedErrors[name];
-                    return updatedErrors;
+            setLocalValue(newValue);
+            
+            // Clear error if user starts typing
+            if (isError && newValue.trim()) {
+                setFormErrors(prev => {
+                    const newErrors = { ...prev };
+                    delete newErrors[name];
+                    return newErrors;
                 });
             }
+        };
+
+        const handleBlur = () => {
+            // Update parent state when leaving the field
+            setViewedPayment(prev => ({
+                ...prev,
+                [name]: localValue
+            }));
         };
 
         return (
@@ -117,9 +142,12 @@ const AdminMngPayments = () => {
                     <input
                         name={name}
                         type="text"
-                        value={inputValue || ""}
+                        value={localValue}
                         onChange={handleChange}
-                        className={`px-4 py-2 rounded w-full text-[15px] text-gray-800 bg-[#F2F2F2] focus:outline-none border ${isError ? 'border-red-500' : 'border-gray-300'}`}
+                        onBlur={handleBlur}
+                        className={`px-4 py-2 rounded w-full text-[15px] text-gray-800 bg-[#F2F2F2] focus:outline-none border ${
+                            isError ? 'border-red-500' : 'border-gray-300'
+                        }`}
                         readOnly={isReadOnly}
                         tabIndex={isReadOnly ? -1 : 0}
                     />
@@ -128,13 +156,9 @@ const AdminMngPayments = () => {
                         {value || "—"}
                     </div>
                 )}
-                {/* Display error message below input */}
-                {isError && <div className="text-red-500 text-sm mt-1">{formErrors[name]}</div>}
             </div>
         );
     };
-
-
 
     return (
         <div className="flex font-[Lexend]">
@@ -145,9 +169,7 @@ const AdminMngPayments = () => {
                     <p className="text-[15px] text-[#4D4D4D] font-light">View, edit, or delete payments.</p>
                 </div>
 
-                {/* Payments Table Container */}
                 <div className="mx-[80px] mt-8 bg-white rounded-lg shadow-md overflow-hidden relative h-[380px] w-[1060px]">
-                    {/* overlay */}
                     {viewedPayment && (
                         <div className="absolute top-0 bg-white bg-opacity-90 z-50 flex rounded-lg items-center justify-center px-6 w-[1060px] h-[380px]">
                             <form ref={formRef} className="p-6 rounded-lg w-full max-w-[1000px] space-y-8 relative">
@@ -163,77 +185,71 @@ const AdminMngPayments = () => {
                                             <button
                                                 type="button"
                                                 onClick={handleSave}
+                                                disabled={isSubmitting}
                                                 className="bg-[#FFAE1A] cursor-pointer text-white text-[20px] font-medium rounded-[4.5px] px-[15px] py-[3px]"
                                             >
-                                                SAVE
+                                                {isSubmitting ? "Saving..." : "SAVE"}
                                             </button>
                                         )}
                                     </div>
                                 </div>
                                 <div className="pt-12 flex flex-col space-y-8">
-                                    {/* Row 1 */}
-                                    <div className="flex flex-wrap gap-[35px] ">
+                                    <div className="flex flex-wrap gap-[35px]">
                                         <PaymentBox label="PAYMENT ID" name="paymentID" value={viewedPayment?.paymentID} />
                                         <PaymentBox label="PAYMENT DATE" name="paymentDate" value={viewedPayment?.paymentDate} />
                                         <PaymentBox label="AMOUNT" name="amount" value={viewedPayment?.amount} />
-                                        <PaymentBox label="PAYMENT STATUS" name="paymentStatus" value={viewedPayment?.paymentStatus} isFirstEditable={editMode} />
+                                        <PaymentBox label="PAYMENT STATUS" name="paymentStatus" value={viewedPayment?.paymentStatus} />
                                     </div>
-                                    {/* Row 2 */}
-                                    <div className="flex flex-wrap gap-[35px] ">
+                                    <div className="flex flex-wrap gap-[35px]">
                                         <PaymentBox label="PROPERTY ID" name="propertyID" value={viewedPayment?.propertyID} />
-                                        <PaymentBox label="PROPERTY NAME" name="propertyName" value={viewedPayment?.propertyID} />
+                                        <PaymentBox label="PROPERTY NAME" name="propertyName" value={viewedPayment?.propertyName} />
                                     </div>
-
-                                    {/* Row 23*/}
-                                    <div className="flex flex-wrap gap-[35px] ">
+                                    <div className="flex flex-wrap gap-[35px]">
                                         <PaymentBox label="TENANT USERNAME" name="tenantUserName" value={viewedPayment?.tenantUserName} />
                                         <PaymentBox label="OWNER USERNAME" name="ownerUserName" value={viewedPayment?.ownerUserName} />
                                     </div>
-
-                                    <div>
-
-                                    </div>
-
                                 </div>
                             </form>
                         </div>
                     )}
-                    {/* Sticky Header */}
+
                     <div className="grid grid-cols-12 bg-gray-100 p-4 font-medium text-gray-700 sticky top-0 z-10">
                         <div className="col-span-2">PAYMENT ID</div>
                         <div className="col-span-2">AMOUNT</div>
                         <div className="col-span-2">STATUS</div>
                         <div className="col-span-2">DATE</div>
-                        <div className="col-span-4 flex justify-end gap-17 pr-9  ">
+                        <div className="col-span-4 flex justify-end gap-17 pr-9">
                             <span>VIEW</span>
                             <span>EDIT</span>
                             <span>DELETE</span>
                         </div>
                     </div>
 
-                    {/* Scrollable Body */}
                     <div className="overflow-y-auto max-h-[322px]">
                         {payments.map((payment) => (
                             <div key={payment.paymentID} className="grid grid-cols-12 p-4 border-b border-gray-200 items-center">
                                 <div className="col-span-2 font-medium">{payment.paymentID}</div>
                                 <div className="col-span-2">${payment.amount}</div>
-                                <div className={`col-span-2 ${payment.paymentStatus === 'Completed' ? 'text-green-600' :
+                                <div className={`col-span-2 ${
+                                    payment.paymentStatus === 'Completed' ? 'text-green-600' :
                                     payment.paymentStatus === 'Pending' ? 'text-yellow-600' :
-                                        'text-red-600'
-                                    }`}>
+                                    'text-red-600'
+                                }`}>
                                     {payment.paymentStatus}
                                 </div>
                                 <div className="col-span-2 text-gray-600">
                                     {new Date(payment.paymentDate).toLocaleDateString()}
                                 </div>
                                 <div className="col-span-4 flex justify-end gap-2 pr-4">
-                                    <button className="text-white flex items-center justify-center gap-2 bg-[#1245A8] py-1 px-3 rounded w-[112px] cursor-pointer"
+                                    <button 
+                                        className="text-white flex items-center justify-center gap-2 bg-[#1245A8] py-1 px-3 rounded w-[112px] cursor-pointer"
                                         onClick={() => handleView(payment)}
                                     >
                                         <Eye className="w-4 h-4" />
                                         <span>View</span>
                                     </button>
-                                    <button className="text-white flex items-center justify-center gap-2 bg-[#1976D2] py-1 px-3 rounded w-[112px] cursor-pointer"
+                                    <button 
+                                        className="text-white flex items-center justify-center gap-2 bg-[#1976D2] py-1 px-3 rounded w-[112px] cursor-pointer"
                                         onClick={() => handleEdit(payment)}
                                     >
                                         <Pencil className="w-4 h-4" />
@@ -258,32 +274,29 @@ const AdminMngPayments = () => {
                 </div>
 
                 {paymentToDelete && (
-                        <div className="absolute top-0 left-0 w-full h-full bg-opacity-50 z-[999] flex items-center justify-center">
-                            <div className="bg-white p-8 rounded-xl w-[480px] flex flex-col gap-6 shadow-lg relative">
-                                <h2 className="text-[24px] font-semibold text-[#081E4A]">Confirm Deletion</h2>
-                                <p className="text-gray-600 text-[18px]">Do you really want to delete Paymont for Property<strong>{paymentToDelete.propertyName}</strong>?</p>
-                                <div className="flex gap-4 mt-4 w-[100%] justify-end">
-                                    <button
-                                        onClick={() => setPaymentToDelete(null)}
-                                        className="bg-[#1976D2] hover:bg-[#125BA3] text-white px-[20px] py-2 cursor-pointer rounded-[4.5px] flex gap-[10px]"
-                                    >
-                                        Cancel
-                                        <X />
-                                    </button>
-                                    <button
-                                        onClick={() => handleDelete(paymentToDelete)}
-                                        className="bg-[#C42211] text-white px-[20px] py-2 cursor-pointer rounded-[4.5px] hover:bg-[#A32012] flex gap-[10px]"
-                                    >
-                                        Delete
-                                        <Trash2 />
-                                    </button>
-                                </div>
+                    <div className="absolute top-0 left-0 w-full h-full bg-opacity-50 z-[999] flex items-center justify-center">
+                        <div className="bg-white p-8 rounded-xl w-[480px] flex flex-col gap-6 shadow-lg relative">
+                            <h2 className="text-[24px] font-semibold text-[#081E4A]">Confirm Deletion</h2>
+                            <p className="text-gray-600 text-[18px]">Do you really want to delete payment for Property <strong>{paymentToDelete.propertyName}</strong>?</p>
+                            <div className="flex gap-4 mt-4 w-[100%] justify-end">
+                                <button
+                                    onClick={() => setPaymentToDelete(null)}
+                                    className="bg-[#1976D2] hover:bg-[#125BA3] text-white px-[20px] py-2 cursor-pointer rounded-[4.5px] flex gap-[10px]"
+                                >
+                                    Cancel
+                                    <X />
+                                </button>
+                                <button
+                                    onClick={() => handleDelete(paymentToDelete)}
+                                    className="bg-[#C42211] text-white px-[20px] py-2 cursor-pointer rounded-[4.5px] hover:bg-[#A32012] flex gap-[10px]"
+                                >
+                                    Delete
+                                    <Trash2 />
+                                </button>
                             </div>
                         </div>
-                    )
-                }
-
-
+                    </div>
+                )}
             </div>
         </div>
     );
