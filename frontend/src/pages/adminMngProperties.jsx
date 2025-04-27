@@ -237,7 +237,7 @@ const AdminMngProperties = () => {
                     <p className="text-[15px] text-[#4D4D4D] font-light">View, edit, or delete properties.</p>
                 </div>
 
-                <div className="mx-[80px] mt-8 bg-white rounded-lg shadow-md relative w-[1060px] h-[380px]">
+                <div className="mx-[80px] mt-8 bg-white rounded-lg shadow-md relative w-[70vw] h-[50vh]">
                     {viewedProperty && (
                         <div className="absolute top-0 bg-white bg-opacity-90 z-50 flex rounded-lg items-center justify-center px-6 w-[1060px]">
                             <form ref={formRef} className="p-6 rounded-lg w-full max-w-[1000px] space-y-8 relative">
@@ -343,7 +343,7 @@ const AdminMngProperties = () => {
                     </div>
                 </div>
 
-                <div className="w-[390px] flex flex-col items-center rounded-[16px] p-[10px] bg-white text-[#081E4A] font-medium ml-[80px] mt-[15px]">
+                <div className="w-[24vw] flex flex-col items-center rounded-[16px] p-[10px] bg-white text-[#081E4A] font-medium ml-[80px] mt-[15px]">
                     <h1 className="text-[36px]">Total Properties</h1>
                     <h1 className="text-[32px]">{properties.length}</h1>
                 </div>

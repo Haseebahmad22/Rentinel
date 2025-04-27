@@ -67,7 +67,7 @@ const AdminDashboard = () => {
                 </div>
                 {/* mid 4 boxes */}
                 <div className="flex w-[100%] justify-between pl-[80px] pr-[50px] mt-[30px]">
-                    <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[17vw]">
+                    <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[17vw] justify-between">
                         <div>
                             <h1 className="text-[#343434] text-[20px]">Total Owners</h1>
                             <h1 className="text-[#232323] text-[24px] font-bold">{ownerCount ? ownerCount.toLocaleString() : "0"}</h1>
@@ -75,7 +75,7 @@ const AdminDashboard = () => {
                         </div>
                         <img src="icons/User.svg" alt="" />
                     </div>
-                    <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[17vw]">
+                    <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[17vw] justify-between">
                         <div>
                             <h1 className="text-[#343434] text-[20px]">Total Tenants</h1>
                             <h1 className="text-[#232323] text-[24px] font-bold">{tenantCount ? tenantCount.toLocaleString() : "0"}</h1>
@@ -83,7 +83,7 @@ const AdminDashboard = () => {
                         </div>
                         <img src="icons/User.svg" alt="" />
                     </div>
-                    <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[17vw]">
+                    <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[17vw] justify-between">
                         <div>
                             <h1 className="text-[#343434] text-[20px]">Total Properties</h1>
                             <h1 className="text-[#232323] text-[24px] font-bold">{propertyCount ? propertyCount.toLocaleString() : "0"}</h1>
@@ -91,7 +91,7 @@ const AdminDashboard = () => {
                         </div>
                         <img src="icons/Home-Icon.svg" alt="" />
                     </div>
-                    <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[17vw]">
+                    <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[17vw] justify-between">
                         <div>
                             <h1 className="text-[#343434] text-[20px]">Total Payments</h1>
                             <h1 className="text-[#232323] text-[24px] font-bold">{paymentCount ? paymentCount.toLocaleString() : "0"}</h1>

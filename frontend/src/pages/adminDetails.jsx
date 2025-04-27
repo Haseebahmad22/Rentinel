@@ -27,7 +27,7 @@ const AdminDetails = () => {
                 </div>
 
                 {/* Card */}
-                <div className="bg-white  rounded-md p-8 w-[1060px] h-[400px] text-[#202224]">
+                <div className="bg-white  rounded-md p-8  w-[70vw] h-[50vh] text-[#202224]">
                     {/* Row 1 */}
                     <div className="flex mb-6 mt-[30px]">
                         <div className="mr-20 w-[260px]">
