@@ -32,7 +32,7 @@ const AdminMngProperties = () => {
     }, []);
 
     const getRentAssignment = (propertyId) => {
-        return rentAssignments.find(assignment => 
+        return rentAssignments.find(assignment =>
             assignment.propertyID === propertyId
         );
     };
@@ -99,28 +99,28 @@ const AdminMngProperties = () => {
     };
     const handleDelete = async (propertyID) => {
         try {
-             // Try deleting rentAssignment blindly
-             await axios.delete(`http://localhost:8080/rentAssignments/property/${propertyID}`)
-             .catch((error) => {
-                 console.error("Error deleting rent assignments:", error.response);
-             });
+            // Try deleting rentAssignment blindly
+            await axios.delete(`http://localhost:8080/rentAssignments/property/${propertyID}`)
+                .catch((error) => {
+                    console.error("Error deleting rent assignments:", error.response);
+                });
 
-             await axios.delete(`http://localhost:8080/propertyAssignments/property/${propertyID}`)
-                 .catch((error) => {
-                     console.error("Error deleting properties:", error.response);
-                 });
+            await axios.delete(`http://localhost:8080/propertyAssignments/property/${propertyID}`)
+                .catch((error) => {
+                    console.error("Error deleting properties:", error.response);
+                });
 
             // First, delete all payment records for the property
             await axios.delete(`http://localhost:8080/payments/property/${propertyID}`)
                 .catch((error) => {
                     console.error("Error deleting payments:", error.response);
                 });
-    
-    
-           
+
+
+
             // Now delete property
             await axios.delete(`http://localhost:8080/properties/${propertyID}`);
-    
+
             // Update frontend
             setProperties(prev => prev.filter(p => p.propertyID !== propertyID));
             setRentAssignments(prev => prev.filter(r => r.propertyID !== propertyID));
@@ -130,15 +130,15 @@ const AdminMngProperties = () => {
             console.error("Error deleting:", error.response || error.message);
         }
     };
-    
-    
+
+
 
     const handleSave = () => {
         if (!validateForm()) return;
 
         setIsSubmitting(true);
         const formData = new FormData(formRef.current);
-        
+
         const updatedProperty = {
             ...viewedProperty,
             propertyName: formData.get('propertyName'),
@@ -174,20 +174,20 @@ const AdminMngProperties = () => {
         const isError = formErrors[name];
         const isNumeric = ['numOfRooms', 'numOfBedRooms', 'numOfBaths', 'fixedRent'].includes(name);
         const [localValue, setLocalValue] = useState(value || "");
-    
+
         useEffect(() => {
             setLocalValue(value || "");
         }, [value]);
-    
+
         const handleChange = (e) => {
             const newValue = e.target.value;
-            
+
             if (isNumeric && newValue !== '' && !/^\d*$/.test(newValue)) {
                 return;
             }
-    
+
             setLocalValue(newValue);
-            
+
             if (isError && newValue.trim()) {
                 setFormErrors(prev => {
                     const newErrors = { ...prev };
@@ -196,14 +196,14 @@ const AdminMngProperties = () => {
                 });
             }
         };
-    
+
         const handleBlur = () => {
             setViewedProperty(prev => ({
                 ...prev,
                 [name]: localValue
             }));
         };
-    
+
         return (
             <div className="flex flex-col w-[230px]">
                 <label className="text-[14px] font-semibold text-gray-600 mb-1">{label}</label>
@@ -280,15 +280,15 @@ const AdminMngProperties = () => {
                                     <hr className="border-gray-300" />
 
                                     <div className="flex flex-wrap justify-between">
-                                        <PropertyBox 
-                                            label="RENT START DATE" 
-                                            name="rentStartDate" 
-                                            value={getRentAssignment(viewedProperty.propertyID)?.startDate} 
+                                        <PropertyBox
+                                            label="RENT START DATE"
+                                            name="rentStartDate"
+                                            value={getRentAssignment(viewedProperty.propertyID)?.startDate}
                                         />
-                                        <PropertyBox 
-                                            label="RENT END DATE" 
-                                            name="rentEndDate" 
-                                            value={getRentAssignment(viewedProperty.propertyID)?.dueDate} 
+                                        <PropertyBox
+                                            label="RENT END DATE"
+                                            name="rentEndDate"
+                                            value={getRentAssignment(viewedProperty.propertyID)?.dueDate}
                                         />
                                         <PropertyBox label="FIXED RENT AMOUNT" name="fixedRent" value={viewedProperty.fixedRent} />
                                         <PropertyBox label="ASSIGNED TENANT" name="tenantName" value={viewedProperty.tenantName} />
@@ -298,49 +298,58 @@ const AdminMngProperties = () => {
                         </div>
                     )}
 
-                    <div className="grid grid-cols-12 bg-gray-100 p-4 font-medium text-gray-700 sticky top-0 z-10 rounded-t-lg h-[56px]">
-                        <div className="col-span-2">PROPERTY ID</div>
-                        <div className="col-span-3">PROPERTY NAME</div>
-                        <div className="col-span-4">Location</div>
-                        <div className="col-span-3 flex justify-end gap-[50px] pr-[50px]">
-                            <span>VIEW</span>
-                            <span>EDIT</span>
-                            <span>DELETE</span>
+                    {properties.length === 0 ? (
+                        <div className="flex justify-center items-center h-full text-[#081E4A] text-[28px] font-medium">
+                            No Properties Found
                         </div>
-                    </div>
+                    ) : (
+                        <>
 
-                    <div className="overflow-y-auto max-h-[324px]">
-                        {properties.map((property) => (
-                            <div key={property.propertyID} className="grid grid-cols-12 p-4 border-b border-gray-200 items-center">
-                                <div className="col-span-2 font-medium">{property.propertyID}</div>
-                                <div className="col-span-3">{property.propertyName}</div>
-                                <div className="col-span-4 text-gray-600">{property.location}</div>
-                                <div className="col-span-3 flex justify-end gap-[10px] pr-[14px]">
-                                    <button
-                                        className="text-white flex items-center justify-center gap-2 bg-[#1245A8] py-1 px-4 rounded w-[112px] cursor-pointer"
-                                        onClick={() => handleView(property)}
-                                    >
-                                        <Eye className="w-4 h-4" />
-                                        <span>View</span>
-                                    </button>
-                                    <button
-                                        className="text-white flex items-center justify-center gap-2 bg-[#1976D2] py-1 px-4 rounded w-[112px] cursor-pointer"
-                                        onClick={() => handleEdit(property)}
-                                    >
-                                        <Pencil className="w-4 h-4" />
-                                        <span>Edit</span>
-                                    </button>
-                                    <button
-                                        className="text-white flex items-center justify-center gap-2 bg-[#C42211] py-1 px-4 rounded w-[112px] cursor-pointer"
-                                        onClick={() => setPropertyToDelete(property)}
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                        <span>Delete</span>
-                                    </button>
+                            <div className="grid grid-cols-12 bg-gray-100 p-4 font-medium text-gray-700 sticky top-0 z-10 rounded-t-lg h-[56px]">
+                                <div className="col-span-2">PROPERTY ID</div>
+                                <div className="col-span-3">PROPERTY NAME</div>
+                                <div className="col-span-4">Location</div>
+                                <div className="col-span-3 flex justify-end gap-[50px] pr-[50px]">
+                                    <span>VIEW</span>
+                                    <span>EDIT</span>
+                                    <span>DELETE</span>
                                 </div>
                             </div>
-                        ))}
-                    </div>
+
+                            <div className="overflow-y-auto max-h-[324px]">
+                                {properties.map((property) => (
+                                    <div key={property.propertyID} className="grid grid-cols-12 p-4 border-b border-gray-200 items-center">
+                                        <div className="col-span-2 font-medium">{property.propertyID}</div>
+                                        <div className="col-span-3">{property.propertyName}</div>
+                                        <div className="col-span-4 text-gray-600">{property.location}</div>
+                                        <div className="col-span-3 flex justify-end gap-[10px] pr-[14px]">
+                                            <button
+                                                className="text-white flex items-center justify-center gap-2 bg-[#1245A8] py-1 px-4 rounded w-[112px] cursor-pointer"
+                                                onClick={() => handleView(property)}
+                                            >
+                                                <Eye className="w-4 h-4" />
+                                                <span>View</span>
+                                            </button>
+                                            <button
+                                                className="text-white flex items-center justify-center gap-2 bg-[#1976D2] py-1 px-4 rounded w-[112px] cursor-pointer"
+                                                onClick={() => handleEdit(property)}
+                                            >
+                                                <Pencil className="w-4 h-4" />
+                                                <span>Edit</span>
+                                            </button>
+                                            <button
+                                                className="text-white flex items-center justify-center gap-2 bg-[#C42211] py-1 px-4 rounded w-[112px] cursor-pointer"
+                                                onClick={() => setPropertyToDelete(property)}
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                                <span>Delete</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </>
+                    )}
                 </div>
 
                 <div className="w-[24vw] flex flex-col items-center rounded-[16px] p-[10px] bg-white text-[#081E4A] font-medium ml-[80px] mt-[15px]">

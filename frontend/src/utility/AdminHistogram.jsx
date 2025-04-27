@@ -46,19 +46,35 @@ export default function Histogram() {
     async function fetchData() {
       try {
         const response = await axios.get("http://localhost:8080/owners/userRegistrations");
-        const updatedData = monthsTemplate.map((item) => {
-          const match = response.data.find((dbItem) => dbItem.month === item.month);
-          return match ? { ...item, rent: match.userCount } : item;
-        });
-        setData(updatedData);
+        if (Array.isArray(response.data) && response.data.length > 0) {
+          const updatedData = monthsTemplate.map((item) => {
+            const match = response.data.find((dbItem) => dbItem.month === item.month);
+            return match ? { ...item, rent: match.userCount } : item;
+          });
+          setData(updatedData);
+        } else {
+          console.warn("No valid registration data received.");
+          setData(monthsTemplate); // Reset to all zero rents
+        }
       } catch (error) {
         console.error("Error fetching user registrations:", error);
+        setData(monthsTemplate); // Also reset to safe template on error
       }
     }
+
     fetchData();
   }, []);
+
+  if (!data.length) {
+    return (
+      <div className="bg-white rounded-xl p-5 shadow-md w-full flex items-center justify-center h-[40vh]">
+        <p className="text-gray-500 text-lg">No registration data available.</p>
+      </div>
+    );
+  }
+  
   return (
-    
+
     <div className="bg-white rounded-xl p-5 shadow-md w-full">
       <div className="flex justify-between items-center mb-[10px]">
         <h2 className="text-3xl font-bold text-gray-900">User Registrations</h2>
@@ -80,9 +96,8 @@ export default function Histogram() {
                       setSelectedMonth(entry.month);
                       setOpen(false);
                     }}
-                    className={`px-4 py-2  cursor-pointer hover:bg-gray-100 ${
-                      selectedMonth === entry.month ? "bg-indigo-100 font-semibold" : ""
-                    }`}
+                    className={`px-4 py-2  cursor-pointer hover:bg-gray-100 ${selectedMonth === entry.month ? "bg-indigo-100 font-semibold" : ""
+                      }`}
                   >
                     {entry.month}
                   </div>
@@ -94,7 +109,7 @@ export default function Histogram() {
       </div>
 
       <div className="w-full h-[210px]">
-      <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={data}
             barSize={55}
@@ -116,7 +131,7 @@ export default function Histogram() {
               fill="#5932EA"
               label={({ x, y, width, value, index }) =>
                 data[index].month === selectedMonth ? (
-                    <>
+                  <>
                     {/* Background Rect for Label */}
                     <rect
                       x={x + width / 4}
@@ -134,7 +149,7 @@ export default function Histogram() {
                       textAnchor="middle"
                       fontSize="16px"
                       fontWeight="bold"
-                      
+
                     >
                       {value}
                     </text>

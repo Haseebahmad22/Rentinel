@@ -66,7 +66,7 @@ const AdminStats = () => {
                                     <h1 className="text-[#232323] text-[24px] font-bold">{propertyCount ? propertyCount.toLocaleString() : "0"}                                    </h1>
                                     <p className="text-[#949494] text-[12px]">Properties</p>
                                 </div>
-                                <img width={40} src="icons/Home-Icon.svg" alt="" />
+                                <img className="w-[45px] h-[45px]" src="icons/Home-Icon.svg" alt="" />
                             </div>
                         </div>
                     </div>
@@ -78,7 +78,7 @@ const AdminStats = () => {
                                     <h1 className="text-[#232323] text-[24px] font-bold">{tenantCount ? tenantCount.toLocaleString() : "0"}</h1>
                                     <p className="text-[#949494] text-[12px]">Tenants</p>
                                 </div>
-                                <img width={40} src="icons/User.svg" alt="" />
+                                <img className="w-[50px] h-[50px]" src="icons/User.svg" alt="" />
                             </div>
                         </div>
                     </div>
@@ -90,7 +90,7 @@ const AdminStats = () => {
                                     <h1 className="text-[#232323] text-[24px] font-bold">{ownerCount ? ownerCount.toLocaleString() : "0"}</h1>
                                     <p className="text-[#949494] text-[12px]">Owners</p>
                                 </div>
-                                <img width={40} src="icons/User.svg" alt="" />
+                                <img className="w-[50px] h-[50px]" src="icons/User.svg" alt="" />
                             </div>
                         </div>
                     </div>
@@ -103,7 +103,7 @@ const AdminStats = () => {
                                     <h1 className="text-[#232323] text-[24px] font-bold">{occupancyRate ? occupancyRate.toFixed(2) : "0.00"}%</h1>
                                     <p className="text-[#949494] text-[12px]">Properties</p>
                                 </div>
-                                <img width={40} src="icons/heartrate.svg" alt="" />
+                                <img className="w-[45px] h-[45px]" src="icons/heartrate.svg" alt="" />
                             </div>
                         </div>
                     </div>
@@ -120,7 +120,7 @@ const AdminStats = () => {
                                     <h1 className="text-[#232323] text-[24px] font-bold">{paymentCount ? paymentCount.toLocaleString() : "0"}</h1>
                                     <p className="text-[#949494] text-[12px]">Payments</p>
                                 </div>
-                                <img width={40} src="icons/heartrate.svg" alt="" />
+                                <img className="w-[45px] h-[45px]" src="icons/heartrate.svg" alt="" />
                             </div>
                         </div>
                     </div>
@@ -132,7 +132,7 @@ const AdminStats = () => {
                                     <h1 className="text-[#232323] text-[24px] font-bold">{yearlyRent ? yearlyRent.toLocaleString() : "0"}</h1>
                                     <p className="text-[#949494] text-[12px]">PKR</p>
                                 </div>
-                                <img width={40} src="icons/Money-Bag.svg" alt="" />
+                                <img className="w-[45px] h-[45px]" src="icons/Money-Bag.svg" alt="" />
                             </div>
                         </div>
                     </div>
@@ -146,7 +146,7 @@ const AdminStats = () => {
                                     </h1>
                                     <p className="text-[#949494] text-[12px]">PKR</p>
                                 </div>
-                                <img width={40} src="icons/Money-Bag.svg" alt="" />
+                                <img className="w-[45px] h-[45px]" src="icons/Money-Bag.svg" alt="" />
                             </div>
                         </div>
                     </div>
@@ -158,13 +158,12 @@ const AdminStats = () => {
                                     <h1 className="text-[#232323] text-[24px] font-bold">{totalPaymentAmount ? totalPaymentAmount.toLocaleString() : "0"}</h1>
                                     <p className="text-[#949494] text-[12px]">PKR</p>
                                 </div>
-                                <img width={40} src="icons/Money-Bag.svg" alt="" />
+                                <img className="w-[45px] h-[45px]" src="icons/Money-Bag.svg" alt="" />
                             </div>
                         </div>
                     </div>
                 </div>
                 <div className="flex w-[80vw] pl-[80px] pr-[50px] gap-[10px] mt-10 items-center justify-start content-center">
-                    {/* Histogram */}
                     <div className="flex flex-col rounded-[15px] w-[75%] h-[40vh] items-center justify-center">
                         <Histogram />
                     </div>

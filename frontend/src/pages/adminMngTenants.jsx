@@ -107,7 +107,7 @@ const AdminMngTenants = () => {
         }
 
         setIsSubmitting(true);
-        
+
         const formData = new FormData(formRef.current);
         const updatedTenant = {
             ...viewedTenant,
@@ -134,24 +134,24 @@ const AdminMngTenants = () => {
         const isReadOnly = name === "id" || name === "userName";
         const isError = formErrors[name];
         const [localValue, setLocalValue] = useState(value || "");
-    
+
         // Sync local value when prop changes
         useEffect(() => {
             setLocalValue(value || "");
         }, [value]);
-    
+
         const handleChange = (e) => {
             const newValue = e.target.value;
             setLocalValue(newValue);
         };
-    
+
         const handleBlur = () => {
             // Update parent state only when leaving the field
             setViewedTenant(prev => ({
                 ...prev,
                 [name]: localValue
             }));
-    
+
             // Clear error if user starts typing
             if (isError && localValue.trim()) {
                 setFormErrors(prev => {
@@ -161,7 +161,7 @@ const AdminMngTenants = () => {
                 });
             }
         };
-    
+
         return (
             <div className="flex flex-col w-[170px]">
                 <label className="text-[14px] font-semibold text-gray-600 mb-1">{label}</label>
@@ -234,7 +234,7 @@ const AdminMngTenants = () => {
                                         <TenantBox
                                             label="CNIC"
                                             name="cnic"
-                                            value={viewedTenant?.cnic}                                            
+                                            value={viewedTenant?.cnic}
                                         />
                                         <TenantBox
                                             label="EMAIL"
@@ -279,51 +279,60 @@ const AdminMngTenants = () => {
                         </div>
                     )}
 
-                    <div className="grid grid-cols-14 bg-gray-100 p-4 font-medium text-gray-700 sticky top-0 z-10">
-                        <div className="col-span-2">TENANT ID</div>
-                        <div className="col-span-2">USERNAME</div>
-                        <div className="col-span-3">EMAIL</div>
-                        <div className="col-span-3">CNIC</div>
-                        <div className="col-span-4 flex justify-end gap-12 pr-12">
-                            <span>VIEW</span>
-                            <span>EDIT</span>
-                            <span>DELETE</span>
+                    {tenants.length === 0 ? (
+                        <div className="flex justify-center items-center h-full text-[#081E4A] text-[28px] font-medium">
+                            No Tenants Found
                         </div>
-                    </div>
+                    ) : (
+                        <>
 
-                    <div className="overflow-y-auto max-h-[322px]">
-                        {tenants.map((tenant) => (
-                            <div key={tenant.id} className="grid grid-cols-14 p-4 border-b border-gray-200 items-center">
-                                <div className="col-span-2 font-medium">{tenant.id}</div>
-                                <div className="col-span-2">{tenant.userName}</div>
-                                <div className="col-span-3">{tenant.email}</div>
-                                <div className="col-span-3">{tenant.cnic}</div>
-                                <div className="col-span-4 flex justify-end gap-2 pr-4">
-                                    <button
-                                        className="text-white flex items-center justify-center gap-2 bg-[#1245A8] py-1 px-3 rounded cursor-pointer w-[112px]"
-                                        onClick={() => handleView(tenant)}
-                                    >
-                                        <Eye className="w-4 h-4" />
-                                        <span>View</span>
-                                    </button>
-                                    <button
-                                        className="text-white flex items-center justify-center gap-2 bg-[#1976D2] py-1 px-3 rounded w-[112px] cursor-pointer"
-                                        onClick={() => handleEdit(tenant)}
-                                    >
-                                        <Pencil className="w-4 h-4" />
-                                        <span>Edit</span>
-                                    </button>
-                                    <button
-                                        className="text-white flex items-center justify-center gap-2 bg-[#C42211] py-1 px-3 rounded w-[112px] cursor-pointer"
-                                        onClick={() => setTenantToDelete(tenant)}
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                        <span>Delete</span>
-                                    </button>
+                            <div className="grid grid-cols-14 bg-gray-100 p-4 font-medium text-gray-700 sticky top-0 z-10">
+                                <div className="col-span-2">TENANT ID</div>
+                                <div className="col-span-2">USERNAME</div>
+                                <div className="col-span-3">EMAIL</div>
+                                <div className="col-span-3">CNIC</div>
+                                <div className="col-span-4 flex justify-end gap-12 pr-12">
+                                    <span>VIEW</span>
+                                    <span>EDIT</span>
+                                    <span>DELETE</span>
                                 </div>
                             </div>
-                        ))}
-                    </div>
+
+                            <div className="overflow-y-auto max-h-[322px]">
+                                {tenants.map((tenant) => (
+                                    <div key={tenant.id} className="grid grid-cols-14 p-4 border-b border-gray-200 items-center">
+                                        <div className="col-span-2 font-medium">{tenant.id}</div>
+                                        <div className="col-span-2">{tenant.userName}</div>
+                                        <div className="col-span-3">{tenant.email}</div>
+                                        <div className="col-span-3">{tenant.cnic}</div>
+                                        <div className="col-span-4 flex justify-end gap-2 pr-4">
+                                            <button
+                                                className="text-white flex items-center justify-center gap-2 bg-[#1245A8] py-1 px-3 rounded cursor-pointer w-[112px]"
+                                                onClick={() => handleView(tenant)}
+                                            >
+                                                <Eye className="w-4 h-4" />
+                                                <span>View</span>
+                                            </button>
+                                            <button
+                                                className="text-white flex items-center justify-center gap-2 bg-[#1976D2] py-1 px-3 rounded w-[112px] cursor-pointer"
+                                                onClick={() => handleEdit(tenant)}
+                                            >
+                                                <Pencil className="w-4 h-4" />
+                                                <span>Edit</span>
+                                            </button>
+                                            <button
+                                                className="text-white flex items-center justify-center gap-2 bg-[#C42211] py-1 px-3 rounded w-[112px] cursor-pointer"
+                                                onClick={() => setTenantToDelete(tenant)}
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                                <span>Delete</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </>
+                    )}
                 </div>
 
                 <div className="w-[24vw] flex flex-col items-center rounded-[16px] p-[10px] bg-white text-[#081E4A] font-medium ml-[80px] mt-[15px]">

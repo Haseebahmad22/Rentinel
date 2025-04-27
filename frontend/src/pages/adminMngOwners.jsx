@@ -105,7 +105,7 @@ const AdminMngOwners = () => {
         if (!validateForm()) return;
 
         setIsSubmitting(true);
-        
+
         const formData = new FormData(formRef.current);
         const updatedOwner = {
             ...viewedOwner,
@@ -132,24 +132,24 @@ const AdminMngOwners = () => {
         const isReadOnly = name === "id" || name === "userName";
         const isError = formErrors[name];
         const [localValue, setLocalValue] = useState(value || "");
-    
+
         // Sync local value when prop changes
         useEffect(() => {
             setLocalValue(value || "");
         }, [value]);
-    
+
         const handleChange = (e) => {
             const newValue = e.target.value;
             setLocalValue(newValue);
         };
-    
+
         const handleBlur = () => {
             // Update parent state only when leaving the field
             setViewedOwner(prev => ({
                 ...prev,
                 [name]: localValue
             }));
-    
+
             // Clear error if user starts typing
             if (isError && localValue.trim()) {
                 setFormErrors(prev => {
@@ -159,7 +159,7 @@ const AdminMngOwners = () => {
                 });
             }
         };
-    
+
         return (
             <div className="flex flex-col w-[170px]">
                 <label className="text-[14px] font-semibold text-gray-600 mb-1">{label}</label>
@@ -225,7 +225,7 @@ const AdminMngOwners = () => {
                                         <OwnerBox label="CNIC" name="cnic" value={viewedOwner?.cnic} />
                                         <OwnerBox label="EMAIL" name="email" value={viewedOwner?.email} />
                                     </div>
-                                   
+
                                     <hr className="border-gray-300" />
 
                                     <div className="space-y-2">
@@ -262,51 +262,60 @@ const AdminMngOwners = () => {
                         </div>
                     )}
 
-                    <div className="grid grid-cols-14 bg-gray-100 p-4 font-medium text-gray-700 sticky top-0 z-10 h-[56px]">
-                        <div className="col-span-2">OWNER ID</div>
-                        <div className="col-span-2">USERNAME</div>
-                        <div className="col-span-3">EMAIL</div>
-                        <div className="col-span-3">CNIC</div>
-                        <div className="col-span-4 flex justify-end gap-12 pr-12">
-                            <span>VIEW</span>
-                            <span>EDIT</span>
-                            <span>DELETE</span>
+                    {owners.length === 0 ? (
+                        <div className="flex justify-center items-center h-full text-[#081E4A] text-[28px] font-medium">
+                            No Owners Found
                         </div>
-                    </div>
+                    ) : (
+                        <>
 
-                    <div className="overflow-y-auto max-h-[324px]">
-                        {owners.map((owner) => (
-                            <div key={owner.id} className="grid grid-cols-14 p-4 border-b border-gray-200 items-center">
-                                <div className="col-span-2 font-medium">{owner.id}</div>
-                                <div className="col-span-2">{owner.userName}</div>
-                                <div className="col-span-3">{owner.email}</div>
-                                <div className="col-span-3">{owner.cnic}</div>
-                                <div className="col-span-4 flex justify-end gap-2 pr-4">
-                                    <button 
-                                        className="text-white flex items-center justify-center gap-2 bg-[#1245A8] py-1 px-3 rounded w-[112px] cursor-pointer"
-                                        onClick={() => handleView(owner)}
-                                    >
-                                        <Eye className="w-4 h-4" />
-                                        <span>View</span>
-                                    </button>
-                                    <button 
-                                        className="text-white flex items-center justify-center gap-2 bg-[#1976D2] py-1 px-3 rounded w-[112px] cursor-pointer"
-                                        onClick={() => handleEdit(owner)}
-                                    >
-                                        <Pencil className="w-4 h-4" />
-                                        <span>Edit</span>
-                                    </button>
-                                    <button
-                                        className="text-white flex items-center justify-center gap-2 bg-[#C42211] py-1 px-3 rounded w-[112px] cursor-pointer"
-                                        onClick={() => setOwnerToDelete(owner)}
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                        <span>Delete</span>
-                                    </button>
+                            <div className="grid grid-cols-14 bg-gray-100 p-4 font-medium text-gray-700 sticky top-0 z-10 h-[56px]">
+                                <div className="col-span-2">OWNER ID</div>
+                                <div className="col-span-2">USERNAME</div>
+                                <div className="col-span-3">EMAIL</div>
+                                <div className="col-span-3">CNIC</div>
+                                <div className="col-span-4 flex justify-end gap-12 pr-12">
+                                    <span>VIEW</span>
+                                    <span>EDIT</span>
+                                    <span>DELETE</span>
                                 </div>
                             </div>
-                        ))}
-                    </div>
+
+                            <div className="overflow-y-auto max-h-[324px]">
+                                {owners.map((owner) => (
+                                    <div key={owner.id} className="grid grid-cols-14 p-4 border-b border-gray-200 items-center">
+                                        <div className="col-span-2 font-medium">{owner.id}</div>
+                                        <div className="col-span-2">{owner.userName}</div>
+                                        <div className="col-span-3">{owner.email}</div>
+                                        <div className="col-span-3">{owner.cnic}</div>
+                                        <div className="col-span-4 flex justify-end gap-2 pr-4">
+                                            <button
+                                                className="text-white flex items-center justify-center gap-2 bg-[#1245A8] py-1 px-3 rounded w-[112px] cursor-pointer"
+                                                onClick={() => handleView(owner)}
+                                            >
+                                                <Eye className="w-4 h-4" />
+                                                <span>View</span>
+                                            </button>
+                                            <button
+                                                className="text-white flex items-center justify-center gap-2 bg-[#1976D2] py-1 px-3 rounded w-[112px] cursor-pointer"
+                                                onClick={() => handleEdit(owner)}
+                                            >
+                                                <Pencil className="w-4 h-4" />
+                                                <span>Edit</span>
+                                            </button>
+                                            <button
+                                                className="text-white flex items-center justify-center gap-2 bg-[#C42211] py-1 px-3 rounded w-[112px] cursor-pointer"
+                                                onClick={() => setOwnerToDelete(owner)}
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                                <span>Delete</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </>
+                    )}
                 </div>
 
                 <div className="w-[24vw] flex flex-col items-center rounded-[16px] p-[10px] bg-white text-[#081E4A] font-medium ml-[80px] mt-[15px]">

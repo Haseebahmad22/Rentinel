@@ -31,18 +31,24 @@ const AdminPieChart = () => {
         fetch("http://localhost:8080/properties/areacount")
             .then((res) => res.json())
             .then((data) => {
-                const formattedData = data.map((item) => ({
-                    name: item.area,
-                    value: Number(item.count),
-                }));
-                setPieData(formattedData);
+                if (Array.isArray(data) && data.length > 0) {
+                    const formattedData = data.map((item) => ({
+                        name: item.area,
+                        value: Number(item.count),
+                    }));
+                    setPieData(formattedData);
+                } else {
+                    setPieData([]); // Safe fallback
+                }
             })
-            .catch((error) =>
-                console.log("Error Fetching data from http://localhost:8080/properties/areacount", error)
-            );
+            .catch((error) => {
+                console.log("Error Fetching data from http://localhost:8080/properties/areacount", error);
+                setPieData([]); // In case of fetch error
+            });
     }, []);
+    
     console.log(pieData);
-    if (!pieData.length) return <p>Loading chart...</p>;
+    if (!pieData.length) return <p className="text-center">No data available for chart <br/> <i className="text-blue-800">(0 Properties)</i></p>;
 
     const total = pieData.reduce((acc, item) => acc + item.value, 0);
 
@@ -72,18 +78,6 @@ const AdminPieChart = () => {
             </Pie>
             <Tooltip content={<CustomTooltip />} />
             <Legend />
-            {/* Center text showing total
-            <text
-                x="50%"
-                y="50%"
-                fill="#00000"
-                textAnchor="middle"
-                dominantBaseline="middle"
-                fontSize={15}
-                fontWeight="bold"
-            >
-                Total: {total}
-            </text> */}
         </PieChart>
     );
 };

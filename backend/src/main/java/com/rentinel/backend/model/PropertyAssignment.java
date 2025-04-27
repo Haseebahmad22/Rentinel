@@ -19,10 +19,10 @@ public class PropertyAssignment {
     @Column(name = "propertyID", nullable = false)
     private Integer propertyID; // ID of the property being assigned
 
-    @Column(name = "ownerID", nullable = false, length = 50)
+    @Column(name = "ownerID", nullable = false)
     private Integer ownerID; // Name of the owner of the property
 
-    @Column(name = "tenantID", nullable = false, length = 50)
+    @Column(name = "tenantID", nullable = false)
     private Integer tenantID; // Name of the tenant assigned to the property
 
     @Column(name = "assignmentDate", nullable = false)

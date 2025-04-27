@@ -57,13 +57,13 @@ const AdminMngPayments = () => {
         const formData = new FormData(formRef.current);
         const status = formData.get('paymentStatus')?.toLowerCase();
         const isValid = status === "pending" || status === "paid";
-        
+
         if (!isValid) {
             setFormErrors({ paymentStatus: "Status must be either 'Pending' or 'Paid'" });
         } else {
             setFormErrors({});
         }
-        
+
         return isValid;
     };
 
@@ -79,7 +79,7 @@ const AdminMngPayments = () => {
 
         axios.put("http://localhost:8080/payments/updateStatus", updatedPayment)
             .then(response => {
-                setPayments(prev => prev.map(p => 
+                setPayments(prev => prev.map(p =>
                     p.paymentID === viewedPayment.paymentID ? updatedPayment : p
                 ));
                 setViewedPayment(updatedPayment);
@@ -104,7 +104,7 @@ const AdminMngPayments = () => {
             "tenantUserName",
             "ownerUserName",
         ].includes(name);
-        
+
         const isError = formErrors[name];
         const [localValue, setLocalValue] = useState(value || "");
 
@@ -116,7 +116,7 @@ const AdminMngPayments = () => {
         const handleChange = (e) => {
             const newValue = e.target.value;
             setLocalValue(newValue);
-            
+
             // Clear error if user starts typing
             if (isError && newValue.trim()) {
                 setFormErrors(prev => {
@@ -145,9 +145,8 @@ const AdminMngPayments = () => {
                         value={localValue}
                         onChange={handleChange}
                         onBlur={handleBlur}
-                        className={`px-4 py-2 rounded w-full text-[15px] text-gray-800 bg-[#F2F2F2] focus:outline-none border ${
-                            isError ? 'border-red-500' : 'border-gray-300'
-                        }`}
+                        className={`px-4 py-2 rounded w-full text-[15px] text-gray-800 bg-[#F2F2F2] focus:outline-none border ${isError ? 'border-red-500' : 'border-gray-300'
+                            }`}
                         readOnly={isReadOnly}
                         tabIndex={isReadOnly ? -1 : 0}
                     />
@@ -213,59 +212,68 @@ const AdminMngPayments = () => {
                         </div>
                     )}
 
-                    <div className="grid grid-cols-12 bg-gray-100 p-4 font-medium text-gray-700 sticky top-0 z-10">
-                        <div className="col-span-2">PAYMENT ID</div>
-                        <div className="col-span-2">AMOUNT</div>
-                        <div className="col-span-2">STATUS</div>
-                        <div className="col-span-2">DATE</div>
-                        <div className="col-span-4 flex justify-end gap-17 pr-9">
-                            <span>VIEW</span>
-                            <span>EDIT</span>
-                            <span>DELETE</span>
-                        </div>
-                    </div>
 
-                    <div className="overflow-y-auto max-h-[322px]">
-                        {payments.map((payment) => (
-                            <div key={payment.paymentID} className="grid grid-cols-12 p-4 border-b border-gray-200 items-center">
-                                <div className="col-span-2 font-medium">{payment.paymentID}</div>
-                                <div className="col-span-2">${payment.amount}</div>
-                                <div className={`col-span-2 ${
-                                    payment.paymentStatus === 'Completed' ? 'text-green-600' :
-                                    payment.paymentStatus === 'Pending' ? 'text-yellow-600' :
-                                    'text-red-600'
-                                }`}>
-                                    {payment.paymentStatus}
-                                </div>
-                                <div className="col-span-2 text-gray-600">
-                                    {new Date(payment.paymentDate).toLocaleDateString()}
-                                </div>
-                                <div className="col-span-4 flex justify-end gap-2 pr-4">
-                                    <button 
-                                        className="text-white flex items-center justify-center gap-2 bg-[#1245A8] py-1 px-3 rounded w-[112px] cursor-pointer"
-                                        onClick={() => handleView(payment)}
-                                    >
-                                        <Eye className="w-4 h-4" />
-                                        <span>View</span>
-                                    </button>
-                                    <button 
-                                        className="text-white flex items-center justify-center gap-2 bg-[#1976D2] py-1 px-3 rounded w-[112px] cursor-pointer"
-                                        onClick={() => handleEdit(payment)}
-                                    >
-                                        <Pencil className="w-4 h-4" />
-                                        <span>Edit</span>
-                                    </button>
-                                    <button
-                                        className="text-white flex items-center justify-center gap-2 bg-[#C42211] py-1 px-3 rounded w-[112px] cursor-pointer"
-                                        onClick={() => setPaymentToDelete(payment)}
-                                    >
-                                        <Trash2 className="w-4 h-4" />
-                                        <span>Delete</span>
-                                    </button>
+                    {payments.length === 0 ? (
+                        <div className="flex justify-center items-center h-full text-[#081E4A] text-[28px] font-medium">
+                            No payment records
+                        </div>
+                    ) : (
+                        <>
+
+                            <div className="grid grid-cols-12 bg-gray-100 p-4 font-medium text-gray-700 sticky top-0 z-10">
+                                <div className="col-span-2">PAYMENT ID</div>
+                                <div className="col-span-2">AMOUNT</div>
+                                <div className="col-span-2">STATUS</div>
+                                <div className="col-span-2">DATE</div>
+                                <div className="col-span-4 flex justify-end gap-17 pr-9">
+                                    <span>VIEW</span>
+                                    <span>EDIT</span>
+                                    <span>DELETE</span>
                                 </div>
                             </div>
-                        ))}
-                    </div>
+
+                            <div className="overflow-y-auto max-h-[322px]">
+                                {payments.map((payment) => (
+                                    <div key={payment.paymentID} className="grid grid-cols-12 p-4 border-b border-gray-200 items-center">
+                                        <div className="col-span-2 font-medium">{payment.paymentID}</div>
+                                        <div className="col-span-2">${payment.amount}</div>
+                                        <div className={`col-span-2 ${payment.paymentStatus === 'Completed' ? 'text-green-600' :
+                                                payment.paymentStatus === 'Pending' ? 'text-yellow-600' :
+                                                    'text-red-600'
+                                            }`}>
+                                            {payment.paymentStatus}
+                                        </div>
+                                        <div className="col-span-2 text-gray-600">
+                                            {new Date(payment.paymentDate).toLocaleDateString()}
+                                        </div>
+                                        <div className="col-span-4 flex justify-end gap-2 pr-4">
+                                            <button
+                                                className="text-white flex items-center justify-center gap-2 bg-[#1245A8] py-1 px-3 rounded w-[112px] cursor-pointer"
+                                                onClick={() => handleView(payment)}
+                                            >
+                                                <Eye className="w-4 h-4" />
+                                                <span>View</span>
+                                            </button>
+                                            <button
+                                                className="text-white flex items-center justify-center gap-2 bg-[#1976D2] py-1 px-3 rounded w-[112px] cursor-pointer"
+                                                onClick={() => handleEdit(payment)}
+                                            >
+                                                <Pencil className="w-4 h-4" />
+                                                <span>Edit</span>
+                                            </button>
+                                            <button
+                                                className="text-white flex items-center justify-center gap-2 bg-[#C42211] py-1 px-3 rounded w-[112px] cursor-pointer"
+                                                onClick={() => setPaymentToDelete(payment)}
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                                <span>Delete</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </>
+                    )}
                 </div>
 
                 <div className="w-[24vw] flex flex-col items-center rounded-[16px] p-[10px] bg-white text-[#081E4A] font-medium ml-[80px] mt-[15px]">

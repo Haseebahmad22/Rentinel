@@ -9,6 +9,7 @@ const AdminDashboard = () => {
     const [ownerCount, setOwnerCount] = useState(0);
     const [propertyCount, setPropertyCount] = useState(0);
     const [paymentCount, setPaymentCount] = useState(0);
+    const adminName = "Haseeb Ahmad"
 
     useEffect(() => {
         axios.get("http://localhost:8080/properties/count")
@@ -33,9 +34,11 @@ const AdminDashboard = () => {
                 <div className="flex w-[100%] content-center justify-between pl-[80px] pr-[50px] mt-[10px]">
                     <h1 className="text-[#081E4A] text-[54px] font-bold">Dashboard</h1>
                     <Link to = "/adminDetails" className="flex justify-center items-center gap-3 cursor-pointer">
-                        <img className="rounded-[50%]" width={50} src="https://lh3.googleusercontent.com/a/ACg8ocJhIQkzBe0Q1lgF3dFOUXbOOylZzEBgRm2dujZb4OGx=s96-c" alt="" />
+                        <div className="rounded-[50%] w-[50px] h-[50px] text-white text-[28px] bg-amber-950 flex items-center justify-center">
+                            {adminName[0]}
+                        </div>
                         <div>
-                            <h3 className="text-[18px] text-[#292D32] font-medium">Haseeb Ahmad</h3>
+                            <h3 className="text-[18px] text-[#292D32] font-medium">{adminName}</h3>
                             <p className="text-[12px] text-[#292D32]">Admin</p>
                         </div>
                     </Link>
@@ -55,49 +58,50 @@ const AdminDashboard = () => {
                             <h1 className="text-[18px] text-white">Manage Owners</h1>
                             <p className="text-[15px] text-[#ffffff] font-extralight">View, edit, or delete <br /> Owners.</p>
                         </div>
-                        <button className="bg-white absolute bottom-4 cursor-pointer right-4 h-[40px] w-[100px] rounded-[8px] text-[#3C21F7] text-[12px] font-bold">View</button>
+                        <Link to="/adminMngOwners" className="bg-white absolute bottom-4 cursor-pointer right-4 h-[40px] w-[100px] rounded-[8px] text-[#3C21F7] text-[12px] font-bold flex justify-center items-center">View</Link>
                     </div>
                     <div className="flex relative rounded-[15px] justify-between  bg-[url(Images/lightBlueBg.png)] w-[22vw] bg-no-repeat bg-cover pl-[20px] pt-[20px] pr-[20px]">
                         <div className="flex flex-col gap-[15px]">
                             <h1 className="text-[18px] text-white">Manage Tenants</h1>
                             <p className="text-[15px] text-[#ffffff] font-extralight">View, edit, or delete <br /> Tenants.</p>
                         </div>
-                        <button className="bg-white cursor-pointer absolute bottom-4 right-4 h-[40px] w-[100px] rounded-[8px] text-[#3C21F7] text-[12px] font-bold">View</button>
+
+                        <Link to = "/adminMngTenants" className="bg-white cursor-pointer absolute bottom-4 right-4 h-[40px] w-[100px] rounded-[8px] text-[#3C21F7] text-[12px] font-bold flex justify-center items-center">View</Link>
                     </div>
                 </div>
                 {/* mid 4 boxes */}
                 <div className="flex w-[100%] justify-between pl-[80px] pr-[50px] mt-[30px]">
-                    <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[17vw] justify-between">
+                    <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[17vw] justify-between items-center">
                         <div>
                             <h1 className="text-[#343434] text-[20px]">Total Owners</h1>
                             <h1 className="text-[#232323] text-[24px] font-bold">{ownerCount ? ownerCount.toLocaleString() : "0"}</h1>
                             <p className="text-[#949494] text-[12px]">Owners</p>
                         </div>
-                        <img src="icons/User.svg" alt="" />
+                        <img src="icons/User.svg" alt="" className="w-[50px] h-[50px]" />
                     </div>
-                    <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[17vw] justify-between">
+                    <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[17vw] justify-between items-center">
                         <div>
                             <h1 className="text-[#343434] text-[20px]">Total Tenants</h1>
                             <h1 className="text-[#232323] text-[24px] font-bold">{tenantCount ? tenantCount.toLocaleString() : "0"}</h1>
                             <p className="text-[#949494] text-[12px]">Tenants</p>
                         </div>
-                        <img src="icons/User.svg" alt="" />
+                        <img src="icons/User.svg" alt="" className="w-[50px] h-[50px]" />
                     </div>
-                    <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[17vw] justify-between">
+                    <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[17vw] justify-between items-center">
                         <div>
                             <h1 className="text-[#343434] text-[20px]">Total Properties</h1>
                             <h1 className="text-[#232323] text-[24px] font-bold">{propertyCount ? propertyCount.toLocaleString() : "0"}</h1>
                             <p className="text-[#949494] text-[12px]">Properties</p>
                         </div>
-                        <img src="icons/Home-Icon.svg" alt="" />
+                        <img src="icons/Home-Icon.svg" alt="" className="w-[45px] h-[45px]" />
                     </div>
-                    <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[17vw] justify-between">
+                    <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[17vw] justify-between items-center">
                         <div>
                             <h1 className="text-[#343434] text-[20px]">Total Payments</h1>
                             <h1 className="text-[#232323] text-[24px] font-bold">{paymentCount ? paymentCount.toLocaleString() : "0"}</h1>
                             <p className="text-[#949494] text-[12px]">PKR</p>
                         </div>
-                        <img src="icons/Money-Bag.svg" alt="" />
+                        <img src="icons/Money-Bag.svg" alt="" className="w-[50px] h-[50px]" />
                     </div>
                 </div>
 
