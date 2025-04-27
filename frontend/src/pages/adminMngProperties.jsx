@@ -7,6 +7,7 @@ const AdminMngProperties = () => {
     const [properties, setProperties] = useState([]);
     const [rentAssignments, setRentAssignments] = useState([]);
     const [viewedProperty, setViewedProperty] = useState(null);
+    const [rentAssignmentToUp, setRentAssignmentToUp] = useState(null);
     const [editMode, setEditMode] = useState(false);
     const [propertyToDelete, setPropertyToDelete] = useState(null);
     const [formErrors, setFormErrors] = useState({});
@@ -45,18 +46,21 @@ const AdminMngProperties = () => {
 
     const handleView = (property) => {
         setViewedProperty(property);
+        setRentAssignmentToUp(getRentAssignment(viewedProperty.propertyID))
         setEditMode(false);
         setFormErrors({});
     };
 
     const handleEdit = (property) => {
         setViewedProperty(property);
+        setRentAssignmentToUp(getRentAssignment(property.propertyID))
         setEditMode(true);
         setFormErrors({});
     };
 
     const handleBack = () => {
         setViewedProperty(null);
+        setRentAssignmentToUp(null)
         setEditMode(false);
     };
 
@@ -97,11 +101,11 @@ const AdminMngProperties = () => {
         // Date validation
         const startDate = formData.get('rentStartDate');
         const endDate = formData.get('rentEndDate');
-        
+
         if (startDate && endDate) {
             const start = new Date(startDate);
             const end = new Date(endDate);
-            
+
             if (start > end) {
                 errors.rentDates = "End date must be after start date";
             }
@@ -162,46 +166,43 @@ const AdminMngProperties = () => {
             tenantName: formData.get('tenantName')
         };
 
-        // Prepare rent assignment update if dates were modified
-        const rentAssignment = getRentAssignment(viewedProperty.propertyID);
-        const updatedRentAssignment = {
-            ...rentAssignment,
-            startDate: formData.get('rentStartDate'),
-            dueDate: formData.get('rentEndDate')
-        };
-
-        // First update the property
         axios.put(`http://localhost:8080/properties/${viewedProperty.propertyID}`, updatedProperty)
-            .then(() => {
-                // Then update the rent assignment if it exists
-                if (rentAssignment) {
-                    return axios.put(`http://localhost:8080/rentAssignments/${rentAssignment.rentAssignmentID}`, updatedRentAssignment);
-                }
-                return Promise.resolve();
-            })
-            .then(() => {
-                // Update state
+            .then(response => {
                 setProperties(prev => prev.map(p =>
                     p.propertyID === viewedProperty.propertyID ? updatedProperty : p
                 ));
-                
-                if (rentAssignment) {
-                    setRentAssignments(prev => prev.map(r =>
-                        r.rentAssignmentID === rentAssignment.rentAssignmentID ? updatedRentAssignment : r
-                    ));
-                }
-                
                 setViewedProperty(updatedProperty);
                 setEditMode(false);
                 setFormErrors({});
             })
             .catch(error => {
-                console.error("Error updating:", error);
+                console.error("Error updating property:", error);
             })
             .finally(() => {
                 setIsSubmitting(false);
             });
+
+
+        if (rentAssignmentToUp) {
+            const rentAssignmentToUpdate = {
+                ...rentAssignmentToUp,
+                startDate: formData.get("startDate"),
+                dueDate: formData.get("dueDate")
+            };
+
+            // Update rent assignment in database
+            axios.put(`http://localhost:8080/rentAssignments/${rentAssignmentToUp.assignmentID}`, rentAssignmentToUpdate)
+                .then(response => {
+                    console.log("Rent Assignment updated successfully");
+                    setRentAssignmentToUp(rentAssignmentToUpdate)
+                })
+                .catch(error => {
+                    console.error("Error updating rent assignment:", error);
+                });
+        }
+
     };
+
 
     const PropertyBox = ({ label, name, value }) => {
         const isReadOnly = name === "propertyID";
@@ -228,8 +229,13 @@ const AdminMngProperties = () => {
             }
         };
 
+
         const handleBlur = () => {
             setViewedProperty(prev => ({
+                ...prev,
+                [name]: localValue
+            }));
+            setRentAssignmentToUp(prev => ({
                 ...prev,
                 [name]: localValue
             }));
@@ -316,15 +322,16 @@ const AdminMngProperties = () => {
                                     <hr className="border-gray-300" />
 
                                     <div className="flex flex-wrap justify-between">
+
                                         <PropertyBox
                                             label="RENT START DATE"
-                                            name="rentStartDate"
-                                            value={getRentAssignment(viewedProperty.propertyID)?.startDate}
+                                            name="startDate"
+                                            value={rentAssignmentToUp?.startDate}
                                         />
                                         <PropertyBox
                                             label="RENT END DATE"
-                                            name="rentEndDate"
-                                            value={getRentAssignment(viewedProperty.propertyID)?.dueDate}
+                                            name="dueDate"
+                                            value={rentAssignmentToUp?.dueDate}
                                         />
                                         <PropertyBox label="FIXED RENT AMOUNT" name="fixedRent" value={viewedProperty.fixedRent} />
                                         <PropertyBox label="ASSIGNED TENANT" name="tenantName" value={viewedProperty.tenantName} />

@@ -58,4 +58,16 @@ public class RentAssignmentController {
         return ResponseEntity.noContent().build();
     }
 
+
+    @PutMapping("/{id}")
+    public ResponseEntity<RentAssignment> updateDates(@PathVariable Integer id,
+            @RequestBody RentAssignment updatedRentAssignment) {
+        return repository.findById(id)
+                .map(existingAssignment -> {
+                    existingAssignment.setStartDate(updatedRentAssignment.getStartDate());
+                    existingAssignment.setDueDate(updatedRentAssignment.getDueDate());
+                    return ResponseEntity.ok(repository.save(existingAssignment));
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
 }
