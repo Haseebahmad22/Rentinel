@@ -208,7 +208,7 @@ const AdminMngProperties = () => {
         const isReadOnly = name === "propertyID";
         const isError = formErrors[name] || (name === 'rentEndDate' && formErrors.rentDates);
         const isNumeric = ['numOfRooms', 'numOfBedRooms', 'numOfBaths', 'fixedRent'].includes(name);
-        const isDateField = ['rentStartDate', 'rentEndDate'].includes(name);
+        const isDateField = ['startDate', 'dueDate'].includes(name);
         const [localValue, setLocalValue] = useState(value || "");
 
         useEffect(() => {
@@ -281,7 +281,7 @@ const AdminMngProperties = () => {
 
                 <div className="mx-[80px] mt-8 bg-white rounded-lg shadow-md relative w-[70vw] h-[50vh]">
                     {viewedProperty && (
-                        <div className="absolute top-0 bg-white bg-opacity-90 z-50 flex rounded-lg items-center justify-center px-6 w-[1060px]">
+                        <div className="absolute top-0 bg-white bg-opacity-90 z-50 flex rounded-lg items-center justify-center px-6 w-[70vw] h-[50vh]">
                             <form ref={formRef} className="p-6 rounded-lg w-full max-w-[1000px] space-y-8 relative">
                                 <div className="flex justify-between items-center absolute top-4 left-4 w-full pr-[40px]">
                                     <div
