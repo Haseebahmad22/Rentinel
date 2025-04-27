@@ -3,18 +3,19 @@ import Sidebar from "../utility/adminSidebar";
 import axios from "axios";
 
 const AdminDetails = () => {
-    const [owner, setOwner] = useState(null);
-
+    const [admin, setAdmin] = useState(null);
+    const adminID = 1;
     useEffect(() => {
-        axios.get("http://localhost:8080/owners")
+        axios.get(`http://localhost:8080/admin/id/${adminID}`)
             .then(response => {
-                setOwner(response.data[0]); // assuming single admin
+                setAdmin(response.data); // assuming single admin
             })
             .catch(error => {
-                console.error("Error fetching owner:", error);
+                console.error("Error fetching admin:", error);
             });
     }, []);
 
+    console.log(admin);
     return (
         <div className="flex font-[Lexend] min-h-screen">
             <Sidebar />
@@ -32,13 +33,19 @@ const AdminDetails = () => {
                         <div className="mr-20 w-[260px]">
                             <h2 className="text-[18px] font-semibold text-gray-600 mb-1 ">FULL NAME</h2>
                             <div className="bg-[#E9E9E9] px-4 py-3 rounded w-full opacity-90">
-                                {owner?.fullName || "Loading..."}
+                                {admin?.fullName || "Loading..."}
+                            </div>
+                        </div>
+                        <div className="w-[260px] mr-20">
+                            <h2 className="text-[18px] font-semibold text-gray-600 mb-1">USERNAME</h2>
+                            <div className="bg-[#E9E9E9] px-4 py-3 rounded  w-full opacity-90">
+                                {admin?.userName || "Loading..."}
                             </div>
                         </div>
                         <div className="w-[260px]">
-                            <h2 className="text-[18px] font-semibold text-gray-600 mb-1">USERNAME</h2>
+                            <h2 className="text-[18px] font-semibold text-gray-600 mb-1">ACCOUNT CREATION DATE</h2>
                             <div className="bg-[#E9E9E9] px-4 py-3 rounded  w-full opacity-90">
-                                {owner?.userName || "Loading..."}
+                                {admin?.accountCreationDate || "Loading..."}
                             </div>
                         </div>
                     </div>
@@ -51,13 +58,13 @@ const AdminDetails = () => {
                         <div className="mr-20 w-[260px]">
                             <h2 className="text-[18px] font-semibold text-gray-600 mb-1">EMAIL</h2>
                             <div className="bg-[#E9E9E9] px-4 py-3 rounded  w-full opacity-90">
-                                {owner?.email || "Loading..."}
+                                {admin?.email || "Loading..."}
                             </div>
                         </div>
                         <div className="w-[260px]">
                             <h2 className="text-[18px] font-semibold text-gray-600 mb-1">CNIC</h2>
                             <div className="bg-[#E9E9E9] px-4 py-3 rounded  w-full opacity-90">
-                                {owner?.cnic || "Loading..."}
+                                {admin?.cnic || "Loading..."}
                             </div>
                         </div>
                     </div>

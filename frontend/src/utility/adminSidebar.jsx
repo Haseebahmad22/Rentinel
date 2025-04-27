@@ -22,7 +22,7 @@ const Sidebar = (setPage) => {
                     <Link to="/adminDashboard" className={linkClass("/adminDashboard")}>
                         <LayoutDashboard className="w-5 h-5 mr-2" /> Dashboard
                     </Link>
-                    <Link to="/adminDetails" className={linkClass("/account")}>
+                    <Link to="/adminDetails" className={linkClass("/adminDetails")}>
                         <User className="w-5 h-5 mr-2" /> Account Details
                     </Link>
                 </div>
