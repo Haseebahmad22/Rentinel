@@ -97,6 +97,41 @@ const AdminMngProperties = () => {
         setFormErrors(errors);
         return Object.keys(errors).length === 0;
     };
+    const handleDelete = async (propertyID) => {
+        try {
+             // Try deleting rentAssignment blindly
+             await axios.delete(`http://localhost:8080/rentAssignments/property/${propertyID}`)
+             .catch((error) => {
+                 console.error("Error deleting rent assignments:", error.response);
+             });
+
+             await axios.delete(`http://localhost:8080/propertyAssignments/property/${propertyID}`)
+                 .catch((error) => {
+                     console.error("Error deleting properties:", error.response);
+                 });
+
+            // First, delete all payment records for the property
+            await axios.delete(`http://localhost:8080/payments/property/${propertyID}`)
+                .catch((error) => {
+                    console.error("Error deleting payments:", error.response);
+                });
+    
+    
+           
+            // Now delete property
+            await axios.delete(`http://localhost:8080/properties/${propertyID}`);
+    
+            // Update frontend
+            setProperties(prev => prev.filter(p => p.propertyID !== propertyID));
+            setRentAssignments(prev => prev.filter(r => r.propertyID !== propertyID));
+            setPropertyToDelete(null);
+
+        } catch (error) {
+            console.error("Error deleting:", error.response || error.message);
+        }
+    };
+    
+    
 
     const handleSave = () => {
         if (!validateForm()) return;
@@ -327,16 +362,7 @@ const AdminMngProperties = () => {
                                     <X />
                                 </button>
                                 <button
-                                    onClick={() => {
-                                        axios.delete(`http://localhost:8080/properties/${propertyToDelete.propertyID}`)
-                                            .then(() => {
-                                                setProperties(prev => prev.filter(p => p.propertyID !== propertyToDelete.propertyID));
-                                                setPropertyToDelete(null);
-                                            })
-                                            .catch(err => {
-                                                console.error("Error deleting property:", err);
-                                            });
-                                    }}
+                                    onClick={() => handleDelete(propertyToDelete.propertyID)}
                                     className="bg-[#C42211] text-white px-[20px] py-2 cursor-pointer rounded-[4.5px] hover:bg-[#A32012] flex gap-[10px]"
                                 >
                                     Delete

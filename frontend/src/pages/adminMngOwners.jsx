@@ -24,7 +24,7 @@ const AdminMngOwners = () => {
     }, []);
 
     const handleDelete = (owner) => {
-        axios.delete(`http://localhost:8080/owners/${owner.id}`)
+        axios.delete(`http://localhost:8080/owners/${owner.userName}`)
             .then(() => {
                 setOwners(prev => prev.filter(o => o.id !== owner.id));
                 setOwnerToDelete(null);
