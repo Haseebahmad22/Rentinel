@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import Sidebar from "../utility/adminSidebar";
 import axios from "axios";
-import { Pencil, Trash2, Eye, ChevronLeft, X, Check, XCircle } from "lucide-react";
+import { Pencil, Trash2, Eye, ChevronLeft, X, Search } from "lucide-react";
 
 const AdminMngTenants = () => {
     const [tenants, setTenants] = useState([]);
@@ -12,6 +12,7 @@ const AdminMngTenants = () => {
     const [formErrors, setFormErrors] = useState({});
     const formRef = useRef(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [searchTerm, setSearchTerm] = useState("");
 
     useEffect(() => {
         axios.get("http://localhost:8080/tenants")
@@ -130,6 +131,12 @@ const AdminMngTenants = () => {
             });
     };
 
+    const filteredTenants = tenants.filter(tenant =>
+        tenant.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        tenant.userName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    
     const TenantBox = ({ label, name, value }) => {
         const isReadOnly = name === "id" || name === "userName";
         const isError = formErrors[name];
@@ -191,11 +198,22 @@ const AdminMngTenants = () => {
         <div className="flex font-[Lexend]">
             <Sidebar />
             <div className="w-[80vw] bg-[#E6E6E6] relative">
-                <div className="pl-[80px] pr-[50px] mt-[10px]">
-                    <h1 className="text-[#081E4A] text-[54px] font-bold">Manage Tenants</h1>
-                    <p className="text-[15px] text-[#4D4D4D] font-light">View, edit, or delete tenants.</p>
+                <div className="flex justify-between items-center w-[75vw]">
+                    <div className="pl-[80px] pr-[50px] mt-[10px]">
+                        <h1 className="text-[#081E4A] text-[54px] font-bold">Manage Tenants</h1>
+                        <p className="text-[15px] text-[#4D4D4D] font-light">View, edit, or delete tenants.</p>
+                    </div>
+                    <div className="relative w-[300px]">
+                        <input
+                            type="text"
+                            placeholder="Search tenants..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="border border-gray-400 rounded px-10 py-2 w-full"
+                        />
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-black" />
+                    </div>
                 </div>
-
                 <div className="mx-[80px] mt-8 bg-white rounded-lg shadow-md overflow-hidden relative w-[70vw] h-[50vh]">
                     {viewedTenant && (
                         <div className="absolute top-0 bg-white bg-opacity-90 z-50 flex rounded-lg items-center justify-center px-6 w-[70vw] h-[50vh]">
@@ -299,7 +317,7 @@ const AdminMngTenants = () => {
                             </div>
 
                             <div className="overflow-y-auto max-h-[322px]">
-                                {tenants.map((tenant) => (
+                                {filteredTenants.map((tenant) => (
                                     <div key={tenant.id} className="grid grid-cols-14 p-4 border-b border-gray-200 items-center">
                                         <div className="col-span-2 font-medium">{tenant.id}</div>
                                         <div className="col-span-2">{tenant.userName}</div>
