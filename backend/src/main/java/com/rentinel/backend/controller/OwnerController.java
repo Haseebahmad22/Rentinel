@@ -1,5 +1,8 @@
 package com.rentinel.backend.controller;
 
+import com.rentinel.backend.model.LoginRequest;
+import com.rentinel.backend.model.LoginResponse;
+
 import com.rentinel.backend.model.Owner;
 import com.rentinel.backend.model.Property;
 import com.rentinel.backend.model.Tenant;
@@ -101,7 +104,7 @@ public class OwnerController {
         existingOwner.setFullName(ownerDetails.getFullName());
         existingOwner.setUserName(ownerDetails.getUserName());
         existingOwner.setEmail(ownerDetails.getEmail());
-        existingOwner.setCNIC(ownerDetails.getCNIC());
+        existingOwner.setCnic(ownerDetails.getCnic());
         return ownerRepository.save(existingOwner);
     }
 
@@ -146,4 +149,21 @@ public class OwnerController {
             throw new RuntimeException("Error fetching user registration stats", e);
         }
     }
+
+   @PostMapping("/login")
+public ResponseEntity<?> loginOwner(@RequestBody LoginRequest loginRequest) {
+    Optional<Owner> owner = ownerRepository.findByEmailAndPassword(
+            loginRequest.getEmail(),
+            loginRequest.getPassword());
+
+    LoginResponse response;
+    if (owner.isPresent()) {
+        response = new LoginResponse(true, "owner", owner.get().getId(), null);
+        return ResponseEntity.ok(response);
+    } else {
+        response = new LoginResponse(false, null, null, "Invalid credentials");
+        return ResponseEntity.status(401).body(response);
+    }
+}
+
 }

@@ -1,11 +1,16 @@
 package com.rentinel.backend.controller;
 
 import com.rentinel.backend.model.Admin;
+import com.rentinel.backend.model.LoginRequest;
+import com.rentinel.backend.model.LoginResponse;
+import com.rentinel.backend.model.Tenant;
 import com.rentinel.backend.repository.AdminRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
+
 @CrossOrigin(origins = "http://localhost:5173")
 
 @RestController
@@ -34,6 +39,22 @@ public class AdminController {
     // Get an admin by CNIC
     @GetMapping("/cnic/{cnic}")
     public Admin getAdminByCNIC(@PathVariable String cnic) {
-        return adminRepository.findByCNIC(cnic);
+        return adminRepository.findByCnic(cnic);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> loginAdmin(@RequestBody LoginRequest loginRequest) {
+        Optional<Admin> admin = adminRepository.findByEmailAndPassword(
+                loginRequest.getEmail(),
+                loginRequest.getPassword());
+
+        LoginResponse response;
+        if (admin.isPresent()) {
+            response = new LoginResponse(true, "admin", admin.get().getId(), null);
+            return ResponseEntity.ok(response);
+        } else {
+            response = new LoginResponse(false, null, null, "Invalid credentials");
+            return ResponseEntity.status(401).body(response);
+        }
     }
 }

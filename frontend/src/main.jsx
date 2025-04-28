@@ -11,6 +11,7 @@ import AdminPayHistory from './pages/adminPayHistory';
 import AdminStats from './pages/adminStats';
 import AdminMngTenants from './pages/adminMngTenants';
 import Signup from './pages/signup';
+import Signin from './pages/signin';
 
 
 const router = createBrowserRouter([
@@ -84,6 +85,14 @@ const router = createBrowserRouter([
     element: (
       <>
         <Signup />
+      </>
+    ),
+  },
+  { 
+    path: "/signin",
+    element: (
+      <>
+        <Signin />
       </>
     ),
   },

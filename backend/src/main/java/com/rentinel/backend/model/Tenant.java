@@ -27,15 +27,13 @@ public class Tenant {
 
     // @JsonIgnore
     @Column(name = "Password", nullable = false, length = 30)
-    @JsonProperty("Password")  // Explicitly map to JSON property "Password"
-    private String Password;
+    private String password;
 
     @Column(name = "email", nullable = false, length = 30)
     private String email;
 
     @Column(name = "CNIC", nullable = false, length = 13)
-    @JsonProperty("CNIC")  // Explicitly map to JSON property "CNIC"
-    private String CNIC;
+    private String cnic;
 
     @Column(name = "accountCreationDate", nullable = false)
     private LocalDate accountCreationDate;
