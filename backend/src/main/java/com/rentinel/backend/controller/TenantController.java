@@ -31,11 +31,12 @@ public class TenantController {
         return tenantRepository.findAll();
     }
 
-    // GET /tenants/exists/{username}
-    @GetMapping("/exists/{username}")
-    public boolean tenantExists(@PathVariable String userName) {
+    // GET /tenants/checkUsername?username={username} - Check if the username exists
+    @GetMapping("/checkUsername/{userName}")
+    public boolean checkTenantUsername(@PathVariable String userName) {
         return tenantRepository.existsByUserName(userName);
     }
+    
 
     // POST /tenants - Register a new tenant
     @PostMapping

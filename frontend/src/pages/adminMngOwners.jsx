@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import Sidebar from "../utility/adminSidebar";
 import axios from "axios";
-import { Pencil, Trash2, Eye, ChevronLeft, X } from "lucide-react";
+import { Pencil, Trash2, Eye, ChevronLeft, X, Search } from "lucide-react";
 
 const AdminMngOwners = () => {
     const [owners, setOwners] = useState([]);
@@ -12,6 +12,8 @@ const AdminMngOwners = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formErrors, setFormErrors] = useState({});
     const formRef = useRef(null);
+    const [searchTerm, setSearchTerm] = useState("");
+
 
     useEffect(() => {
         axios.get("http://localhost:8080/owners")
@@ -36,6 +38,11 @@ const AdminMngOwners = () => {
                 console.error("Error deleting owner:", error);
             });
     };
+    const filteredOwners = owners.filter(owner =>
+        owner.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        owner.userName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
 
     const handleView = (owner) => {
         setViewedOwner(owner);
@@ -187,10 +194,24 @@ const AdminMngOwners = () => {
         <div className="flex font-[Lexend]">
             <Sidebar />
             <div className="w-[80vw] bg-[#E6E6E6] relative">
-                <div className="pl-[80px] pr-[50px] mt-[10px]">
-                    <h1 className="text-[#081E4A] text-[54px] font-bold">Manage Owners</h1>
-                    <p className="text-[15px] text-[#4D4D4D] font-light">View, edit, or delete owners.</p>
+                <div className="flex justify-between items-center w-[75vw]">
+                    <div className="pl-[80px] mt-[10px]">
+                        <h1 className="text-[#081E4A] text-[54px] font-bold">Manage Owners</h1>
+                        <p className="text-[15px] text-[#4D4D4D] font-light">View, edit, or delete owners.</p>
+                    </div>
+                    <div className="relative w-[300px]">
+                        <input
+                            type="text"
+                            placeholder="Search owners..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="border border-gray-400 rounded px-10 py-2 w-full"
+                        />
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-black" />
+                    </div>
+
                 </div>
+
 
                 <div className="mx-[80px] mt-8 bg-white rounded-lg shadow-md overflow-hidden relative w-[70vw] h-[50vh]">
                     {viewedOwner && (
@@ -282,7 +303,7 @@ const AdminMngOwners = () => {
                             </div>
 
                             <div className="overflow-y-auto max-h-[324px]">
-                                {owners.map((owner) => (
+                                {filteredOwners.map((owner) => (
                                     <div key={owner.id} className="grid grid-cols-14 p-4 border-b border-gray-200 items-center">
                                         <div className="col-span-2 font-medium">{owner.id}</div>
                                         <div className="col-span-2">{owner.userName}</div>

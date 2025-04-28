@@ -13,6 +13,7 @@ const AdminMngProperties = () => {
     const [formErrors, setFormErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const formRef = useRef(null);
+    const [tenantValid, setTenantValid] = useState(null); // null = untouched, true = valid, false = invalid
 
     useEffect(() => {
         axios.get("http://localhost:8080/properties")
@@ -157,6 +158,9 @@ const AdminMngProperties = () => {
     const handleSave = () => {
         if (!validateForm()) return;
     
+        if (tenantValid === false) {
+            return;
+        }
         setIsSubmitting(true);
         const formData = new FormData(formRef.current);
     
@@ -241,7 +245,7 @@ const AdminMngProperties = () => {
             setLocalValue(value || "");
         }, [value]);
     
-        const handleChange = (e) => {
+        const handleChange = async (e) => {
             const newValue = e.target.value;
             setLocalValue(newValue);
     
@@ -252,6 +256,30 @@ const AdminMngProperties = () => {
                     return newErrors;
                 });
             }
+            if (name === 'tenantName') {
+                if (newValue.trim() === "") {
+                    setTenantValid(null);
+                    return;
+                }
+                try {
+                    const response = await axios.get(`http://localhost:8080/tenants/checkUsername/${newValue}`);
+                    if (response.data.exists) { 
+                        setTenantValid(true);
+                    } else {
+                        setTenantValid(false);
+                    }
+                } catch (error) {
+                    console.error("Error checking tenant username:", error);
+                    setTenantValid(false);
+                }
+            }
+        };
+        const getBorderColor = () => {
+            if (name === "tenantName") {
+                if (tenantValid === true) return "border-green-500";
+                if (tenantValid === false) return "border-red-500";
+            }
+            return isError ? "border-red-500" : "border-gray-300";
         };
     
         const handleBlur = () => {
@@ -284,7 +312,7 @@ const AdminMngProperties = () => {
                             value={localValue}
                             onChange={handleChange}
                             onBlur={handleBlur}
-                            className={`px-4 py-2 rounded w-full text-[15px] text-gray-800 bg-[#F2F2F2] focus:outline-none border ${isError ? 'border-red-500' : 'border-gray-300'}`}
+                            className={`px-4 py-2 rounded w-full text-[15px] text-gray-800 bg-[#F2F2F2] focus:outline-none border ${(!tenantValid && name==="tenantName") ? 'border-red-500' : ''}  ${isError ? 'border-red-500' : 'border-gray-300 border'} '}`}
                             readOnly={isReadOnly}
                             tabIndex={isReadOnly ? -1 : 0}
                             min={isNumeric ? "1" : undefined}
