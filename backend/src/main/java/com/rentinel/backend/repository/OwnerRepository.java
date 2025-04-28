@@ -2,7 +2,7 @@ package com.rentinel.backend.repository;
 
 import com.rentinel.backend.model.Owner;
 
-import java.util.Optional;
+// import java.util.Optional;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface OwnerRepository extends JpaRepository<Owner, Integer> {
-    Optional<Owner> findById(Integer ID);
+    // Optional<Owner> findById(Integer ID);
     void deleteByUserName(String userName);
 
     @Query(value = "SELECT FORMAT(accountCreationDate, 'MMM') AS month, COUNT(*) AS userCount " +

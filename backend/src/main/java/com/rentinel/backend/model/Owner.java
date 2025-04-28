@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+// import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
@@ -25,7 +25,7 @@ public class Owner {
     @Column(name = "userName", nullable = false, unique = true, length = 50)
     private String userName;
 
-    //@JsonIgnore
+    // @JsonIgnore
     @Column(name = "Password", nullable = false, length = 30)
     @JsonProperty("Password") // Explicitly map to JSON property "Password"
     private String Password;

@@ -2,7 +2,7 @@ package com.rentinel.backend.controller;
 
 import com.rentinel.backend.model.Owner;
 import com.rentinel.backend.model.Property;
-import com.rentinel.backend.model.Tenant;
+// import com.rentinel.backend.model.Tenant;
 import com.rentinel.backend.model.UserRegistrationStats;
 import com.rentinel.backend.repository.OwnerRepository;
 import com.rentinel.backend.repository.PaymentRepository;
@@ -114,7 +114,7 @@ public class OwnerController {
             return new ResponseEntity<>(savedOwner, HttpStatus.CREATED);
         } catch (Exception e) {
             e.printStackTrace(); // For debugging, remove in production
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

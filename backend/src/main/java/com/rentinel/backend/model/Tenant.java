@@ -2,7 +2,7 @@ package com.rentinel.backend.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+// import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.LocalDate;
@@ -27,14 +27,14 @@ public class Tenant {
 
     // @JsonIgnore
     @Column(name = "Password", nullable = false, length = 30)
-    @JsonProperty("Password")  // Explicitly map to JSON property "Password"
+    @JsonProperty("Password") // Explicitly map to JSON property "Password"
     private String Password;
 
     @Column(name = "email", nullable = false, length = 30)
     private String email;
 
     @Column(name = "CNIC", nullable = false, length = 13)
-    @JsonProperty("CNIC")  // Explicitly map to JSON property "CNIC"
+    @JsonProperty("CNIC") // Explicitly map to JSON property "CNIC"
     private String CNIC;
 
     @Column(name = "accountCreationDate", nullable = false)

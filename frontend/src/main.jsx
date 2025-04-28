@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import './index.css'
 import Home from './pages/home';
+import Signup from './pages/signup';
 import AdminDashboard from './pages/adminDashboard';
 import AdminDetails from './pages/adminDetails';
 import AdminMngOwners from './pages/adminMngOwners';
@@ -10,8 +11,13 @@ import AdminManageProperties from './pages/adminMngProperties';
 import AdminPayHistory from './pages/adminPayHistory';
 import AdminStats from './pages/adminStats';
 import AdminMngTenants from './pages/adminMngTenants';
-import Signup from './pages/signup';
 
+import OwnerDashboard from './pages/ownerDashboard';
+import OwnerMngProperties from './pages/ownerMngProperties';
+import OwnerNotifications from './pages/ownerNotifications';
+import OwnerDetails from './pages/ownerDetails';
+import OwnerMngPayments from './pages/ownerPayHistory';
+import OwnerStats from './pages/ownerStats';
 
 const router = createBrowserRouter([
   {
@@ -19,6 +25,14 @@ const router = createBrowserRouter([
     element: (
       <>
         <Home />
+      </>
+    ),
+  },
+  {
+    path: "/signup",
+    element: (
+      <>
+        <Signup />
       </>
     ),
   },
@@ -38,8 +52,7 @@ const router = createBrowserRouter([
       </>
     ),
   },
-  
-  { 
+  {
     path: "/adminMngProperties",
     element: (
       <>
@@ -47,7 +60,7 @@ const router = createBrowserRouter([
       </>
     ),
   },
-  { 
+  {
     path: "/adminMngPayments",
     element: (
       <>
@@ -55,7 +68,7 @@ const router = createBrowserRouter([
       </>
     ),
   },
-  { 
+  {
     path: "/adminStatistics",
     element: (
       <>
@@ -63,7 +76,7 @@ const router = createBrowserRouter([
       </>
     ),
   },
-  { 
+  {
     path: "/adminMngTenants",
     element: (
       <>
@@ -71,7 +84,7 @@ const router = createBrowserRouter([
       </>
     ),
   },
-  { 
+  {
     path: "/adminMngOwners",
     element: (
       <>
@@ -79,11 +92,51 @@ const router = createBrowserRouter([
       </>
     ),
   },
-  { 
-    path: "/signup",
+  {
+    path: "/ownerDashboard",
     element: (
       <>
-        <Signup />
+        <OwnerDashboard />
+      </>
+    ),
+  },
+  {
+    path: "/ownerMngProperties",
+    element: (
+      <>
+        <OwnerMngProperties />
+      </>
+    ),
+  },
+  {
+    path: "/ownerNotifications",
+    element: (
+      <>
+        <OwnerNotifications />
+      </>
+    ),
+  },
+  {
+    path: "/ownerDetails",
+    element: (
+      <>
+        <OwnerDetails />
+      </>
+    ),
+  },
+  {
+    path: "/ownerMngPayments",
+    element: (
+      <>
+        <OwnerMngPayments />
+      </>
+    ),
+  },
+  {
+    path: "/ownerStatistics",
+    element: (
+      <>
+        <OwnerStats />
       </>
     ),
   },
