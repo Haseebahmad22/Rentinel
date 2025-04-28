@@ -46,7 +46,7 @@ const AdminMngProperties = () => {
 
     const handleView = (property) => {
         setViewedProperty(property);
-        setRentAssignmentToUp(getRentAssignment(viewedProperty.propertyID))
+        setRentAssignmentToUp(getRentAssignment(property.propertyID))
         setEditMode(false);
         setFormErrors({});
     };
@@ -302,6 +302,7 @@ const AdminMngProperties = () => {
             </div>
         );
     };
+    console.log(rentAssignmentToUp)
     return (
         <div className="flex font-[Lexend] relative">
             <Sidebar />
