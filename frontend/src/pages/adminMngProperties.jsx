@@ -67,24 +67,24 @@ const AdminMngProperties = () => {
     const validateForm = () => {
         const errors = {};
         const formData = new FormData(formRef.current);
-
+    
         // Required fields validation
         if (!formData.get('propertyName')?.trim()) {
             errors.propertyName = "Property name is required";
         }
-
+    
         if (!formData.get('ownerName')?.trim()) {
             errors.ownerName = "Owner name is required";
         }
-
+    
         if (!formData.get('area')?.trim()) {
             errors.area = "Area is required";
         }
-
+    
         if (!formData.get('location')?.trim()) {
             errors.location = "Location is required";
         }
-
+    
         // Numeric fields validation
         const numericFields = ['numOfRooms', 'numOfBedRooms', 'numOfBaths', 'fixedRent'];
         numericFields.forEach(field => {
@@ -97,20 +97,28 @@ const AdminMngProperties = () => {
                 errors[field] = "Must be greater than 0";
             }
         });
-
+    
         // Date validation
-        const startDate = formData.get('rentStartDate');
-        const endDate = formData.get('rentEndDate');
-
-        if (startDate && endDate) {
+        const startDate = formData.get('startDate');
+        const dueDate = formData.get('dueDate');
+    
+        if (startDate && dueDate) {
             const start = new Date(startDate);
-            const end = new Date(endDate);
-
+            const end = new Date(dueDate);
+    
             if (start > end) {
-                errors.rentDates = "End date must be after start date";
+                errors.startDate = "Start date must be before end date";
+                errors.dueDate = "End date must be after start date";
+            }
+        } else {
+            if (!startDate) {
+                errors.startDate = "Start date is required";
+            }
+            if (!dueDate) {
+                errors.dueDate = "End date is required";
             }
         }
-
+    
         setFormErrors(errors);
         return Object.keys(errors).length === 0;
     };
@@ -146,13 +154,32 @@ const AdminMngProperties = () => {
             console.error("Error deleting:", error.response || error.message);
         }
     };
-
     const handleSave = () => {
         if (!validateForm()) return;
-
+    
         setIsSubmitting(true);
         const formData = new FormData(formRef.current);
-
+    
+        // Date validation - ensure start date is before due date
+        const startDate = formData.get('startDate');
+        const dueDate = formData.get('dueDate');
+        
+        if (startDate && dueDate) {
+            const start = new Date(startDate);
+            const end = new Date(dueDate);
+            
+            if (start > end) {
+                setFormErrors({
+                    ...formErrors,
+                    startDate: true,
+                    dueDate: true
+                });
+                setIsSubmitting(false);
+                return;
+            }
+        }
+    
+        // Rest of your existing handleSave code...
         const updatedProperty = {
             ...viewedProperty,
             propertyName: formData.get('propertyName'),
@@ -165,7 +192,7 @@ const AdminMngProperties = () => {
             fixedRent: parseInt(formData.get('fixedRent')),
             tenantName: formData.get('tenantName')
         };
-
+    
         axios.put(`http://localhost:8080/properties/${viewedProperty.propertyID}`, updatedProperty)
             .then(response => {
                 setProperties(prev => prev.map(p =>
@@ -181,15 +208,15 @@ const AdminMngProperties = () => {
             .finally(() => {
                 setIsSubmitting(false);
             });
-
-
+    
+    
         if (rentAssignmentToUp) {
             const rentAssignmentToUpdate = {
                 ...rentAssignmentToUp,
                 startDate: formData.get("startDate"),
                 dueDate: formData.get("dueDate")
             };
-
+    
             // Update rent assignment in database
             axios.put(`http://localhost:8080/rentAssignments/${rentAssignmentToUp.assignmentID}`, rentAssignmentToUpdate)
                 .then(response => {
@@ -200,47 +227,52 @@ const AdminMngProperties = () => {
                     console.error("Error updating rent assignment:", error);
                 });
         }
-
     };
 
 
     const PropertyBox = ({ label, name, value }) => {
         const isReadOnly = name === "propertyID";
-        const isError = formErrors[name] || (name === 'rentEndDate' && formErrors.rentDates);
+        const isError = formErrors[name];
         const isNumeric = ['numOfRooms', 'numOfBedRooms', 'numOfBaths', 'fixedRent'].includes(name);
         const isDateField = ['startDate', 'dueDate'].includes(name);
         const [localValue, setLocalValue] = useState(value || "");
-
+    
         useEffect(() => {
             setLocalValue(value || "");
         }, [value]);
-
+    
         const handleChange = (e) => {
             const newValue = e.target.value;
             setLocalValue(newValue);
-
+    
             if (isError) {
                 setFormErrors(prev => {
                     const newErrors = { ...prev };
                     delete newErrors[name];
-                    if (newErrors.rentDates) delete newErrors.rentDates;
                     return newErrors;
                 });
             }
         };
-
-
+    
         const handleBlur = () => {
-            setViewedProperty(prev => ({
-                ...prev,
-                [name]: localValue
-            }));
-            setRentAssignmentToUp(prev => ({
-                ...prev,
-                [name]: localValue
-            }));
+            if (name === 'startDate' || name === 'dueDate') {
+                // Trigger validation when date fields lose focus
+                validateForm();
+            }
+            
+            if (name in viewedProperty) {
+                setViewedProperty(prev => ({
+                    ...prev,
+                    [name]: localValue
+                }));
+            } else if (rentAssignmentToUp && name in rentAssignmentToUp) {
+                setRentAssignmentToUp(prev => ({
+                    ...prev,
+                    [name]: localValue
+                }));
+            }
         };
-
+    
         return (
             <div className="flex flex-col w-[230px]">
                 <label className="text-[14px] font-semibold text-gray-600 mb-1">{label}</label>
@@ -257,8 +289,9 @@ const AdminMngProperties = () => {
                             tabIndex={isReadOnly ? -1 : 0}
                             min={isNumeric ? "1" : undefined}
                         />
-                        {isError && (
-                            <p className="text-red-500 text-xs mt-1">{formErrors[name] || formErrors.rentDates}</p>
+                        
+                        {isError && !isDateField && (
+                            <p className="text-red-500 text-xs mt-1">{formErrors[name]}</p>
                         )}
                     </>
                 ) : (
@@ -269,7 +302,6 @@ const AdminMngProperties = () => {
             </div>
         );
     };
-
     return (
         <div className="flex font-[Lexend] relative">
             <Sidebar />
