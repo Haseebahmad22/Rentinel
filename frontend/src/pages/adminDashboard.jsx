@@ -9,7 +9,26 @@ const AdminDashboard = () => {
     const [ownerCount, setOwnerCount] = useState(0);
     const [propertyCount, setPropertyCount] = useState(0);
     const [paymentCount, setPaymentCount] = useState(0);
-    const adminName = "Haseeb Ahmad"
+    const [userId, setUserId] = useState("");
+    const [admin, setAdmin] = useState(null)
+    useEffect(() => {
+        const storedId = localStorage.getItem('userID');
+        if (storedId !== null && storedId !== "null") {
+            setUserId(storedId);
+        } else {
+            console.error('No userId found in localStorage');
+        }
+      }, []);
+      
+
+    useEffect(() => {
+        if (userId) {
+            axios.get(`http://localhost:8080/admin/id/${userId}`)
+                .then(res => setAdmin(res.data))
+                .catch(err => console.error(err));
+        }
+    }, [userId]);  // <- watch userId, not []
+    
 
     useEffect(() => {
         axios.get("http://localhost:8080/properties/count")
@@ -35,10 +54,10 @@ const AdminDashboard = () => {
                     <h1 className="text-[#081E4A] text-[54px] font-bold">Dashboard</h1>
                     <Link to = "/adminDetails" className="flex justify-center items-center gap-3 cursor-pointer">
                         <div className="rounded-[50%] w-[50px] h-[50px] text-white text-[28px] bg-amber-950 flex items-center justify-center">
-                            {adminName[0]}
+                        {admin?.fullName?.[0]}
                         </div>
                         <div>
-                            <h3 className="text-[18px] text-[#292D32] font-medium">{adminName}</h3>
+                            <h3 className="text-[18px] text-[#292D32] font-medium">{admin?.fullName}</h3>
                             <p className="text-[12px] text-[#292D32]">Admin</p>
                         </div>
                     </Link>

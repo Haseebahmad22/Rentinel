@@ -1,16 +1,17 @@
 import { useState } from "react";
 import { Eye, EyeClosed, ChevronDown } from "lucide-react";
 import axios from "axios";
+import { Link } from "react-router-dom";
 export default function Signup() {
     const [formData, setFormData] = useState({
         fullName: "",
         userName: "",
         email: "",
-        Password: "",
-        CNIC: "",
+        password: "",
+        cnic: "",
         role: "Tenant",
     });
-    const [showPassword, setShowPassword] = useState(false); // State for Password visibility
+    const [showPassword, setShowPassword] = useState(false); // State for password visibility
 
     const [dropdownOpen, setDropdownOpen] = useState(false);  // Manage dropdown visibility
 
@@ -30,8 +31,8 @@ export default function Signup() {
             fullName: formData.fullName,
             userName: formData.userName,
             email: formData.email,
-            Password: formData.Password,  // Note capital P to match backend
-            CNIC: formData.cnic,          // Match case with backend
+            password: formData.password,  // Note capital P to match backend
+            cnic: formData.cnic,          // Match case with backend
             accountCreationDate: accountCreationDate,
         };
 
@@ -55,7 +56,7 @@ export default function Signup() {
     
 
     const togglePasswordVisibility = () => {
-        setShowPassword(!showPassword); // Toggle Password visibility
+        setShowPassword(!showPassword); // Toggle password visibility
     };
     const toggleDropdown = () => {
         setDropdownOpen(!dropdownOpen);  // Toggle dropdown visibility
@@ -75,7 +76,7 @@ export default function Signup() {
             <div className="w-[50vw] h-full bg-[#111822] flex flex-col justify-center items-center p-8">
                 <div className="w-full max-w-md">
                     <div className="flex space-x-6 mb-10">
-                        <span className="text-white text-xl border-b-2 border-transparent hover:border-orange-400 cursor-pointer">Login</span>
+                        <Link to ="/signin" className="text-white text-xl border-b-2 border-transparent hover:border-orange-400 cursor-pointer">Login</Link>
                         <span className="text-white text-xl border-b-2 border-orange-400">Registration</span>
                     </div>
 
@@ -88,9 +89,9 @@ export default function Signup() {
                             { label: "User Name", name: "userName", type: "text" },
                             { label: "Your Email", name: "email", type: "email" },
                             {
-                                label: "Password",
-                                name: "Password",
-                                type: showPassword ? "text" : "Password", // Toggle Password visibility
+                                label: "password",
+                                name: "password",
+                                type: showPassword ? "text" : "password", // Toggle password visibility
                             }, { label: "CNIC", name: "cnic", type: "text" }
                         ].map((field) => (
                             <div key={field.name} className="bg-gray-700 w-full h-fit relative">
@@ -104,7 +105,7 @@ export default function Signup() {
                                     className="bg-gray-700 placeholder:text-gray-500 text-white rounded p-3 w-full focus:outline-none pr-10" // added padding for button
                                     required
                                 />
-                                {field.name === "Password" && (
+                                {field.name === "password" && (
                                     <button
                                         type="button"
                                         onClick={togglePasswordVisibility}
