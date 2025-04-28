@@ -32,6 +32,13 @@ public class TenantController {
         return tenantRepository.existsByUserName(userName);
     }
 
+    // POST /tenants - Register a new tenant
+    @PostMapping
+    public Tenant registerTenant(@RequestBody Tenant tenant) {
+        System.out.println(tenant);
+        return tenantRepository.save(tenant);
+    }
+
     // DELETE /tenants/{id}
     @DeleteMapping("/{id}")
     public void deleteTenant(@PathVariable Integer id) {

@@ -2,6 +2,7 @@ package com.rentinel.backend.controller;
 
 import com.rentinel.backend.model.Owner;
 import com.rentinel.backend.model.Property;
+import com.rentinel.backend.model.Tenant;
 import com.rentinel.backend.model.UserRegistrationStats;
 import com.rentinel.backend.repository.OwnerRepository;
 import com.rentinel.backend.repository.PaymentRepository;
@@ -12,8 +13,11 @@ import com.rentinel.backend.repository.RentAssignmentRepository;
 import jakarta.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -99,6 +103,19 @@ public class OwnerController {
         existingOwner.setEmail(ownerDetails.getEmail());
         existingOwner.setCNIC(ownerDetails.getCNIC());
         return ownerRepository.save(existingOwner);
+    }
+
+    @PostMapping
+    public ResponseEntity<Owner> createOwner(@RequestBody Owner newOwner) {
+        try {
+            System.out.println(newOwner);
+            newOwner.setAccountCreationDate(LocalDate.now());
+            Owner savedOwner = ownerRepository.save(newOwner);
+            return new ResponseEntity<>(savedOwner, HttpStatus.CREATED);
+        } catch (Exception e) {
+            e.printStackTrace(); // For debugging, remove in production
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping("/count")

@@ -10,6 +10,7 @@ import AdminManageProperties from './pages/adminMngProperties';
 import AdminPayHistory from './pages/adminPayHistory';
 import AdminStats from './pages/adminStats';
 import AdminMngTenants from './pages/adminMngTenants';
+import Signup from './pages/signup';
 
 
 const router = createBrowserRouter([
@@ -75,6 +76,14 @@ const router = createBrowserRouter([
     element: (
       <>
         <AdminMngOwners />
+      </>
+    ),
+  },
+  { 
+    path: "/signup",
+    element: (
+      <>
+        <Signup />
       </>
     ),
   },

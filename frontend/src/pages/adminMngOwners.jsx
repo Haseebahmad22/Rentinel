@@ -274,7 +274,7 @@ const AdminMngOwners = () => {
                                 <div className="col-span-2">USERNAME</div>
                                 <div className="col-span-3">EMAIL</div>
                                 <div className="col-span-3">CNIC</div>
-                                <div className="col-span-4 flex justify-end gap-12 pr-12">
+                                <div className="col-span-4 flex justify-end gap-18 pr-[3vw]">
                                     <span>VIEW</span>
                                     <span>EDIT</span>
                                     <span>DELETE</span>

@@ -46,7 +46,7 @@ const AdminDashboard = () => {
 
                 {/* top 3 boxes */}
                 <div className="flex w-[100%] justify-between pl-[80px] pr-[50px] mt-[20px]">
-                    <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[26vw]"                    >
+                    <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[26vw] justify-between "                    >
                         <div className="flex flex-col gap-[40px]">
                             <h1 className="text-[18px]">Welcome Back Haseeb Ahmad!</h1>
                             <p className="text-[15px] text-[#949494]">Its good to see you again</p>
