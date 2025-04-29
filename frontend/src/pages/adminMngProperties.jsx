@@ -13,8 +13,8 @@ const AdminMngProperties = () => {
     const [formErrors, setFormErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const formRef = useRef(null);
-    const [tenantValid, setTenantValid] = useState(null);
-
+    const [tenantValid, setTenantValid] = useState(false);
+    const [assignedTennatLocal, setAssignedTennatLocal] = useState([]);
     useEffect(() => {
         fetchProperties();
         fetchRentAssignments();
@@ -53,6 +53,7 @@ const AdminMngProperties = () => {
     const handleView = (property) => {
         setViewedProperty(property);
         setRentAssignmentToUp(getRentAssignment(property.propertyID));
+        setAssignedTennatLocal(property.tenantName);
         setEditMode(false);
         setFormErrors({});
         setTenantValid(null);
@@ -61,6 +62,7 @@ const AdminMngProperties = () => {
     const handleEdit = (property) => {
         setViewedProperty(property);
         setRentAssignmentToUp(getRentAssignment(property.propertyID));
+        setAssignedTennatLocal(property.tenantName);
         setEditMode(true);
         setFormErrors({});
         setTenantValid(null);
@@ -139,18 +141,35 @@ const AdminMngProperties = () => {
         }
     };
 
-    const handleSave = () => {
+    const handleTenantExist = async (tenantName) => {
+        if (tenantName.trim() === "") {
+            return null;
+        }
+    
+        try {
+            const response = await axios.get(`http://localhost:8080/tenants/checkUsername/${tenantName}`);
+            return response.data;
+        } catch (error) {
+            console.error("Error checking tenant username:", error);
+            return false;
+        }
+    };
+    
+    const handleSave = async  () => {
         if (!validateForm()) return;
-        
-        const tenantName = formRef.current?.tenantName?.value;
-        if (tenantName && tenantName.trim() !== "" && tenantValid === false) {
-            // Show red border for invalid tenant name
+        const formData = new FormData(formRef.current);
+        const tenantName = formData.get('tenantName')
+        setAssignedTennatLocal(tenantName);
+        const isValidTenant = await handleTenantExist(tenantName);
+        setTenantValid(isValidTenant);
+        if (!isValidTenant) {
             setTenantValid(false);
             return;
         }
+        setTenantValid(true);
+        
 
         setIsSubmitting(true);
-        const formData = new FormData(formRef.current);
 
         const updatedProperty = {
             ...viewedProperty,
@@ -193,6 +212,7 @@ const AdminMngProperties = () => {
                         r.assignmentID === rentAssignmentToUp.assignmentID ? rentAssignmentToUpdate : r
                     ));
                     setRentAssignmentToUp(rentAssignmentToUpdate);
+                    
                 })
                 .catch(error => {
                     console.error("Error updating rent assignment:", error);
@@ -210,54 +230,20 @@ const AdminMngProperties = () => {
     
         useEffect(() => {
             setLocalValue(value || "");
-            if (name === 'tenantName') setTenantValid(null);
+           // if (name === 'tenantName') setTenantValid(null);
         }, [value, name]);
 
-        // Maintain focus when editing
-        useEffect(() => {
-            if (editMode && name === 'tenantName') {
-                inputRef.current?.focus();
-            }
-        }, [editMode, name]);
     
         const handleChange = async (e) => {
             const newValue = e.target.value;
             setLocalValue(newValue);
-    
-            // Update state immediately
-            if (name in viewedProperty) {
-                setViewedProperty(prev => ({
-                    ...prev,
-                    [name]: newValue
-                }));
-            } else if (rentAssignmentToUp && name in rentAssignmentToUp) {
-                setRentAssignmentToUp(prev => ({
-                    ...prev,
-                    [name]: newValue
-                }));
-            }
-    
+
             if (isError) {
                 setFormErrors(prev => {
                     const newErrors = { ...prev };
                     delete newErrors[name];
                     return newErrors;
                 });
-            }
-            
-            if (name === 'tenantName') {
-                if (newValue.trim() === "") {
-                    setTenantValid(null);
-                    return;
-                }
-                
-                try {
-                    const response = await axios.get(`http://localhost:8080/tenants/checkUsername/${newValue}`);
-                    setTenantValid(response.data.exists);
-                } catch (error) {
-                    console.error("Error checking tenant username:", error);
-                    setTenantValid(false);
-                }
             }
         };
     
@@ -310,7 +296,7 @@ const AdminMngProperties = () => {
                 <div className="mx-[80px] mt-8 bg-white rounded-lg shadow-md relative w-[70vw] h-[50vh]">
                     {viewedProperty && (
                         <div className="absolute top-0 bg-white bg-opacity-90 z-50 flex rounded-lg items-center justify-center px-6 w-[70vw] h-[50vh]">
-                            <form ref={formRef} className="p-6 rounded-lg w-full max-w-[1000px] space-y-8 relative">
+                            <form ref={formRef} autoComplete="off" className="p-6 rounded-lg w-full max-w-[1000px] space-y-8 relative">
                                 <div className="flex justify-between items-center absolute top-4 left-4 w-full pr-[40px]">
                                     <div
                                         onClick={handleBack}
@@ -357,7 +343,7 @@ const AdminMngProperties = () => {
                                             value={rentAssignmentToUp?.dueDate}
                                         />
                                         <PropertyBox label="FIXED RENT AMOUNT" name="fixedRent" value={viewedProperty.fixedRent} />
-                                        <PropertyBox label="ASSIGNED TENANT" name="tenantName" value={viewedProperty.tenantName} />
+                                        <PropertyBox label="ASSIGNED TENANT" name="tenantName" value={assignedTennatLocal} />
                                     </div>
                                 </div>
                             </form>
