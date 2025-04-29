@@ -18,8 +18,8 @@ const AdminDashboard = () => {
         } else {
             console.error('No userId found in localStorage');
         }
-      }, []);
-      
+    }, []);
+
 
     useEffect(() => {
         if (userId) {
@@ -28,7 +28,7 @@ const AdminDashboard = () => {
                 .catch(err => console.error(err));
         }
     }, [userId]);  // <- watch userId, not []
-    
+
 
     useEffect(() => {
         axios.get("http://localhost:8080/properties/count")
@@ -52,9 +52,9 @@ const AdminDashboard = () => {
                 {/* top bar showing dashboard and profile */}
                 <div className="flex w-[100%] content-center justify-between pl-[80px] pr-[50px] mt-[10px]">
                     <h1 className="text-[#081E4A] text-[54px] font-bold">Dashboard</h1>
-                    <Link to = "/adminDetails" className="flex justify-center items-center gap-3 cursor-pointer">
+                    <Link to="/adminDetails" className="flex justify-center items-center gap-3 cursor-pointer">
                         <div className="rounded-[50%] w-[50px] h-[50px] text-white text-[28px] bg-amber-950 flex items-center justify-center">
-                        {admin?.fullName?.[0]}
+                            {admin?.fullName?.[0]}
                         </div>
                         <div>
                             <h3 className="text-[18px] text-[#292D32] font-medium">{admin?.fullName}</h3>
@@ -85,42 +85,58 @@ const AdminDashboard = () => {
                             <p className="text-[15px] text-[#ffffff] font-extralight">View, edit, or delete <br /> Tenants.</p>
                         </div>
 
-                        <Link to = "/adminMngTenants" className="bg-white cursor-pointer absolute bottom-4 right-4 h-[40px] w-[100px] rounded-[8px] text-[#3C21F7] text-[12px] font-bold flex justify-center items-center">View</Link>
+                        <Link to="/adminMngTenants" className="bg-white cursor-pointer absolute bottom-4 right-4 h-[40px] w-[100px] rounded-[8px] text-[#3C21F7] text-[12px] font-bold flex justify-center items-center">View</Link>
                     </div>
                 </div>
                 {/* mid 4 boxes */}
                 <div className="flex w-[100%] justify-between pl-[80px] pr-[50px] mt-[30px]">
-                    <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[17vw] justify-between items-center">
-                        <div>
+                    <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[17vw]">
+                        <div className="w-full">
                             <h1 className="text-[#343434] text-[20px]">Total Owners</h1>
-                            <h1 className="text-[#232323] text-[24px] font-bold">{ownerCount ? ownerCount.toLocaleString() : "0"}</h1>
-                            <p className="text-[#949494] text-[12px]">Owners</p>
+                            <div className="flex justify-between">
+                                <div>
+                                    <h1 className="text-[#232323] text-[24px] font-bold">{ownerCount ? ownerCount.toLocaleString() : "0"}</h1>
+                                    <p className="text-[#949494] text-[12px]">Owners</p>
+                                </div>
+                                <img src="icons/User.svg" alt="" className="w-[50px] h-[50px]" />
+                            </div>
                         </div>
-                        <img src="icons/User.svg" alt="" className="w-[50px] h-[50px]" />
                     </div>
-                    <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[17vw] justify-between items-center">
-                        <div>
+                    <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[17vw]">
+                        <div className="w-full">
                             <h1 className="text-[#343434] text-[20px]">Total Tenants</h1>
-                            <h1 className="text-[#232323] text-[24px] font-bold">{tenantCount ? tenantCount.toLocaleString() : "0"}</h1>
-                            <p className="text-[#949494] text-[12px]">Tenants</p>
+                            <div className="flex justify-between">
+                                <div>
+                                    <h1 className="text-[#232323] text-[24px] font-bold">{tenantCount ? tenantCount.toLocaleString() : "0"}</h1>
+                                    <p className="text-[#949494] text-[12px]">Tenants</p>
+                                </div>
+                                <img src="icons/User.svg" alt="" className="w-[50px] h-[50px]" />
+                            </div>
                         </div>
-                        <img src="icons/User.svg" alt="" className="w-[50px] h-[50px]" />
                     </div>
-                    <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[17vw] justify-between items-center">
-                        <div>
+                    <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[17vw]">
+                        <div className="w-full">
                             <h1 className="text-[#343434] text-[20px]">Total Properties</h1>
-                            <h1 className="text-[#232323] text-[24px] font-bold">{propertyCount ? propertyCount.toLocaleString() : "0"}</h1>
-                            <p className="text-[#949494] text-[12px]">Properties</p>
+                            <div className="flex justify-between">
+                                <div>
+                                    <h1 className="text-[#232323] text-[24px] font-bold">{propertyCount ? propertyCount.toLocaleString() : "0"}</h1>
+                                    <p className="text-[#949494] text-[12px]">Properties</p>
+                                </div>
+                                <img src="icons/Home-Icon.svg" alt="" className="w-[50px] h-[50px]" />
+                            </div>
                         </div>
-                        <img src="icons/Home-Icon.svg" alt="" className="w-[45px] h-[45px]" />
                     </div>
-                    <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[17vw] justify-between items-center">
-                        <div>
+                    <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[17vw]">
+                        <div className="w-full">
                             <h1 className="text-[#343434] text-[20px]">Total Payments</h1>
-                            <h1 className="text-[#232323] text-[24px] font-bold">{paymentCount ? paymentCount.toLocaleString() : "0"}</h1>
-                            <p className="text-[#949494] text-[12px]">PKR</p>
+                            <div className="flex justify-between">
+                                <div>
+                                    <h1 className="text-[#232323] text-[24px] font-bold">{paymentCount ? paymentCount.toLocaleString() : "0"}</h1>
+                                    <p className="text-[#949494] text-[12px]">PKR</p>
+                                </div>
+                                <img src="icons/Money-Bag.svg" alt="" className="w-[50px] h-[50px]" />
+                            </div>
                         </div>
-                        <img src="icons/Money-Bag.svg" alt="" className="w-[50px] h-[50px]" />
                     </div>
                 </div>
 

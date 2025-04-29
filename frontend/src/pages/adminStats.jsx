@@ -163,7 +163,7 @@ const AdminStats = () => {
                         </div>
                     </div>
                 </div>
-                <div className="flex w-[80vw] pl-[80px] pr-[50px] gap-[10px] mt-10 items-center justify-start content-center">
+                <div className="flex w-[80vw] pl-[80px] pr-[50px] gap-[10px] mt-7 items-center justify-start content-center">
                     <div className="flex flex-col rounded-[15px] w-[75%] h-[40vh] items-center justify-center">
                         <Histogram />
                     </div>

@@ -217,7 +217,7 @@ const AdminMngTenants = () => {
                 <div className="mx-[80px] mt-8 bg-white rounded-lg shadow-md overflow-hidden relative w-[70vw] h-[50vh]">
                     {viewedTenant && (
                         <div className="absolute top-0 bg-white bg-opacity-90 z-50 flex rounded-lg items-center justify-center px-6 w-[70vw] h-[50vh]">
-                            <form ref={formRef} className="p-6 rounded-lg w-full max-w-[1000px] space-y-8 relative">
+                            <form ref={formRef} className="p-6 rounded-lg w-full space-y-8 relative">
                                 <div className="flex justify-between items-center absolute top-4 left-4 w-full pr-[40px]">
                                     <div
                                         onClick={handleBack}
@@ -316,7 +316,7 @@ const AdminMngTenants = () => {
                                 </div>
                             </div>
 
-                            <div className="overflow-y-auto max-h-[322px]">
+                            <div className="overflow-y-auto max-h-[43vh]">
                                 {filteredTenants.map((tenant) => (
                                     <div key={tenant.id} className="grid grid-cols-14 p-4 border-b border-gray-200 items-center">
                                         <div className="col-span-2 font-medium">{tenant.id}</div>

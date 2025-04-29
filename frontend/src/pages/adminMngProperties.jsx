@@ -296,7 +296,7 @@ const AdminMngProperties = () => {
                 <div className="mx-[80px] mt-8 bg-white rounded-lg shadow-md relative w-[70vw] h-[50vh]">
                     {viewedProperty && (
                         <div className="absolute top-0 bg-white bg-opacity-90 z-50 flex rounded-lg items-center justify-center px-6 w-[70vw] h-[50vh]">
-                            <form ref={formRef} autoComplete="off" className="p-6 rounded-lg w-full max-w-[1000px] space-y-8 relative">
+                            <form ref={formRef} autoComplete="off" className="p-6 rounded-lg w-full space-y-8 relative">
                                 <div className="flex justify-between items-center absolute top-4 left-4 w-full pr-[40px]">
                                     <div
                                         onClick={handleBack}
@@ -365,7 +365,7 @@ const AdminMngProperties = () => {
                                     <span>DELETE</span>
                                 </div>
                             </div>
-                            <div className="overflow-y-auto max-h-[324px]">
+                            <div className="overflow-y-auto max-h-[43vh]">
                                 {properties.map((property) => (
                                     <div key={property.propertyID} className="grid grid-cols-12 p-4 border-b border-gray-200 items-center">
                                         <div className="col-span-2 font-medium">{property.propertyID}</div>
