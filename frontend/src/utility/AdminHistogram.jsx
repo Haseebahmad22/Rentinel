@@ -75,7 +75,7 @@ export default function Histogram() {
   
   return (
 
-    <div className="bg-white rounded-xl p-5 shadow-md w-full h-[40vh]">
+    <div className="bg-white rounded-xl px-5 pt-5 shadow-md w-full h-[40vh]">
       <div className="flex justify-between items-center mb-[10px]">
         <h2 className="text-3xl font-bold text-gray-900">User Registrations</h2>
         <div className="relative inline-block text-left">
@@ -108,7 +108,7 @@ export default function Histogram() {
         </div>
       </div>
 
-      <div className="w-full h-full">
+      <div className="w-full h-[32vh]">
         <ResponsiveContainer width="100%" height="80%">
           <BarChart
             data={data}

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface OwnerRepository extends JpaRepository<Owner, Integer> {
     Optional<Owner> findById(Integer id);  // Match the lowercase field name
+    Optional<Owner> findByUserName(String userName);
     
     void deleteByUserName(String userName);
 

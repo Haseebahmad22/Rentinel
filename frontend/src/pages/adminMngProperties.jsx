@@ -14,7 +14,10 @@ const AdminMngProperties = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const formRef = useRef(null);
     const [tenantValid, setTenantValid] = useState(false);
-    const [assignedTennatLocal, setAssignedTennatLocal] = useState([]);
+    const [assignedTennatLocal, setAssignedTennatLocal] = useState(null);
+    const [propertyAssignmentToUp, setPropertyAssignmentToUp] = useState(null);
+    const [assignedTennat, setAssignedTennat] = useState([]);
+
     useEffect(() => {
         fetchProperties();
         fetchRentAssignments();
@@ -41,7 +44,9 @@ const AdminMngProperties = () => {
     };
 
     const getRentAssignment = (propertyId) => {
+        console.log(rentAssignments.find(assignment => assignment.propertyID === propertyId));
         return rentAssignments.find(assignment => assignment.propertyID === propertyId);
+
     };
 
     const formatDate = (dateStr) => {
@@ -51,21 +56,66 @@ const AdminMngProperties = () => {
     };
 
     const handleView = (property) => {
+        const assignment = rentAssignments.find(a => a.propertyID === property.propertyID);
+
         setViewedProperty(property);
-        setRentAssignmentToUp(getRentAssignment(property.propertyID));
+        setRentAssignmentToUp(assignment);
+        console.log(rentAssignmentToUp);
         setAssignedTennatLocal(property.tenantName);
         setEditMode(false);
         setFormErrors({});
         setTenantValid(null);
+        console.log(property);
+
+        // In handleView and handleEdit, update the propertyAssignmentToUp setting:
+        axios.get(`http://localhost:8080/propertyAssignments/property/${property.propertyID}`)
+            .then(response => {
+                // Take the first assignment if the response is an array
+                const assignment = Array.isArray(response.data) ? response.data[0] : response.data;
+                setPropertyAssignmentToUp(assignment);
+            })
+            .catch(error => {
+                console.error("Error fetching property assignments:", error);
+            });
+
+        axios.get(`http://localhost:8080/tenants/userName/${assignment.tenantID}`)
+            .then(response => {
+                setAssignedTennat(response.data);
+            })
+            .catch(error => {
+                console.error("Error fetching rent assignement tenant:", error);
+            });
     };
 
     const handleEdit = (property) => {
+        const assignment = rentAssignments.find(a => a.propertyID === property.propertyID);
+
         setViewedProperty(property);
-        setRentAssignmentToUp(getRentAssignment(property.propertyID));
+        setRentAssignmentToUp(assignment);
         setAssignedTennatLocal(property.tenantName);
         setEditMode(true);
         setFormErrors({});
         setTenantValid(null);
+
+
+        // In handleView and handleEdit, update the propertyAssignmentToUp setting:
+        axios.get(`http://localhost:8080/propertyAssignments/property/${property.propertyID}`)
+            .then(response => {
+                // Take the first assignment if the response is an array
+                const assignment = Array.isArray(response.data) ? response.data[0] : response.data;
+                setPropertyAssignmentToUp(assignment);
+            })
+            .catch(error => {
+                console.error("Error fetching property assignments:", error);
+            });
+
+        axios.get(`http://localhost:8080/tenants/userName/${assignment.tenantID}`)
+            .then(response => {
+                setAssignedTennat(response.data);
+            })
+            .catch(error => {
+                console.error("Error fetching rent assignement tenant:", error);
+            });
     };
 
     const handleBack = () => {
@@ -128,6 +178,7 @@ const AdminMngProperties = () => {
 
     const handleDelete = async (propertyID) => {
         try {
+
             await axios.delete(`http://localhost:8080/rentAssignments/property/${propertyID}`);
             await axios.delete(`http://localhost:8080/propertyAssignments/property/${propertyID}`);
             await axios.delete(`http://localhost:8080/payments/property/${propertyID}`);
@@ -145,7 +196,7 @@ const AdminMngProperties = () => {
         if (tenantName.trim() === "") {
             return null;
         }
-    
+
         try {
             const response = await axios.get(`http://localhost:8080/tenants/checkUsername/${tenantName}`);
             return response.data;
@@ -154,21 +205,23 @@ const AdminMngProperties = () => {
             return false;
         }
     };
-    
-    const handleSave = async  () => {
+
+    const handleSave = async () => {
         if (!validateForm()) return;
         const formData = new FormData(formRef.current);
-        const tenantName = formData.get('tenantName')
-        setAssignedTennatLocal(tenantName);
+
+        const tenantName = formData.get('tenantName');
         const isValidTenant = await handleTenantExist(tenantName);
         setTenantValid(isValidTenant);
+        setAssignedTennatLocal(tenantName);
         if (!isValidTenant) {
             setTenantValid(false);
             return;
         }
         setTenantValid(true);
-        
 
+        const newTenantResponse = await axios.get(`http://localhost:8080/tenants/id/${tenantName}`);
+        const newTenantId = newTenantResponse.data;
         setIsSubmitting(true);
 
         const updatedProperty = {
@@ -198,46 +251,75 @@ const AdminMngProperties = () => {
             .finally(() => {
                 setIsSubmitting(false);
             });
-
+        // Get the current dates from state (they should be up-to-date)
+        const startDate = rentAssignmentToUp?.startDate;
+        const dueDate = rentAssignmentToUp?.dueDate;
         if (rentAssignmentToUp) {
             const rentAssignmentToUpdate = {
                 ...rentAssignmentToUp,
-                startDate: formData.get("startDate"),
-                dueDate: formData.get("dueDate")
+                startDate: startDate,
+                dueDate: dueDate
             };
-
             axios.put(`http://localhost:8080/rentAssignments/${rentAssignmentToUp.assignmentID}`, rentAssignmentToUpdate)
                 .then(response => {
-                    setRentAssignments(prev => prev.map(r => 
+                    setRentAssignments(prev => prev.map(r =>
                         r.assignmentID === rentAssignmentToUp.assignmentID ? rentAssignmentToUpdate : r
                     ));
                     setRentAssignmentToUp(rentAssignmentToUpdate);
-                    
+
                 })
                 .catch(error => {
                     console.error("Error updating rent assignment:", error);
                 });
         }
+
+
+        const assignment = Array.isArray(propertyAssignmentToUp)
+            ? propertyAssignmentToUp[0]
+            : propertyAssignmentToUp;
+
+        if (!assignment || !assignment.assignmentID) {
+            console.error("Invalid property assignment data");
+            return;
+        }
+        // Update property assignment if it exists
+        await axios.put(
+            `http://localhost:8080/propertyAssignments/updateTenant/${assignment.assignmentID}`,
+            { tenantID: newTenantId }  // Simplified payload
+        );
     };
 
     const PropertyBox = ({ label, name, value }) => {
         const inputRef = useRef(null);
-        const isReadOnly = name === "propertyID";
+        const isReadOnly = [
+            "propertyID",
+            "ownerName",
+        ].includes(name);
         const isError = formErrors[name];
         const isNumeric = ['numOfRooms', 'numOfBedRooms', 'numOfBaths', 'fixedRent'].includes(name);
         const isDateField = ['startDate', 'dueDate'].includes(name);
         const [localValue, setLocalValue] = useState(value || "");
-    
+
         useEffect(() => {
             setLocalValue(value || "");
-           // if (name === 'tenantName') setTenantValid(null);
         }, [value, name]);
 
-    
+
         const handleChange = async (e) => {
             const newValue = e.target.value;
             setLocalValue(newValue);
-
+           if(name == "assignedTennat"){
+                await setAssignedTennatLocal(localValue);
+           }
+            // Update parent state for dates
+            if (name === 'startDate' || name === 'dueDate') {
+                if (rentAssignmentToUp) {
+                    setRentAssignmentToUp(prev => ({
+                        ...prev,
+                        [name]: newValue
+                    }));
+                }
+            }
             if (isError) {
                 setFormErrors(prev => {
                     const newErrors = { ...prev };
@@ -246,13 +328,13 @@ const AdminMngProperties = () => {
                 });
             }
         };
-    
+
         const handleBlur = () => {
             if (name === 'startDate' || name === 'dueDate') {
                 validateForm();
             }
         };
-    
+
         return (
             <div className="flex flex-col w-[230px]">
                 <label className="text-[14px] font-semibold text-gray-600 mb-1">{label}</label>
@@ -265,10 +347,9 @@ const AdminMngProperties = () => {
                             value={localValue}
                             onChange={handleChange}
                             onBlur={handleBlur}
-                            className={`px-4 py-2 rounded w-full text-[15px] text-gray-800 bg-[#F2F2F2] focus:outline-none border ${
-                                (name === 'tenantName' && tenantValid === false) ? 'border-red-500' : 
+                            className={`px-4 py-2 rounded w-full text-[15px] text-gray-800 bg-[#F2F2F2] focus:outline-none border ${(name === 'tenantName' && tenantValid === false) ? 'border-red-500' :
                                 isError ? 'border-red-500' : 'border-gray-300'
-                            }`}
+                                }`}
                             readOnly={isReadOnly}
                             tabIndex={isReadOnly ? -1 : 0}
                             min={isNumeric ? "1" : undefined}
@@ -365,7 +446,7 @@ const AdminMngProperties = () => {
                                     <span>DELETE</span>
                                 </div>
                             </div>
-                            <div className="overflow-y-auto max-h-[43vh]">
+                            <div className="overflow-y-auto max-h-[40vh]">
                                 {properties.map((property) => (
                                     <div key={property.propertyID} className="grid grid-cols-12 p-4 border-b border-gray-200 items-center">
                                         <div className="col-span-2 font-medium">{property.propertyID}</div>

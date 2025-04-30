@@ -42,6 +42,32 @@ const AdminMngTenants = () => {
         setViewedTenant(tenant);
         setEditMode(true);
         setFormErrors({}); // Clear previous errors when entering edit mode
+        axios.get(`http://localhost:8080/propertyAssignments/tenant/${tenant.id}`)
+        .then(response => {
+            const propertyAssignments = response.data;
+            const propertyRequests = propertyAssignments.map(property =>
+                axios.get(`http://localhost:8080/properties/${property.propertyID}`)
+            );
+
+            Promise.all(propertyRequests)
+                .then(responses => {
+                    const propertiesWithDetails = responses.map((response, index) => {
+                        const property = response.data;
+                        return {
+                            ...propertyAssignments[index],
+                            propertyName: property.propertyName,
+                            ownerName: property.ownerName
+                        };
+                    });
+                    setTenantProperties(propertiesWithDetails);
+                })
+                .catch(error => {
+                    console.error("Error fetching property details:", error);
+                });
+        })
+        .catch(error => {
+            console.error("Error fetching tenant properties:", error);
+        });
     };
 
     const handleView = (tenant) => {
@@ -316,7 +342,7 @@ const AdminMngTenants = () => {
                                 </div>
                             </div>
 
-                            <div className="overflow-y-auto max-h-[43vh]">
+                            <div className="overflow-y-auto max-h-[40vh]">
                                 {filteredTenants.map((tenant) => (
                                     <div key={tenant.id} className="grid grid-cols-14 p-4 border-b border-gray-200 items-center">
                                         <div className="col-span-2 font-medium">{tenant.id}</div>

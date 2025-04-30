@@ -64,7 +64,7 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* top 3 boxes */}
-                <div className="flex w-[100%] justify-between pl-[80px] pr-[50px] mt-[20px]">
+                <div className="flex w-[100%] justify-between pl-[80px] pr-[50px] mt-[10px]">
                     <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[26vw] justify-between "                    >
                         <div className="flex flex-col gap-[40px]">
                             <h1 className="text-[18px]">Welcome Back Haseeb Ahmad!</h1>
@@ -89,7 +89,7 @@ const AdminDashboard = () => {
                     </div>
                 </div>
                 {/* mid 4 boxes */}
-                <div className="flex w-[100%] justify-between pl-[80px] pr-[50px] mt-[30px]">
+                <div className="flex w-[100%] justify-between pl-[80px] pr-[50px] mt-[10px]">
                     <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[17vw]">
                         <div className="w-full">
                             <h1 className="text-[#343434] text-[20px]">Total Owners</h1>
@@ -141,7 +141,7 @@ const AdminDashboard = () => {
                 </div>
 
                 {/* Histogram */}
-                <div className="mt-[30px] w-[80vw] pl-[80px] pr-[50px]">
+                <div className="mt-[10px] w-[80vw] pl-[80px] pr-[50px]">
                     <Histogram />
                 </div>
 

@@ -30,21 +30,20 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/owners")
 public class OwnerController {
-
-    private final PaymentRepository paymentRepository;
-
     @Autowired
     private OwnerRepository ownerRepository;
+
     @Autowired
     private PropertyRepository propertyRepository;
+
+    @Autowired
+    private PaymentRepository paymentRepository;
+
     @Autowired
     private RentAssignmentRepository rentAssignmentRepository;
+
     @Autowired
     private PropertyAssignmentRepository propertyAssignmentRepository;
-
-    OwnerController(PaymentRepository paymentRepository) {
-        this.paymentRepository = paymentRepository;
-    }
 
     // GET /api/owners
     @GetMapping
@@ -63,30 +62,41 @@ public class OwnerController {
         }
     }
 
-    @DeleteMapping("/{ownerName}")
+    @DeleteMapping("/{userName}")
     @Transactional
-    public void deleteOwner(@PathVariable String ownerName) {
-        // First, get all the properties of the owner
-        List<Property> properties = propertyRepository.findByOwnerName(ownerName);
-        System.out.println(ownerName);
-        // For each property, delete related Payment, RentAssignment, PropertyAssignment
-        // records and then the property itself
-        for (Property property : properties) {
-            // Delete payments related to the property
-            paymentRepository.deleteAllByPropertyID(property.getPropertyID());
-
-            // Delete rent assignments related to the property
-            rentAssignmentRepository.deleteAllByPropertyID(property.getPropertyID());
-
-            // Delete property assignments related to the property
-            propertyAssignmentRepository.deleteByPropertyID(property.getPropertyID());
-
-            // Now, delete the property
-            propertyRepository.deleteById(property.getPropertyID());
+    public ResponseEntity<Void> deleteOwner(@PathVariable String userName) {
+        // Find the owner first
+        Optional<Owner> ownerOpt = ownerRepository.findByUserName(userName);
+        if (!ownerOpt.isPresent()) {
+            return ResponseEntity.notFound().build();
         }
 
-        // Finally, delete the owner
-        ownerRepository.deleteByUserName(ownerName);
+        Owner owner = ownerOpt.get();
+
+        // Get all properties owned by this owner
+        List<Property> properties = propertyRepository.findByOwnerName(userName);
+
+        // For each property, delete dependent entities
+        for (Property property : properties) {
+            Integer propertyId = property.getPropertyID();
+
+            // 1. Delete payments for this property
+            paymentRepository.deletePaymentsForProperty(propertyId);
+
+            // 2. Delete rent assignments for this property
+            rentAssignmentRepository.deleteAllByPropertyID(propertyId);
+
+            // 3. Delete property assignments for this property
+            propertyAssignmentRepository.deleteByPropertyID(propertyId);
+
+            // Finally, delete the property itself
+            propertyRepository.deleteById(propertyId);
+        }
+
+        // Now delete the owner
+        ownerRepository.deleteByUserName(userName);
+
+        return ResponseEntity.noContent().build();
     }
 
     // PUT /tenants/{id} - Update tenant details
@@ -150,20 +160,20 @@ public class OwnerController {
         }
     }
 
-   @PostMapping("/login")
-public ResponseEntity<?> loginOwner(@RequestBody LoginRequest loginRequest) {
-    Optional<Owner> owner = ownerRepository.findByEmailAndPassword(
-            loginRequest.getEmail(),
-            loginRequest.getPassword());
+    @PostMapping("/login")
+    public ResponseEntity<?> loginOwner(@RequestBody LoginRequest loginRequest) {
+        Optional<Owner> owner = ownerRepository.findByEmailAndPassword(
+                loginRequest.getEmail(),
+                loginRequest.getPassword());
 
-    LoginResponse response;
-    if (owner.isPresent()) {
-        response = new LoginResponse(true, "owner", owner.get().getId(), null);
-        return ResponseEntity.ok(response);
-    } else {
-        response = new LoginResponse(false, null, null, "Invalid credentials");
-        return ResponseEntity.status(401).body(response);
+        LoginResponse response;
+        if (owner.isPresent()) {
+            response = new LoginResponse(true, "owner", owner.get().getId(), null);
+            return ResponseEntity.ok(response);
+        } else {
+            response = new LoginResponse(false, null, null, "Invalid credentials");
+            return ResponseEntity.status(401).body(response);
+        }
     }
-}
 
 }

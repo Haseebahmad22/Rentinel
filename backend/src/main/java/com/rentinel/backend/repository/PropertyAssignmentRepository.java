@@ -12,9 +12,16 @@ public interface PropertyAssignmentRepository extends JpaRepository<PropertyAssi
 
     // Custom query to find property assignments by tenant ID (tenantName)
     List<PropertyAssignment> findByTenantID(Integer ID);
+    List<PropertyAssignment> findByPropertyID(Integer propertyID);
 
     @Modifying
     @Transactional
     @Query("DELETE FROM PropertyAssignment pa WHERE pa.propertyID = :propertyID")
     void deleteByPropertyID(Integer propertyID);
+
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM PropertyAssignment ra WHERE ra.tenantID = :tenantID")
+    void deleteAllByTenantID(Integer tenantID);
 }

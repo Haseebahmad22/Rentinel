@@ -11,6 +11,7 @@ const AdminMngPayments = () => {
     const formRef = useRef(null);
     const [paymentToDelete, setPaymentToDelete] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [property, setProperty] = useState([]);
 
     useEffect(() => {
         axios.get("http://localhost:8080/payments")
@@ -23,6 +24,13 @@ const AdminMngPayments = () => {
     }, []);
 
     const handleView = (payment) => {
+        axios.get(`http://localhost:8080/properties/${payment.propertyID}`)
+            .then(response => {
+                setProperty(response.data);
+            })
+            .catch(error => {
+                console.error("Error fetching property:", error);
+            });
         setViewedPayment(payment);
         setEditMode(false);
         setFormErrors({});
@@ -48,6 +56,13 @@ const AdminMngPayments = () => {
     };
 
     const handleEdit = (payment) => {
+        axios.get(`http://localhost:8080/properties/${payment.propertyID}`)
+        .then(response => {
+            setProperty(response.data);
+        })
+        .catch(error => {
+            console.error("Error fetching property:", error);
+        });
         setViewedPayment(payment);
         setEditMode(true);
         setFormErrors({});
@@ -201,7 +216,7 @@ const AdminMngPayments = () => {
                                     </div>
                                     <div className="flex flex-wrap gap-[35px]">
                                         <PaymentBox label="PROPERTY ID" name="propertyID" value={viewedPayment?.propertyID} />
-                                        <PaymentBox label="PROPERTY NAME" name="propertyName" value={viewedPayment?.propertyName} />
+                                        <PaymentBox label="PROPERTY NAME" name="propertyName" value={property?.propertyName} />
                                     </div>
                                     <div className="flex flex-wrap gap-[35px]">
                                         <PaymentBox label="TENANT USERNAME" name="tenantUserName" value={viewedPayment?.tenantUserName} />
@@ -232,7 +247,7 @@ const AdminMngPayments = () => {
                                 </div>
                             </div>
 
-                            <div className="overflow-y-auto max-h-[43vh]">
+                            <div className="overflow-y-auto max-h-[40vh]">
                                 {payments.map((payment) => (
                                     <div key={payment.paymentID} className="grid grid-cols-12 p-4 border-b border-gray-200 items-center">
                                         <div className="col-span-2 font-medium">{payment.paymentID}</div>

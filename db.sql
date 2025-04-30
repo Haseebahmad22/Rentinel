@@ -14,7 +14,8 @@ go
 --DROP TABLE Tenant;
 --DROP TABLE Owner;
 
-CREATE TABLE Owner
+
+	CREATE TABLE Owner
 (
 ID int identity(1,1) PRIMARY KEY,
 fullName varchar(50) NOT NULL,
