@@ -52,14 +52,19 @@ public class OwnerController {
         return ownerRepository.findAll();
     }
 
-    // GET /properties/{propertyID} - Fetch a single property by its propertyID
+    // Get an owner by ID
+    @GetMapping("/id/{id}")
+    public Optional<Owner> getOwnerById(@PathVariable Integer id) {
+        return ownerRepository.findById(id);
+    }
+
     @GetMapping("/{ID}")
     public Owner getPropertyById(@PathVariable Integer ID) {
         Optional<Owner> owner = ownerRepository.findById(ID);
         if (owner.isPresent()) {
             return owner.get();
         } else {
-            throw new RuntimeException("Property not found with id " + ID);
+            throw new RuntimeException("Owner not found with id " + ID);
         }
     }
 
@@ -150,20 +155,20 @@ public class OwnerController {
         }
     }
 
-   @PostMapping("/login")
-public ResponseEntity<?> loginOwner(@RequestBody LoginRequest loginRequest) {
-    Optional<Owner> owner = ownerRepository.findByEmailAndPassword(
-            loginRequest.getEmail(),
-            loginRequest.getPassword());
+    @PostMapping("/login")
+    public ResponseEntity<?> loginOwner(@RequestBody LoginRequest loginRequest) {
+        Optional<Owner> owner = ownerRepository.findByEmailAndPassword(
+                loginRequest.getEmail(),
+                loginRequest.getPassword());
 
-    LoginResponse response;
-    if (owner.isPresent()) {
-        response = new LoginResponse(true, "owner", owner.get().getId(), null);
-        return ResponseEntity.ok(response);
-    } else {
-        response = new LoginResponse(false, null, null, "Invalid credentials");
-        return ResponseEntity.status(401).body(response);
+        LoginResponse response;
+        if (owner.isPresent()) {
+            response = new LoginResponse(true, "owner", owner.get().getId(), null);
+            return ResponseEntity.ok(response);
+        } else {
+            response = new LoginResponse(false, null, null, "Invalid credentials");
+            return ResponseEntity.status(401).body(response);
+        }
     }
-}
 
 }

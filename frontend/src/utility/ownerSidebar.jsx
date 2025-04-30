@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { useRef } from "react";
-import { User, Building, Users, FileText, BarChart2, LogOut, LayoutDashboard } from "lucide-react";
+import { User, Building, Users, FileText, BarChart2, LogOut, LayoutDashboard, House, Bell } from "lucide-react";
 
 const Sidebar = (setPage) => {
     const location = useLocation();
@@ -18,37 +18,28 @@ const Sidebar = (setPage) => {
 
             {/* Navigation */}
             <nav className="flex flex-col px-4">
-                <div className="mt-4">
-                    <Link to="/ownerDashboard" className={linkClass("/adminDashboard")}>
+                <div className="mb-10">
+                    <Link to="/ownerDashboard" className={linkClass("/ownerDashboard")}>
                         <LayoutDashboard className="w-5 h-5 mr-2" /> Dashboard
                     </Link>
-                    <Link to="/adminDetails" className={linkClass("/adminDetails")}>
+                    <Link to="/ownerMngProperties" className={linkClass("/ownerMngProperties")}>
+                        <House className="w-5 h-5 mr-2" /> Properties
+                    </Link>
+                    <Link to="/ownerNotifications" className={linkClass("/ownerNotifications")}>
+                        <Bell className="w-5 h-5 mr-2" /> Notifications
+                    </Link>
+                    <Link to="/ownerDetails" className={linkClass("/ownerDetails")}>
                         <User className="w-5 h-5 mr-2" /> Account Details
                     </Link>
                 </div>
 
-                <div className="mt-4">
-                    {/* Divider above Management */}
-                    <div className="border-t border-gray-700 my-4" />
-                    <div className="text-gray-400 text-sm px-4">Management</div>
-                    <Link to="/adminMngProperties" className={linkClass("/adminMngProperties")}>
-                        <Building className="w-5 h-5 mr-2" /> Properties
-                    </Link>
-                    <Link to="/adminMngOwners" className={linkClass("/adminMngOwners")}>
-                        <Users className="w-5 h-5 mr-2" /> Owners
-                    </Link>
-                    <Link to="/adminMngTenants" className={linkClass("/adminMngTenants")}>
-                        <Users className="w-5 h-5 mr-2" /> Tenants
-                    </Link>
-                </div>
-
-                <div className="mt-4">
+                <div className="mb-12">
                     <div className="border-t border-gray-700 my-4" />
                     <div className="text-gray-400 text-sm px-4">Report</div>
-                    <Link to="/adminMngPayments" className={linkClass("/adminMngPayments")}>
+                    <Link to="/ownerMngPayments" className={linkClass("/ownerMngPayments")}>
                         <FileText className="w-5 h-5 mr-2" /> Payment History
                     </Link>
-                    <Link to="/adminStatistics" className={linkClass("/adminStatistics")}>
+                    <Link to="/ownerStatistics" className={linkClass("/ownerStatistics")}>
                         <BarChart2 className="w-5 h-5 mr-2" /> Statistics
                     </Link>
                 </div>

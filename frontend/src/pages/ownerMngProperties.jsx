@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from "react";
-import Sidebar from "../utility/adminSidebar";
+import Sidebar from "../utility/ownerSidebar";
 import axios from "axios";
-import { Pencil, Trash2, Eye, ChevronLeft, X } from "lucide-react";
+import { Pencil, Trash2, Eye, ChevronLeft, X, Search, Plus } from "lucide-react";
 
 const OwnerMngProperties = () => {
+    const [owner, setOwner] = useState(null);
     const [properties, setProperties] = useState([]);
     const [rentAssignments, setRentAssignments] = useState([]);
     const [viewedProperty, setViewedProperty] = useState(null);
@@ -13,24 +14,53 @@ const OwnerMngProperties = () => {
     const [formErrors, setFormErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const formRef = useRef(null);
+    const [tenantValid, setTenantValid] = useState(null); // null = untouched, true = valid, false = invalid
+    const [searchTerm, setSearchTerm] = useState("");
+    const [addProperty, setAddProperty] = useState(false);
+    const [userId, setUserId] = useState("1");
+    const addedPropertyID = useRef(null);
+    const isStored = useRef(true);
+    const tenantID = useRef(null)
 
     useEffect(() => {
-        axios.get("http://localhost:8080/properties")
-            .then(response => {
-                setProperties(response.data);
-            })
-            .catch(error => {
-                console.error("Error fetching properties:", error);
-            });
-
-        axios.get("http://localhost:8080/rentAssignments")
-            .then(response => {
-                setRentAssignments(response.data);
-            })
-            .catch(error => {
-                console.error("Error fetching rent assignments:", error);
-            });
+        const storedId = localStorage.getItem('userID');
+        if (storedId !== null && storedId !== "null") {
+            setUserId(storedId);
+        } else {
+            console.error('No userId found in localStorage');
+        }
     }, []);
+
+    useEffect(() => {
+        if (userId) {
+            axios.get(`http://localhost:8080/owners/id/${userId}`)
+                .then(res => setOwner(res.data))
+                .catch(err => console.error(err));
+        }
+    }, [userId]);
+
+    useEffect(() => {
+        if (owner) {
+            axios.get(`http://localhost:8080/properties/owner/${owner.userName}`)
+                .then(res => setProperties(res.data))
+                .catch(err => console.error(err));
+
+            axios.get("http://localhost:8080/rentAssignments")
+                .then(response => {
+                    setRentAssignments(response.data);
+                })
+                .catch(error => {
+                    console.error("Error fetching rent assignments:", error);
+                });
+        }
+    }, [owner]);
+
+    const getHigestPropertyID = () => {
+        if (properties.length > 0) {
+            const highestID = Math.max(...properties.map(property => property.propertyID));
+            return highestID;
+        }
+    }
 
     const getRentAssignment = (propertyId) => {
         return rentAssignments.find(assignment =>
@@ -59,6 +89,7 @@ const OwnerMngProperties = () => {
     };
 
     const handleBack = () => {
+        setAddProperty(false);
         setViewedProperty(null);
         setRentAssignmentToUp(null)
         setEditMode(false);
@@ -157,6 +188,9 @@ const OwnerMngProperties = () => {
     const handleSave = () => {
         if (!validateForm()) return;
 
+        if (tenantValid === false) {
+            return;
+        }
         setIsSubmitting(true);
         const formData = new FormData(formRef.current);
 
@@ -229,9 +263,109 @@ const OwnerMngProperties = () => {
         }
     };
 
+    const handleAdd = async () => {
+        if (!validateForm()) return;
+
+        if (tenantValid === false) {
+            return;
+        }
+
+        setIsSubmitting(true);
+        const formData = new FormData(formRef.current);
+
+        // Date validation - ensure start date is before due date
+        const startDate = formData.get('startDate');
+        const dueDate = formData.get('dueDate');
+
+        if (startDate && dueDate) {
+            const start = new Date(startDate);
+            const end = new Date(dueDate);
+
+            if (start > end) {
+                setFormErrors({
+                    ...formErrors,
+                    startDate: true,
+                    dueDate: true
+                });
+                setIsSubmitting(false);
+                return;
+            }
+        }
+
+        const addedProperty = {
+            propertyName: formData.get('propertyName'),
+            area: formData.get('area'),
+            location: formData.get('location'),
+            fixedRent: parseInt(formData.get('fixedRent')),
+            ownerName: formData.get('ownerName'),
+            tenantName: formData.get('tenantName'),
+            numOfBedRooms: parseInt(formData.get('numOfBedRooms')),
+            numOfRooms: parseInt(formData.get('numOfRooms')),
+            numOfBaths: parseInt(formData.get('numOfBaths')),
+        };
+
+        try {
+            // Add new property and wait for the response
+            const propertyResponse = await axios.post(`http://localhost:8080/properties`, addedProperty);
+            setProperties(prev => [...prev, propertyResponse.data]);
+            addedPropertyID.current = propertyResponse.data.propertyID;
+            console.log("Added propertyID:", addedPropertyID.current);
+
+            if (startDate && dueDate && addedProperty.tenantName) {
+                // Fetch tenant ID and wait for the response
+                const tenantResponse = await axios.get(`http://localhost:8080/tenants/id/${addedProperty.tenantName}`);
+                tenantID.current = tenantResponse.data;
+                console.log("Fetched tenantID:", tenantID.current);
+
+                // Create property assignment
+                const propertyAssignmentToUpdate = {
+                    propertyID: addedPropertyID.current,
+                    ownerID: owner.id,
+                    tenantID: tenantID.current,
+                    // assignmentDate handled in backend
+                };
+
+                console.log("Property Assignment Payload:", propertyAssignmentToUpdate);
+
+                await axios.post(`http://localhost:8080/propertyAssignments`, propertyAssignmentToUpdate);
+                console.log("Property Assignment added successfully");
+
+                // Create rent assignment
+                const rentAssignmentToUpdate = {
+                    startDate: startDate,
+                    dueDate: dueDate,
+                    propertyID: addedPropertyID.current,
+                    tenantID: tenantID.current,
+                };
+
+                await axios.post(`http://localhost:8080/rentAssignments`, rentAssignmentToUpdate);
+                console.log("Rent Assignment added successfully");
+                setRentAssignments(prev => [...prev, rentAssignmentToUpdate]);
+                setRentAssignmentToUp(rentAssignmentToUpdate);
+            }
+
+            // Finalize the process
+            if (isStored.current) {
+                const updatedAddedProperty = {
+                    ...addedProperty,
+                    propertyID: addedPropertyID.current, // Add the property ID to the object
+                };
+
+                setIsSubmitting(false);
+                setViewedProperty(updatedAddedProperty); // Use the updated object here
+                setAddProperty(false);
+                setEditMode(false);
+                setFormErrors({});
+            }
+        } catch (error) {
+            console.error("Error during property or assignment creation:", error);
+            isStored.current = false;
+            setIsSubmitting(false);
+        }
+    };
 
     const PropertyBox = ({ label, name, value }) => {
-        const isReadOnly = name === "propertyID";
+        const isReadOnly = (name || "") === "propertyID" || (name || "") === "ownerName";
         const isError = formErrors[name];
         const isNumeric = ['numOfRooms', 'numOfBedRooms', 'numOfBaths', 'fixedRent'].includes(name);
         const isDateField = ['startDate', 'dueDate'].includes(name);
@@ -241,7 +375,7 @@ const OwnerMngProperties = () => {
             setLocalValue(value || "");
         }, [value]);
 
-        const handleChange = (e) => {
+        const handleChange = async (e) => {
             const newValue = e.target.value;
             setLocalValue(newValue);
 
@@ -252,26 +386,52 @@ const OwnerMngProperties = () => {
                     return newErrors;
                 });
             }
+            // if (name === 'tenantName') {
+            //     if (newValue.trim() === "") {
+            //         setTenantValid(null);
+            //         return;
+            //     }
+            //     try {
+            //         const response = await axios.get(`http://localhost:8080/tenants/checkUsername/${newValue}`);
+            //         if (response.data.exists) {
+            //             setTenantValid(true);
+            //         } else {
+            //             setTenantValid(false);
+            //         }
+            //     } catch (error) {
+            //         console.error("Error checking tenant username:", error);
+            //         setTenantValid(false);
+            //     }
+            // }
+        };
+        const getBorderColor = () => {
+            if (name === "tenantName") {
+                if (tenantValid === true) return "border-green-500";
+                if (tenantValid === false) return "border-red-500";
+            }
+            return isError ? "border-red-500" : "border-gray-300";
         };
 
-        const handleBlur = () => {
-            if (name === 'startDate' || name === 'dueDate') {
-                // Trigger validation when date fields lose focus
-                validateForm();
-            }
+        // const handleBlur = () => {
+        //     if (name === 'startDate' || name === 'dueDate') {
+        //         // Trigger validation when date fields lose focus
+        //         validateForm();
+        //     }
 
-            if (name in viewedProperty) {
-                setViewedProperty(prev => ({
-                    ...prev,
-                    [name]: localValue
-                }));
-            } else if (rentAssignmentToUp && name in rentAssignmentToUp) {
-                setRentAssignmentToUp(prev => ({
-                    ...prev,
-                    [name]: localValue
-                }));
-            }
-        };
+        //     if (viewedProperty) {
+        //         if (name in viewedProperty) {
+        //             setViewedProperty(prev => ({
+        //                 ...prev,
+        //                 [name]: localValue
+        //             }));
+        //         } else if (rentAssignmentToUp && name in rentAssignmentToUp) {
+        //             setRentAssignmentToUp(prev => ({
+        //                 ...prev,
+        //                 [name]: localValue
+        //             }));
+        //         }
+        //     }
+        // };
 
         return (
             <div className="flex flex-col w-[230px]">
@@ -283,8 +443,8 @@ const OwnerMngProperties = () => {
                             type={isDateField ? "date" : (isNumeric ? "number" : "text")}
                             value={localValue}
                             onChange={handleChange}
-                            onBlur={handleBlur}
-                            className={`px-4 py-2 rounded w-full text-[15px] text-gray-800 bg-[#F2F2F2] focus:outline-none border ${isError ? 'border-red-500' : 'border-gray-300'}`}
+                            // onBlur={handleBlur}
+                            className={`px-4 py-2 rounded w-full text-[15px] text-gray-800 bg-[#F2F2F2] focus:outline-none border ${(!tenantValid && name === "tenantName") ? 'border-red-500' : ''}  ${isError ? 'border-red-500' : 'border-gray-300 border'} '}`}
                             readOnly={isReadOnly}
                             tabIndex={isReadOnly ? -1 : 0}
                             min={isNumeric ? "1" : undefined}
@@ -302,14 +462,26 @@ const OwnerMngProperties = () => {
             </div>
         );
     };
-    console.log(rentAssignmentToUp)
+
     return (
         <div className="flex font-[Lexend] relative">
             <Sidebar />
             <div className="w-[80vw] bg-[#E6E6E6] relative">
-                <div className="pl-[80px] pr-[50px] mt-[10px]">
-                    <h1 className="text-[#081E4A] text-[54px] font-bold">Manage Properties</h1>
-                    <p className="text-[15px] text-[#4D4D4D] font-light">View, edit, or delete properties.</p>
+                <div className="flex justify-between items-center w-[75vw]">
+                    <div className="pl-[80px] mt-[10px]">
+                        <h1 className="text-[#081E4A] text-[54px] font-bold">Manage Properties</h1>
+                        <p className="text-[15px] text-[#4D4D4D] font-light">View, add, edit, or delete properties.</p>
+                    </div>
+                    <div className="relative w-[300px]">
+                        <input
+                            type="text"
+                            placeholder="Search properties..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="border border-gray-400 rounded px-10 py-2 w-full"
+                        />
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-black" />
+                    </div>
                 </div>
 
                 <div className="mx-[80px] mt-8 bg-white rounded-lg shadow-md relative w-[70vw] h-[50vh]">
@@ -425,6 +597,72 @@ const OwnerMngProperties = () => {
                             </div>
                         </>
                     )}
+                    {!viewedProperty && !addProperty && (<>
+                        <div className="bg-black absolute left-[45%] bottom-[-25px] rounded-[50%] w-[50px] h-[50px] flex justify-center items-center content-center cursor-pointer" onClick={() => {
+                            setAddProperty(true)
+                            setEditMode(true)
+                            setFormErrors({});
+                        }}>
+                            <Plus className="w-8 h-8 text-white" />
+                        </div>
+                    </>)}
+                    {addProperty && (
+                        <div className="absolute top-0 bg-white bg-opacity-90 z-50 flex rounded-lg items-center justify-center px-6 w-[70vw] h-[50vh]">
+                            <form ref={formRef} className="p-6 rounded-lg w-full max-w-[1000px] space-y-8 relative">
+                                <div className="flex justify-between items-center absolute top-4 left-4 w-full pr-[40px]">
+                                    <div
+                                        onClick={handleBack}
+                                        className="w-[43px] h-[43px] cursor-pointer rounded-full bg-[#D9D9D9] flex items-center justify-center"
+                                    >
+                                        <ChevronLeft className="text-black" />
+                                    </div>
+                                    <div>
+                                        <button
+                                            type="button"
+                                            onClick={handleAdd}
+                                            disabled={isSubmitting}
+                                            className="bg-[#FFAE1A] cursor-pointer text-white text-[20px] font-medium rounded-[4.5px] px-[15px] py-[3px]"
+                                        >
+                                            {isSubmitting ? "Saving..." : "SAVE"}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="pt-12 flex flex-col space-y-8">
+                                    <div className="flex flex-wrap justify-between">
+                                        <PropertyBox label="PROPERTY ID" name="propertyID" value={() => { return (getHigestPropertyID() + 1) }} />
+                                        <PropertyBox label="PROPERTY NAME" name="propertyName" />
+                                        <PropertyBox label="OWNER NAME" name="ownerName" value={owner.userName} />
+                                        <PropertyBox label="AREA" name="area" />
+                                    </div>
+
+                                    <div className="flex flex-wrap justify-between">
+                                        <PropertyBox label="LOCATION" name="location" />
+                                        <PropertyBox label="NO OF ROOMS" name="numOfRooms" />
+                                        <PropertyBox label="NO OF BED ROOMS" name="numOfBedRooms" />
+                                        <PropertyBox label="NO OF BATHS" name="numOfBaths" />
+                                    </div>
+
+                                    <hr className="border-gray-300" />
+
+                                    <div className="flex flex-wrap justify-between">
+
+                                        <PropertyBox
+                                            label="RENT START DATE"
+                                            name="startDate"
+                                        />
+                                        <PropertyBox
+                                            label="RENT END DATE"
+                                            name="dueDate"
+                                        />
+                                        <PropertyBox label="FIXED RENT AMOUNT" name="fixedRent" />
+                                        <PropertyBox label="ASSIGNED TENANT" name="tenantName" />
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    )}
+
                 </div>
 
                 <div className="w-[24vw] flex flex-col items-center rounded-[16px] p-[10px] bg-white text-[#081E4A] font-medium ml-[80px] mt-[15px]">

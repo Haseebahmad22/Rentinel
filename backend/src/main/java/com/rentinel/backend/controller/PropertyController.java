@@ -4,6 +4,8 @@ import com.rentinel.backend.model.AreaCount;
 import com.rentinel.backend.model.Property;
 import com.rentinel.backend.repository.PropertyRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -59,7 +61,6 @@ public class PropertyController {
                 .orElseThrow(() -> new RuntimeException("Property not found with id " + propertyID));
     }
 
-    
     // GET /properties/owner/{ownerID} - Fetch properties by ownerID
     @GetMapping("/owner/{ownerName}")
     public List<Property> getPropertiesByOwnerName(@PathVariable String ownerName) {
@@ -70,6 +71,7 @@ public class PropertyController {
     public long getPropertyCount() {
         return propertyRepository.count();
     }
+
     @GetMapping("/averageRent")
     public Double getAverageRent() {
         return propertyRepository.getAverageRent();
@@ -80,11 +82,23 @@ public class PropertyController {
         return propertyRepository.getOccupancyRate();
     }
 
-     @GetMapping("/areacount")
+    @GetMapping("/areacount")
     public List<AreaCount> getAreaCount() {
         return propertyRepository.getAreaCount()
                 .stream()
                 .map(row -> new AreaCount((String) row[0], ((Number) row[1]).intValue()))
                 .collect(Collectors.toList());
+    }
+
+    // create new property at /properties
+    @PostMapping
+    public ResponseEntity<Property> createProperty(@RequestBody Property newProperty) {
+        try {
+            System.out.println(newProperty);
+            Property savedProperty = propertyRepository.save(newProperty);
+            return new ResponseEntity<>(savedProperty, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

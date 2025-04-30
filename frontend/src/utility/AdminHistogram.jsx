@@ -72,12 +72,12 @@ export default function Histogram() {
       </div>
     );
   }
-  
+
   return (
 
     <div className="bg-white rounded-xl p-5 shadow-md w-full h-[40vh]">
       <div className="flex justify-between items-center mb-[10px]">
-        <h2 className="text-3xl font-bold text-gray-900">User Registrations</h2>
+        <h2 className="text-3xl font-bold text-gray-900">Monthly Rents</h2>
         <div className="relative inline-block text-left">
           <button
             onClick={() => setOpen(!open)}

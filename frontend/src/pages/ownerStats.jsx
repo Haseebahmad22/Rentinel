@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import Sidebar from "../utility/adminSidebar";
+import Sidebar from "../utility/ownerSidebar";
 import Histogram from "../utility/AdminHistogram";
 import axios from "axios";
 import AdminPieChart from "../utility/AdminPieChart";

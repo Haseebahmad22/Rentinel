@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import Sidebar from "../utility/adminSidebar";
+import Sidebar from "../utility/ownerSidebar";
 import axios from "axios";
 import { Pencil, Trash2, Eye, ChevronLeft, X } from "lucide-react";
 

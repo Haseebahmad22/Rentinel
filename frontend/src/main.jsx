@@ -15,7 +15,7 @@ import Signin from './pages/signin';
 
 import OwnerDashboard from './pages/ownerDashboard';
 import OwnerMngProperties from './pages/ownerMngProperties';
-import OwnerMngPayments from './pages/ownerMngPayments';
+import OwnerMngPayments from './pages/ownerPayHistory';
 import OwnerNotifications from './pages/ownerNotifications';
 import OwnerDetails from './pages/ownerDetails';
 import OwnerStats from './pages/ownerStats';

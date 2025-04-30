@@ -9,7 +9,7 @@ const AdminDashboard = () => {
     const [ownerCount, setOwnerCount] = useState(0);
     const [propertyCount, setPropertyCount] = useState(0);
     const [paymentCount, setPaymentCount] = useState(0);
-    const [userId, setUserId] = useState("");
+    const [userId, setUserId] = useState("1");
     const [admin, setAdmin] = useState(null)
     useEffect(() => {
         const storedId = localStorage.getItem('userID');
@@ -18,8 +18,8 @@ const AdminDashboard = () => {
         } else {
             console.error('No userId found in localStorage');
         }
-      }, []);
-      
+    }, []);
+
 
     useEffect(() => {
         if (userId) {
@@ -28,7 +28,7 @@ const AdminDashboard = () => {
                 .catch(err => console.error(err));
         }
     }, [userId]);  // <- watch userId, not []
-    
+
 
     useEffect(() => {
         axios.get("http://localhost:8080/properties/count")
@@ -52,9 +52,9 @@ const AdminDashboard = () => {
                 {/* top bar showing dashboard and profile */}
                 <div className="flex w-[100%] content-center justify-between pl-[80px] pr-[50px] mt-[10px]">
                     <h1 className="text-[#081E4A] text-[54px] font-bold">Dashboard</h1>
-                    <Link to = "/adminDetails" className="flex justify-center items-center gap-3 cursor-pointer">
+                    <Link to="/adminDetails" className="flex justify-center items-center gap-3 cursor-pointer">
                         <div className="rounded-[50%] w-[50px] h-[50px] text-white text-[28px] bg-amber-950 flex items-center justify-center">
-                        {admin?.fullName?.[0]}
+                            {admin?.fullName?.[0]}
                         </div>
                         <div>
                             <h3 className="text-[18px] text-[#292D32] font-medium">{admin?.fullName}</h3>
@@ -85,7 +85,7 @@ const AdminDashboard = () => {
                             <p className="text-[15px] text-[#ffffff] font-extralight">View, edit, or delete <br /> Tenants.</p>
                         </div>
 
-                        <Link to = "/adminMngTenants" className="bg-white cursor-pointer absolute bottom-4 right-4 h-[40px] w-[100px] rounded-[8px] text-[#3C21F7] text-[12px] font-bold flex justify-center items-center">View</Link>
+                        <Link to="/adminMngTenants" className="bg-white cursor-pointer absolute bottom-4 right-4 h-[40px] w-[100px] rounded-[8px] text-[#3C21F7] text-[12px] font-bold flex justify-center items-center">View</Link>
                     </div>
                 </div>
                 {/* mid 4 boxes */}

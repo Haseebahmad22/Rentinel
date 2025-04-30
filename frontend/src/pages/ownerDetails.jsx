@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import Sidebar from "../utility/adminSidebar";
+import Sidebar from "../utility/ownerSidebar";
 import axios from "axios";
 
 const OwnerDetails = () => {
