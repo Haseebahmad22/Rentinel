@@ -23,7 +23,7 @@ const Sidebar = () => {
                     <Link to="/tenantDashboard" className={linkClass("/tenantDashboard")}>
                         <LayoutDashboard className="w-5 h-5 mr-2" /> Dashboard
                     </Link>
-                    <Link to="/tenantMngProperties" className={linkClass("/tenantMngProperties ")}>
+                    <Link to="/tenantMngProperties" className={linkClass("/tenantMngProperties")}>
                         <Building className="w-5 h-5 mr-2" /> Properties
                     </Link>
                     <Link to="/tenantNotifications" className={linkClass("/tenantNotifications")}>

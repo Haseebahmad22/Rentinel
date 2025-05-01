@@ -46,7 +46,7 @@ const TenantDashboard = () => {
         {/* Top Bar */}
         <div className="flex justify-between items-center px-[80px] mt-[10px]">
           <h1 className="text-[#081E4A] text-[54px] font-bold">Dashboard</h1>
-          <Link to="/adminDetails" className="flex justify-center items-center gap-3 cursor-pointer">
+          <Link to="/tenantDetails" className="flex justify-center items-center gap-3 cursor-pointer">
             <div className="rounded-[50%] w-[50px] h-[50px] text-white text-[28px] bg-amber-950 flex items-center justify-center">
               {userName[0].toUpperCase()}
             </div>
@@ -74,7 +74,7 @@ const TenantDashboard = () => {
               <h1 className="text-[18px] text-white">Manage Properties</h1>
               <p className="text-[15px] text-[#ffffff] font-extralight">View and pay for rented  <br /> properties.</p>
             </div>
-            <Link to="/adminMngOwners" className="bg-white absolute bottom-4 cursor-pointer right-4 h-[40px] w-[100px] rounded-[8px] text-[#3C21F7] text-[12px] font-bold flex justify-center items-center">View</Link>
+            <Link to="/tenantMngProperties" className="bg-white absolute bottom-4 cursor-pointer right-4 h-[40px] w-[100px] rounded-[8px] text-[#3C21F7] text-[12px] font-bold flex justify-center items-center">View</Link>
           </div>
 
           {/* Manage Notifications */}
@@ -85,7 +85,7 @@ const TenantDashboard = () => {
               <p className="text-[15px] text-[#ffffff] font-extralight">View notifications received</p>
             </div>
 
-            <Link to="/adminMngTenants" className="bg-white cursor-pointer absolute bottom-4 right-4 h-[40px] w-[100px] rounded-[8px] text-[#3C21F7] text-[12px] font-bold flex justify-center items-center">View</Link>
+            <Link to="/tenantNotifications" className="bg-white cursor-pointer absolute bottom-4 right-4 h-[40px] w-[100px] rounded-[8px] text-[#3C21F7] text-[12px] font-bold flex justify-center items-center">View</Link>
           </div>
         </div>
 
