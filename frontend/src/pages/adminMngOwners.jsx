@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import Sidebar from "../utility/adminSidebar";
 import axios from "axios";
 import { Pencil, Trash2, Eye, ChevronLeft, X, Search } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const AdminMngOwners = () => {
     const [owners, setOwners] = useState([]);
@@ -13,7 +14,17 @@ const AdminMngOwners = () => {
     const [formErrors, setFormErrors] = useState({});
     const formRef = useRef(null);
     const [searchTerm, setSearchTerm] = useState("");
+    const [userID, setUserId] = useState();
+    const navigate = useNavigate();
 
+    useEffect(() => {
+        const storedId = localStorage.getItem('userID');
+        if (storedId !== null && storedId !== "null") {
+            setUserId(storedId);
+        } else {
+            navigate("/signin");
+        }
+    }, [navigate]);
 
     useEffect(() => {
         axios.get("http://localhost:8080/owners")

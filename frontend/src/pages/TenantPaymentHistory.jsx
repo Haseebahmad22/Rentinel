@@ -1,19 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Tenantsidebar';
 import { fetchTenantPaymentHistory } from '../services/tenantpaymenthistoryservice';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Eye } from 'lucide-react';
 
 const TenantPaymentHistory = () => {
   const [paymentHistory, setPaymentHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const username = 'rachelbrown'; // Hardcoded username (or get from auth context)
+  const navigate = useNavigate(); // initialize navigation
 
+  const userName = localStorage.getItem("userName");
+
+  useEffect(() => {
+      if (!userName) {
+          navigate("/signin");
+      }
+  }, [userName, navigate]);
   useEffect(() => {
     const loadPaymentHistory = async () => {
       try {
-        const data = await fetchTenantPaymentHistory(username);
+        const data = await fetchTenantPaymentHistory(userName);
         setPaymentHistory(data);
       } catch (err) {
         setError('Failed to load payment history');
@@ -24,7 +31,7 @@ const TenantPaymentHistory = () => {
     };
 
     loadPaymentHistory();
-  }, [username]); // Add username to dependency array
+  }, [userName]); // Add userName to dependency array
 
   const handleViewClick = (paymentID) => {
     console.log('View clicked for Payment ID:', paymentID);
@@ -35,15 +42,14 @@ const TenantPaymentHistory = () => {
       <Sidebar />
 
       {/* Main Container */}
-      <div className="flex-1 bg-[#E6E6E6] pt-12 pr-[1rem] overflow-y-auto">
+      <div className="flex-1 bg-[#E6E6E6] pr-[1rem] overflow-y-auto">
         {/* Header */}
-        <div className="pl-[20px] pr-[20px] mt-[-20px]">
-          <h1 className="text-[#081E4A] text-[36px] font-bold">Payment History</h1>
-          <p className="text-[14px] text-[#4D4D4D] font-light">View your payment history.</p>
+        <div className="pl-[80px] pr-[50px] mt-[10px]">
+          <h1 className="text-[#081E4A] text-[54px] font-bold">Payment History</h1>
+          <p className="text-[15px] text-[#4D4D4D] font-light">View your payment history.</p>
         </div>
-
         {/* Payment History Container */}
-        <div className="mx-[20px] mt-8 bg-white rounded-lg shadow-md overflow-hidden relative">
+        <div className="mx-[80px] mt-8 bg-white rounded-lg shadow-md relative w-[70vw] h-[50vh]">
           {/* Sticky Header */}
           <div className="grid grid-cols-12 bg-gray-100 p-3 font-medium text-gray-700 sticky top-0 z-10">
             <div className="col-span-2 text-[12px]">Payment ID</div>
@@ -93,9 +99,9 @@ const TenantPaymentHistory = () => {
         </div>
 
         {/* Payment Count */}
-        <div className="w-[250px] flex flex-col items-center rounded-[12px] p-[8px] bg-white text-[#081E4A] font-medium ml-[20px] mt-[15px]">
-          <h1 className="text-[24px]">Total Payments</h1>
-          <h1 className="text-[24px]">{paymentHistory.length}</h1>
+        <div className="w-[24vw] flex flex-col items-center rounded-[16px] p-[10px] bg-white text-[#081E4A] font-medium ml-[80px] mt-[15px]">
+          <h1 className="text-[36px]">Total Payments</h1>
+          <h1 className="text-[32px]">{paymentHistory.length}</h1>
         </div>
       </div>
     </div>

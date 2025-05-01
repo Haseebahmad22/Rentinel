@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import Sidebar from "../utility/adminSidebar";
 import axios from "axios";
 import { Pencil, Trash2, Eye, ChevronLeft, X, Search } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const AdminMngTenants = () => {
     const [tenants, setTenants] = useState([]);
@@ -14,6 +15,17 @@ const AdminMngTenants = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
 
+    const [userID, setUserId] = useState();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const storedId = localStorage.getItem('userID');
+        if (storedId !== null && storedId !== "null") {
+            setUserId(storedId);
+        } else {
+            navigate("/signin");
+        }
+    }, [navigate]);
     useEffect(() => {
         axios.get("http://localhost:8080/tenants")
             .then(response => {

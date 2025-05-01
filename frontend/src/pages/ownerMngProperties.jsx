@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import Sidebar from "../utility/ownerSidebar";
 import axios from "axios";
 import { Pencil, Trash2, Eye, ChevronLeft, X, Search, Plus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const OwnerMngProperties = () => {
     const [owner, setOwner] = useState(null);
@@ -20,9 +21,20 @@ const OwnerMngProperties = () => {
     const [assignedTennat, setAssignedTennat] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [addProperty, setAddProperty] = useState(false);
-    const [userId, setUserId] = useState("1");
     const addedPropertyID = useRef(null);
     const [filterBy, setFilterBy] = useState("propertyName"); // Default to "Name"
+
+    const [userId, setUserId] = useState();
+    const navigate = useNavigate();
+    useEffect(() => {
+        const storedId = localStorage.getItem('userID');
+        if (storedId !== null && storedId !== "null") {
+            setUserId(storedId);
+        } else {
+            console.error('No userId found in localStorage');
+            navigate("/signin")
+        }
+    }, []);
 
     useEffect(() => {
         const storedId = localStorage.getItem('userID');

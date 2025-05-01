@@ -1,19 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Tenantsidebar';
 import { fetchAllTenantManageProperties } from '../services/tenantmanagepropertiesservice';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Eye } from 'lucide-react';
 
 const TenantManageProperties = () => {
   const [assignments, setAssignments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const username = 'rachelbrown'; // Hardcoded 
+
+  const navigate = useNavigate(); // initialize navigation
+
+  const userName = localStorage.getItem("userName");
+
+  useEffect(() => {
+      if (!userName) {
+          navigate("/signin");
+      }
+  }, [userName, navigate]);
 
   useEffect(() => {
     const loadProperties = async () => {
       try {
-        const data = await fetchAllTenantManageProperties(username);
+        const data = await fetchAllTenantManageProperties(userName);
         setAssignments(data);
       } catch (err) {
         setError('Failed to load properties');
@@ -24,7 +33,7 @@ const TenantManageProperties = () => {
     };
 
     loadProperties();
-  }, [username]);
+  }, [userName]);
 
   return (
     <div className="flex font-[Lexend]">
@@ -32,13 +41,13 @@ const TenantManageProperties = () => {
 
       {/* Main Content Area */}
       <div className="flex-1 bg-[#E6E6E6] overflow-x-hidden">
-        <div className="pl-[20px] pr-[20px] mt-[28px]">
-          <h1 className="text-[#081E4A] text-[36px] font-bold">Manage Properties</h1>
-          <p className="text-[14px] text-[#4D4D4D] font-light">View and manage your properties.</p>
+        <div className="pl-[80px] pr-[50px] mt-[10px]">
+          <h1 className="text-[#081E4A] text-[54px] font-bold">Manage Properties</h1>
+          <p className="text-[15px] text-[#4D4D4D] font-light">View and manage your properties.</p>
         </div>
 
         {/* Properties Table Container */}
-        <div className="mx-[20px] mt-8 bg-white rounded-lg shadow-md overflow-hidden relative h-[320px] w-[95%]">
+        <div className="mx-[80px] mt-8 bg-white rounded-lg shadow-md relative w-[70vw] h-[50vh]">
           {/* Sticky Header */}
           <div className="grid grid-cols-12 bg-gray-100 p-3 font-medium text-gray-700 sticky top-0 z-10">
             <div className="col-span-3 text-[12px]">Property ID</div>
@@ -49,7 +58,7 @@ const TenantManageProperties = () => {
           </div>
 
           {/* Scrollable Body */}
-          <div className="overflow-y-auto max-h-[256px]">
+          <div className="overflow-y-auto max-h-[40vh]">
             {loading ? (
               <div className="text-center p-3 text-gray-700">Loading properties...</div>
             ) : error ? (
@@ -85,9 +94,9 @@ const TenantManageProperties = () => {
         </div>
 
         {/* Property Count */}
-        <div className="w-[250px] flex flex-col items-center rounded-[12px] p-[8px] bg-white text-[#081E4A] font-medium ml-[20px] mt-[15px]">
-          <h1 className="text-[24px]">Total Properties</h1>
-          <h1 className="text-[24px]">{assignments.length}</h1>
+        <div className="w-[24vw] flex flex-col items-center rounded-[16px] p-[10px] bg-white text-[#081E4A] font-medium ml-[80px] mt-[15px]">
+          <h1 className="text-[36px]">Total Properties</h1>
+          <h1 className="text-[32px]">{assignments.length}</h1>
         </div>
       </div>
     </div>

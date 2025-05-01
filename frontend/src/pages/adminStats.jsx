@@ -4,6 +4,7 @@ import Histogram from "../utility/AdminHistogram";
 import axios from "axios";
 import AdminPieChart from "../utility/AdminPieChart";
 
+import { useNavigate } from "react-router-dom";
 
 const AdminStats = () => {
     const [tenantCount, setTenantCount] = useState(0);
@@ -14,6 +15,17 @@ const AdminStats = () => {
     const [avgRent, setavgRent] = useState(0);
     const [occupancyRate, setOccupancyRate] = useState(0);
     const [yearlyRent, setYearlyRent] = useState(0);
+    const [userID, setUserId] = useState();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const storedId = localStorage.getItem('userID');
+        if (storedId !== null && storedId !== "null") {
+            setUserId(storedId);
+        } else {
+            navigate("/signin");
+        }
+    }, [navigate]);
 
     useEffect(() => {
         axios.get("http://localhost:8080/payments/count")

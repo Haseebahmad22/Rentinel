@@ -3,6 +3,7 @@ import Sidebar from "../utility/ownerSidebar";
 import Histogram from "../utility/ownerHistogram";
 import axios from "axios";
 import OwnerPieChart from "../utility/ownerPieChart";
+import { useNavigate } from "react-router-dom";
 
 
 const OwnerStats = () => {
@@ -16,7 +17,16 @@ const OwnerStats = () => {
     const [totalPaymentAmount, setTotalPaymetAmount] = useState(0);
     const [userId, setUserId] = useState("1");
 
-
+    const navigate = useNavigate();
+    useEffect(() => {
+        const storedId = localStorage.getItem('userID');
+        if (storedId !== null && storedId !== "null") {
+            setUserId(storedId);
+        } else {
+            console.error('No userId found in localStorage');
+            navigate("/signin")
+        }
+    }, []);
     useEffect(() => {
         const storedId = localStorage.getItem('userID');
         if (storedId !== null && storedId !== "null") {

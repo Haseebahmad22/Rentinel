@@ -2,23 +2,27 @@ import { useState, useEffect } from "react";
 import Sidebar from "../utility/adminSidebar";
 import Histogram from "../utility/AdminHistogram";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const AdminDashboard = () => {
     const [tenantCount, setTenantCount] = useState(0);
     const [ownerCount, setOwnerCount] = useState(0);
     const [propertyCount, setPropertyCount] = useState(0);
     const [paymentCount, setPaymentCount] = useState(0);
-    const [userId, setUserId] = useState("1");
-    const [admin, setAdmin] = useState(null)
+    const [admin, setAdmin] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [userId, setUserId] = useState();
+    const navigate = useNavigate();
+
     useEffect(() => {
         const storedId = localStorage.getItem('userID');
         if (storedId !== null && storedId !== "null") {
             setUserId(storedId);
         } else {
-            console.error('No userId found in localStorage');
+            navigate("/signin");
         }
-    }, []);
+        console.log(userId)
+    }, [navigate]);
 
 
     useEffect(() => {
@@ -27,7 +31,7 @@ const AdminDashboard = () => {
                 .then(res => setAdmin(res.data))
                 .catch(err => console.error(err));
         }
-    }, [userId]);  // <- watch userId, not []
+    }, [userId]); 
 
 
     useEffect(() => {

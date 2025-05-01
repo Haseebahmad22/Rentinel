@@ -1,10 +1,16 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation,useNavigate } from "react-router-dom";
 import { useRef } from "react";
 import { User, Building, Users, FileText, BarChart2, LogOut, LayoutDashboard } from "lucide-react";
 
 const Sidebar = (setPage) => {
     const location = useLocation();
 
+    const navigate = useNavigate();
+    
+    const handleLogout=()=>{
+        localStorage.removeItem('userID');
+        navigate("/signin");
+    }
     const linkClass = (path) =>
         `flex items-center px-4 py-2 rounded-lg hover:bg-gray-700 transition ${location.pathname === path ? "bg-blue-600 text-white" : "text-gray-300"
         }`;
@@ -56,7 +62,8 @@ const Sidebar = (setPage) => {
 
             {/* Logout Button */}
             <div className="px-4 w-full flex items-center justify-center">
-                <button className="w-[60%] flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg transition">
+                <button className="w-[60%] flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2 cursor-pointer rounded-lg transition"
+                onClick={handleLogout}>
                     <LogOut className="w-5 h-5" /> Logout
                 </button>
             </div>

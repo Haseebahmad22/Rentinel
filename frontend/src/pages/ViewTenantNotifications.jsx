@@ -9,14 +9,21 @@ const ViewTenantNotifications = () => {
   const [notification, setNotification] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
 
-  const tenantUsername = 'rachelbrown'; // Can be dynamic based on current user
+  const navigate = useNavigate(); // initialize navigation
 
+    const userName = localStorage.getItem("userName");
+
+    useEffect(() => {
+        if (!userName) {
+            navigate("/signin");
+        }
+    }, [userName, navigate]);
+    
   useEffect(() => {
     const fetchNotification = async () => {
       try {
-        const data = await fetchNotificationByID(tenantUsername, notificationID);
+        const data = await fetchNotificationByID(userName, notificationID);
         setNotification(data);
       } catch (err) {
         setError('Failed to load notification details');
@@ -36,17 +43,16 @@ const ViewTenantNotifications = () => {
   return (
     <div className="flex font-[Lexend] min-h-screen">
       <Sidebar />
-      <div className="flex-1 bg-[#E6E6E6] flex flex-col items-center pt-10">
+      <div className="flex-1 bg-[#E6E6E6] flex flex-col items-center">
         {/* Header */}
-        <div className="w-full max-w-5xl px-6">
-          <h1 className="text-[#081E4A] text-[32px] font-bold">Notification Details</h1>
-          <p className="text-[14px] text-[#4D4D4D] font-light">View your notification details.</p>
+        <div className="pl-[80px] pr-[50px] mt-[10px] w-full">
+          <h1 className="text-[#081E4A] text-[54px] font-bold">Notification Detail</h1>
+          <p className="text-[15px] text-[#4D4D4D] font-light">View your notification details.</p>
         </div>
-
         {/* White Card */}
-        <div className="relative bg-white w-full max-w-4xl mt-8 rounded-lg shadow-md overflow-hidden min-h-[390px]">
+        <div className="relative bg-white w-[70vw] h-[60vh] mt-8 rounded-lg shadow-md overflow-hidden">
           {/* Back Button */}
-          <div className="absolute top-4 left-4">
+          <div className="absolute top-5 left-8">
             <button
               onClick={handleBack}
               className="w-[32px] h-[32px] rounded-full bg-[#D9D9D9] flex items-center justify-center"

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import Sidebar from "../utility/adminSidebar";
 import axios from "axios";
 import { Pencil, Trash2, Eye, ChevronLeft, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const AdminMngPayments = () => {
     const [payments, setPayments] = useState([]);
@@ -13,6 +14,17 @@ const AdminMngPayments = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [property, setProperty] = useState([]);
 
+     const [userID, setUserId] = useState();
+        const navigate = useNavigate();
+    
+        useEffect(() => {
+            const storedId = localStorage.getItem('userID');
+            if (storedId !== null && storedId !== "null") {
+                setUserId(storedId);
+            } else {
+                navigate("/signin");
+            }
+        }, [navigate]);
     useEffect(() => {
         axios.get("http://localhost:8080/payments")
             .then(response => {
