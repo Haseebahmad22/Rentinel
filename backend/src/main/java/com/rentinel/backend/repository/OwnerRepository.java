@@ -11,6 +11,8 @@ import org.springframework.stereotype.Repository;
 public interface OwnerRepository extends JpaRepository<Owner, Integer> {
     // Optional<Owner> findById(Integer id); // Match the lowercase field name
 
+    Optional<Owner> findByUserName(String userName);
+
     void deleteByUserName(String userName);
 
     @Query(value = "SELECT FORMAT(accountCreationDate, 'MMM') AS month, COUNT(*) AS userCount " +

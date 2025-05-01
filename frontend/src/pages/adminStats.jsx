@@ -111,7 +111,7 @@ const AdminStats = () => {
 
 
                 {/* Last 4 boxes */}
-                <div className="flex w-[100%] justify-between h-fit gap-[10px] pl-[80px] pr-[50px] mt-[20px]">
+                <div className="flex w-[100%] justify-between h-fit gap-[10px] pl-[80px] pr-[50px] mt-[10px]">
                     <div className="flex bg-white px-[20px] py-[20px] gap-[30px] rounded-[15px] w-[33vw]">
                         <div className="w-full">
                             <h1 className="text-[#343434] text-[20px]  mb-[5px]">Total Payments Made</h1>
@@ -163,7 +163,7 @@ const AdminStats = () => {
                         </div>
                     </div>
                 </div>
-                <div className="flex w-[80vw] pl-[80px] pr-[50px] gap-[10px] mt-10 items-center justify-start content-center">
+                <div className="flex w-[80vw] pl-[80px] pr-[50px] gap-[10px] mt-5 items-center justify-start content-center">
                     <div className="flex flex-col rounded-[15px] w-[75%] h-[40vh] items-center justify-center">
                         <Histogram />
                     </div>

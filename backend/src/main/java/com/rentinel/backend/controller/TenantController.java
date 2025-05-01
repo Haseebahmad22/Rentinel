@@ -3,6 +3,7 @@ package com.rentinel.backend.controller;
 import com.rentinel.backend.model.LoginRequest;
 import com.rentinel.backend.model.LoginResponse;
 import com.rentinel.backend.model.Tenant;
+import com.rentinel.backend.repository.PropertyAssignmentRepository;
 import com.rentinel.backend.repository.RentAssignmentRepository;
 import com.rentinel.backend.repository.TenantRepository;
 
@@ -24,6 +25,8 @@ public class TenantController {
 
     @Autowired
     private RentAssignmentRepository rentAssignmentRepository;
+    @Autowired
+    private PropertyAssignmentRepository propertyAssignmentRepository;
 
     // GET /api/owners
     @GetMapping
@@ -36,7 +39,6 @@ public class TenantController {
     public boolean checkTenantUsername(@PathVariable String userName) {
         return tenantRepository.existsByUserName(userName);
     }
-    
 
     // POST /tenants - Register a new tenant
     @PostMapping
@@ -49,6 +51,7 @@ public class TenantController {
     @DeleteMapping("/{id}")
     public void deleteTenant(@PathVariable Integer id) {
         rentAssignmentRepository.deleteAllByTenantID(id);
+        propertyAssignmentRepository.deleteAllByTenantID(id);
         tenantRepository.deleteById(id);
     }
 
@@ -61,6 +64,12 @@ public class TenantController {
         } else {
             throw new RuntimeException("Tenant not found with name " + userName);
         }
+    }
+
+    @GetMapping("/userName/{ID}")
+    public Optional<Tenant> getTenant(@PathVariable Integer ID) {
+        Optional<Tenant> tenant = tenantRepository.findById(ID);
+        return tenant;
     }
 
     // PUT /tenants/{id} - Update tenant details
@@ -101,6 +110,11 @@ public class TenantController {
             response = new LoginResponse(false, null, null, "Invalid credentials");
             return ResponseEntity.status(401).body(response);
         }
+    }
+
+    @GetMapping("/count/by-owner/{ownerId}")
+    public long getTenantCountByOwner(@PathVariable Integer ownerId) {
+        return propertyAssignmentRepository.countDistinctTenantIDByOwnerID(ownerId);
     }
 
 }

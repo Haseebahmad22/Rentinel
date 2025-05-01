@@ -41,43 +41,55 @@ export default function Histogram() {
     const [data, setData] = useState([]);
     const [selectedMonth, setSelectedMonth] = useState("Aug");
     const [open, setOpen] = useState(false);
+    const [userId, setUserId] = useState("1");
 
     useEffect(() => {
-        async function fetchData() {
-            try {
-                const response = await axios.get("http://localhost:8080/owners/userRegistrations");
-                if (Array.isArray(response.data) && response.data.length > 0) {
-                    const updatedData = monthsTemplate.map((item) => {
-                        const match = response.data.find((dbItem) => dbItem.month === item.month);
-                        return match ? { ...item, rent: match.userCount } : item;
-                    });
-                    setData(updatedData);
-                } else {
-                    console.warn("No valid registration data received.");
-                    setData(monthsTemplate); // Reset to all zero rents
-                }
-            } catch (error) {
-                console.error("Error fetching user registrations:", error);
-                setData(monthsTemplate); // Also reset to safe template on error
-            }
+        const storedId = localStorage.getItem('userID');
+        if (storedId !== null && storedId !== "null") {
+            setUserId(storedId);
+        } else {
+            console.error('No userId found in localStorage');
         }
-
-        fetchData();
     }, []);
+
+    useEffect(() => {
+        if (userId) {
+            async function fetchData() {
+                try {
+                    const response = await axios.get(`http://localhost:8080/payments/monthlyRents/${userId}`);
+                    if (Array.isArray(response.data) && response.data.length > 0) {
+                        const updatedData = monthsTemplate.map((item) => {
+                            const match = response.data.find((dbItem) => dbItem.month === item.month);
+                            return match ? { ...item, rent: match.totalAmount } : item;
+                        });
+                        setData(updatedData);
+                    } else {
+                        console.warn("No valid monthly data received.");
+                        setData(monthsTemplate); // Reset to all zero rents
+                    }
+                } catch (error) {
+                    console.error("Error fetching monthly rents:", error);
+                    setData(monthsTemplate); // Also reset to safe template on error
+                }
+            }
+
+            fetchData();
+        }
+    }, [userId]);
 
     if (!data.length) {
         return (
             <div className="bg-white rounded-xl p-5 shadow-md w-full flex items-center justify-center h-[40vh]">
-                <p className="text-gray-500 text-lg">No registration data available.</p>
+                <p className="text-gray-500 text-lg">No monthly rent data available.</p>
             </div>
         );
     }
 
     return (
 
-        <div className="bg-white rounded-xl p-5 shadow-md w-full h-[40vh]">
+        <div className="bg-white rounded-xl px-5 pt-5 shadow-md w-full h-[40vh]">
             <div className="flex justify-between items-center mb-[10px]">
-                <h2 className="text-3xl font-bold text-gray-900">User Registrations</h2>
+                <h2 className="text-3xl font-bold text-gray-900">Monthly Rents</h2>
                 <div className="relative inline-block text-left">
                     <button
                         onClick={() => setOpen(!open)}
@@ -108,7 +120,7 @@ export default function Histogram() {
                 </div>
             </div>
 
-            <div className="w-full h-full">
+            <div className="w-full h-[32vh]">
                 <ResponsiveContainer width="100%" height="80%">
                     <BarChart
                         data={data}
@@ -129,33 +141,47 @@ export default function Histogram() {
                             dataKey="rent"
                             radius={[8, 8, 8, 8]}
                             fill="#5932EA"
-                            label={({ x, y, width, value, index }) =>
-                                data[index].month === selectedMonth ? (
+                            label={({ x, y, width, value, index }) => {
+                                const isSelected = data[index].month === selectedMonth;
+                                if (!isSelected) return null;
+
+                                const digitCount = `${value}`.length;
+                                const minRectWidth = 40;
+                                const maxRectWidth = 80;
+                                const minDigits = 1;
+                                const maxDigits = 4;
+
+                                // Interpolate width based on digit count (1 to 4 digits)
+                                const clampedDigits = Math.min(Math.max(digitCount, minDigits), maxDigits);
+                                const scale = (clampedDigits - minDigits) / (maxDigits - minDigits);
+                                const rectWidth = minRectWidth + scale * (maxRectWidth - minRectWidth);
+
+                                const rectX = x + width / 2 - rectWidth / 2;
+
+                                return (
                                     <>
-                                        {/* Background Rect for Label */}
                                         <rect
-                                            x={x + width / 4}
+                                            x={rectX}
                                             y={y - 30}
-                                            width={width / 2}
+                                            width={rectWidth}
                                             height={22}
-                                            fill="#1A2B88"  // Background color for the label
-                                            rx={4} // Rounded corners
+                                            fill="#1A2B88"
+                                            rx={4}
                                         />
-                                        {/* Label Text */}
                                         <text
                                             x={x + width / 2}
-                                            y={y - 15 + 1.5}
+                                            y={y - 15}
                                             fill="#FFFFFF"
                                             textAnchor="middle"
                                             fontSize="16px"
                                             fontWeight="bold"
-
                                         >
                                             {value}
                                         </text>
                                     </>
-                                ) : null
-                            }
+                                );
+                            }}
+
                         />
                     </BarChart>
                 </ResponsiveContainer>

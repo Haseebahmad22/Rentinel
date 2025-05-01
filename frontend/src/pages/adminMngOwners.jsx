@@ -76,6 +76,28 @@ const AdminMngOwners = () => {
         setViewedOwner(owner);
         setEditMode(true);
         setFormErrors({});
+
+        axios.get(`http://localhost:8080/properties/owner/${owner.userName}`)
+        .then(response => {
+            const properties = response.data;
+            setOwnerProperties(properties);
+
+            const tenantRequests = properties.map((property) =>
+                axios.get(`http://localhost:8080/tenants/id/${property.tenantName}`)
+            );
+
+            Promise.all(tenantRequests)
+                .then(tenantResponses => {
+                    const propertiesWithTenantDetails = properties.map((property, index) => ({
+                        ...property,
+                        tenantID: tenantResponses[index].data,
+                    }));
+                    setOwnerProperties(propertiesWithTenantDetails);
+                });
+        })
+        .catch(error => {
+            console.error("Error fetching owner properties:", error);
+        });
     };
 
     const handleBack = () => {
@@ -216,7 +238,7 @@ const AdminMngOwners = () => {
                 <div className="mx-[80px] mt-8 bg-white rounded-lg shadow-md overflow-hidden relative w-[70vw] h-[50vh]">
                     {viewedOwner && (
                         <div className="absolute top-0 bg-white bg-opacity-90 z-50 flex rounded-lg items-center justify-center px-6 w-[70vw] h-[50vh]">
-                            <form ref={formRef} className="p-6 rounded-lg w-full max-w-[1000px] space-y-8 relative">
+                            <form ref={formRef} className="p-6 rounded-lg w-full space-y-8 relative">
                                 <div className="flex justify-between items-center absolute top-4 left-4 w-full pr-[40px]">
                                     <div
                                         onClick={handleBack}
@@ -295,14 +317,14 @@ const AdminMngOwners = () => {
                                 <div className="col-span-2">USERNAME</div>
                                 <div className="col-span-3">EMAIL</div>
                                 <div className="col-span-3">CNIC</div>
-                                <div className="col-span-4 flex justify-end gap-18 pr-[3vw]">
+                                <div className="col-span-4 flex justify-end gap-12 pr-[3vw]">
                                     <span>VIEW</span>
                                     <span>EDIT</span>
                                     <span>DELETE</span>
                                 </div>
                             </div>
 
-                            <div className="overflow-y-auto max-h-[324px]">
+                            <div className="overflow-y-auto max-h-[40vh]">
                                 {filteredOwners.map((owner) => (
                                     <div key={owner.id} className="grid grid-cols-14 p-4 border-b border-gray-200 items-center">
                                         <div className="col-span-2 font-medium">{owner.id}</div>

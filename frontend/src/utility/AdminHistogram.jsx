@@ -75,9 +75,9 @@ export default function Histogram() {
 
   return (
 
-    <div className="bg-white rounded-xl p-5 shadow-md w-full h-[40vh]">
+    <div className="bg-white rounded-xl px-5 pt-5 shadow-md w-full h-[40vh]">
       <div className="flex justify-between items-center mb-[10px]">
-        <h2 className="text-3xl font-bold text-gray-900">Monthly Rents</h2>
+        <h2 className="text-3xl font-bold text-gray-900">User Registrations</h2>
         <div className="relative inline-block text-left">
           <button
             onClick={() => setOpen(!open)}
@@ -108,7 +108,7 @@ export default function Histogram() {
         </div>
       </div>
 
-      <div className="w-full h-full">
+      <div className="w-full h-[32vh]">
         <ResponsiveContainer width="100%" height="80%">
           <BarChart
             data={data}
@@ -129,33 +129,47 @@ export default function Histogram() {
               dataKey="rent"
               radius={[8, 8, 8, 8]}
               fill="#5932EA"
-              label={({ x, y, width, value, index }) =>
-                data[index].month === selectedMonth ? (
+              label={({ x, y, width, value, index }) => {
+                const isSelected = data[index].month === selectedMonth;
+                if (!isSelected) return null;
+
+                const digitCount = `${value}`.length;
+                const minRectWidth = 40;
+                const maxRectWidth = 80;
+                const minDigits = 1;
+                const maxDigits = 4;
+
+                // Interpolate width based on digit count (1 to 4 digits)
+                const clampedDigits = Math.min(Math.max(digitCount, minDigits), maxDigits);
+                const scale = (clampedDigits - minDigits) / (maxDigits - minDigits);
+                const rectWidth = minRectWidth + scale * (maxRectWidth - minRectWidth);
+
+                const rectX = x + width / 2 - rectWidth / 2;
+
+                return (
                   <>
-                    {/* Background Rect for Label */}
                     <rect
-                      x={x + width / 4}
+                      x={rectX}
                       y={y - 30}
-                      width={width / 2}
+                      width={rectWidth}
                       height={22}
-                      fill="#1A2B88"  // Background color for the label
-                      rx={4} // Rounded corners
+                      fill="#1A2B88"
+                      rx={4}
                     />
-                    {/* Label Text */}
                     <text
                       x={x + width / 2}
-                      y={y - 15 + 1.5}
+                      y={y - 15}
                       fill="#FFFFFF"
                       textAnchor="middle"
                       fontSize="16px"
                       fontWeight="bold"
-
                     >
                       {value}
                     </text>
                   </>
-                ) : null
-              }
+                );
+              }}
+
             />
           </BarChart>
         </ResponsiveContainer>

@@ -15,12 +15,14 @@ const OwnerMngProperties = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const formRef = useRef(null);
     const [tenantValid, setTenantValid] = useState(null); // null = untouched, true = valid, false = invalid
+    const [assignedTenantLocal, setAssignedTenantLocal] = useState(null);
+    const [propertyAssignmentToUp, setPropertyAssignmentToUp] = useState(null);
+    const [assignedTennat, setAssignedTennat] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [addProperty, setAddProperty] = useState(false);
     const [userId, setUserId] = useState("1");
     const addedPropertyID = useRef(null);
-    const isStored = useRef(true);
-    const tenantID = useRef(null)
+    const [filterBy, setFilterBy] = useState("propertyName"); // Default to "Name"
 
     useEffect(() => {
         const storedId = localStorage.getItem('userID');
@@ -63,9 +65,8 @@ const OwnerMngProperties = () => {
     }
 
     const getRentAssignment = (propertyId) => {
-        return rentAssignments.find(assignment =>
-            assignment.propertyID === propertyId
-        );
+        console.log(rentAssignments.find(assignment => assignment.propertyID === propertyId));
+        return rentAssignments.find(assignment => assignment.propertyID === propertyId);
     };
 
     const formatDate = (dateStr) => {
@@ -75,17 +76,63 @@ const OwnerMngProperties = () => {
     };
 
     const handleView = (property) => {
+        const assignment = rentAssignments.find(a => a.propertyID === property.propertyID);
+
         setViewedProperty(property);
-        setRentAssignmentToUp(getRentAssignment(property.propertyID))
+        setRentAssignmentToUp(assignment);
+        setAssignedTenantLocal(property.tenantName);
         setEditMode(false);
         setFormErrors({});
+        setTenantValid(null);
+        setAddProperty(false);
+
+        axios.get(`http://localhost:8080/propertyAssignments/property/${property.propertyID}`)
+            .then(response => {
+                // Take the first assignment if the response is an array
+                const assignment = Array.isArray(response.data) ? response.data[0] : response.data;
+                setPropertyAssignmentToUp(assignment);
+            })
+            .catch(error => {
+                console.error("Error fetching property assignments:", error);
+            });
+
+        axios.get(`http://localhost:8080/tenants/userName/${assignment.tenantID}`)
+            .then(response => {
+                setAssignedTennat(response.data);
+            })
+            .catch(error => {
+                console.error("Error fetching rent assignement tenant:", error);
+            });
     };
 
     const handleEdit = (property) => {
+        const assignment = rentAssignments.find(a => a.propertyID === property.propertyID);
+
         setViewedProperty(property);
-        setRentAssignmentToUp(getRentAssignment(property.propertyID))
+        setRentAssignmentToUp(assignment);
+        setAssignedTenantLocal(property.tenantName);
         setEditMode(true);
         setFormErrors({});
+        setTenantValid(null);
+        setAddProperty(false);
+
+        axios.get(`http://localhost:8080/propertyAssignments/property/${property.propertyID}`)
+            .then(response => {
+                // Take the first assignment if the response is an array
+                const assignment = Array.isArray(response.data) ? response.data[0] : response.data;
+                setPropertyAssignmentToUp(assignment);
+            })
+            .catch(error => {
+                console.error("Error fetching property assignments:", error);
+            });
+
+        axios.get(`http://localhost:8080/tenants/userName/${assignment.tenantID}`)
+            .then(response => {
+                setAssignedTennat(response.data);
+            })
+            .catch(error => {
+                console.error("Error fetching rent assignement tenant:", error);
+            });
     };
 
     const handleBack = () => {
@@ -93,13 +140,13 @@ const OwnerMngProperties = () => {
         setViewedProperty(null);
         setRentAssignmentToUp(null)
         setEditMode(false);
+        setTenantValid(null);
     };
 
     const validateForm = () => {
         const errors = {};
         const formData = new FormData(formRef.current);
 
-        // Required fields validation
         if (!formData.get('propertyName')?.trim()) {
             errors.propertyName = "Property name is required";
         }
@@ -156,64 +203,52 @@ const OwnerMngProperties = () => {
 
     const handleDelete = async (propertyID) => {
         try {
-            // Try deleting rentAssignment blindly
-            await axios.delete(`http://localhost:8080/rentAssignments/property/${propertyID}`)
-                .catch((error) => {
-                    console.error("Error deleting rent assignments:", error.response);
-                });
 
-            await axios.delete(`http://localhost:8080/propertyAssignments/property/${propertyID}`)
-                .catch((error) => {
-                    console.error("Error deleting properties:", error.response);
-                });
-
-            // First, delete all payment records for the property
-            await axios.delete(`http://localhost:8080/payments/property/${propertyID}`)
-                .catch((error) => {
-                    console.error("Error deleting payments:", error.response);
-                });
-
-            // Now delete property
+            await axios.delete(`http://localhost:8080/rentAssignments/property/${propertyID}`);
+            await axios.delete(`http://localhost:8080/propertyAssignments/property/${propertyID}`);
+            await axios.delete(`http://localhost:8080/payments/property/${propertyID}`);
             await axios.delete(`http://localhost:8080/properties/${propertyID}`);
 
-            // Update frontend
             setProperties(prev => prev.filter(p => p.propertyID !== propertyID));
             setRentAssignments(prev => prev.filter(r => r.propertyID !== propertyID));
             setPropertyToDelete(null);
-
         } catch (error) {
             console.error("Error deleting:", error.response || error.message);
         }
     };
-    const handleSave = () => {
-        if (!validateForm()) return;
 
-        if (tenantValid === false) {
-            return;
+    const handleTenantExist = async (tenantName) => {
+        if (tenantName.trim() === "") {
+            return null;
         }
-        setIsSubmitting(true);
+
+        try {
+            const response = await axios.get(`http://localhost:8080/tenants/checkUsername/${tenantName}`);
+            return response.data;
+        } catch (error) {
+            console.error("Error checking tenant username:", error);
+            return false;
+        }
+    };
+
+    const handleSave = async () => {
+        if (!validateForm()) return;
         const formData = new FormData(formRef.current);
 
-        // Date validation - ensure start date is before due date
-        const startDate = formData.get('startDate');
-        const dueDate = formData.get('dueDate');
-
-        if (startDate && dueDate) {
-            const start = new Date(startDate);
-            const end = new Date(dueDate);
-
-            if (start > end) {
-                setFormErrors({
-                    ...formErrors,
-                    startDate: true,
-                    dueDate: true
-                });
-                setIsSubmitting(false);
-                return;
-            }
+        const tenantName = formData.get('tenantName');
+        const isValidTenant = await handleTenantExist(tenantName);
+        setTenantValid(isValidTenant);
+        setAssignedTenantLocal(tenantName);
+        if (!isValidTenant) {
+            setTenantValid(false);
+            return;
         }
+        setTenantValid(true);
 
-        // Rest of your existing handleSave code...
+        const newTenantResponse = await axios.get(`http://localhost:8080/tenants/id/${tenantName}`);
+        const newTenantId = newTenantResponse.data;
+        setIsSubmitting(true);
+
         const updatedProperty = {
             ...viewedProperty,
             propertyName: formData.get('propertyName'),
@@ -229,12 +264,11 @@ const OwnerMngProperties = () => {
 
         axios.put(`http://localhost:8080/properties/${viewedProperty.propertyID}`, updatedProperty)
             .then(response => {
-                setProperties(prev => prev.map(p =>
-                    p.propertyID === viewedProperty.propertyID ? updatedProperty : p
-                ));
+                setProperties(prev => prev.map(p => p.propertyID === viewedProperty.propertyID ? updatedProperty : p));
                 setViewedProperty(updatedProperty);
                 setEditMode(false);
                 setFormErrors({});
+                setTenantValid(null);
             })
             .catch(error => {
                 console.error("Error updating property:", error);
@@ -242,55 +276,61 @@ const OwnerMngProperties = () => {
             .finally(() => {
                 setIsSubmitting(false);
             });
-
-
+        // Get the current dates from state (they should be up-to-date)
+        const startDate = rentAssignmentToUp?.startDate;
+        const dueDate = rentAssignmentToUp?.dueDate;
         if (rentAssignmentToUp) {
             const rentAssignmentToUpdate = {
                 ...rentAssignmentToUp,
-                startDate: formData.get("startDate"),
-                dueDate: formData.get("dueDate")
+                startDate: startDate,
+                dueDate: dueDate
             };
-
-            // Update rent assignment in database
             axios.put(`http://localhost:8080/rentAssignments/${rentAssignmentToUp.assignmentID}`, rentAssignmentToUpdate)
                 .then(response => {
-                    console.log("Rent Assignment updated successfully");
-                    setRentAssignmentToUp(rentAssignmentToUpdate)
+                    setRentAssignments(prev => prev.map(r =>
+                        r.assignmentID === rentAssignmentToUp.assignmentID ? rentAssignmentToUpdate : r
+                    ));
+                    setRentAssignmentToUp(rentAssignmentToUpdate);
+
                 })
                 .catch(error => {
                     console.error("Error updating rent assignment:", error);
                 });
         }
+
+
+        const assignment = Array.isArray(propertyAssignmentToUp)
+            ? propertyAssignmentToUp[0]
+            : propertyAssignmentToUp;
+
+        if (!assignment || !assignment.assignmentID) {
+            console.error("Invalid property assignment data");
+            return;
+        }
+        // Update property assignment if it exists
+        await axios.put(
+            `http://localhost:8080/propertyAssignments/updateTenant/${assignment.assignmentID}`,
+            { tenantID: newTenantId }  // Simplified payload
+        );
     };
 
     const handleAdd = async () => {
         if (!validateForm()) return;
-
-        if (tenantValid === false) {
-            return;
-        }
-
-        setIsSubmitting(true);
         const formData = new FormData(formRef.current);
 
-        // Date validation - ensure start date is before due date
-        const startDate = formData.get('startDate');
-        const dueDate = formData.get('dueDate');
-
-        if (startDate && dueDate) {
-            const start = new Date(startDate);
-            const end = new Date(dueDate);
-
-            if (start > end) {
-                setFormErrors({
-                    ...formErrors,
-                    startDate: true,
-                    dueDate: true
-                });
-                setIsSubmitting(false);
-                return;
-            }
+        const tenantName = formData.get('tenantName');
+        const isValidTenant = await handleTenantExist(tenantName);
+        setTenantValid(isValidTenant);
+        setAssignedTenantLocal(tenantName);
+        if (!isValidTenant) {
+            setTenantValid(false);
+            return;
         }
+        setTenantValid(true);
+
+        const newTenantResponse = await axios.get(`http://localhost:8080/tenants/id/${tenantName}`);
+        const newTenantId = newTenantResponse.data;
+        setIsSubmitting(true);
 
         const addedProperty = {
             propertyName: formData.get('propertyName'),
@@ -311,61 +351,57 @@ const OwnerMngProperties = () => {
             addedPropertyID.current = propertyResponse.data.propertyID;
             console.log("Added propertyID:", addedPropertyID.current);
 
-            if (startDate && dueDate && addedProperty.tenantName) {
-                // Fetch tenant ID and wait for the response
-                const tenantResponse = await axios.get(`http://localhost:8080/tenants/id/${addedProperty.tenantName}`);
-                tenantID.current = tenantResponse.data;
-                console.log("Fetched tenantID:", tenantID.current);
+            // Create property assignment
+            const propertyAssignmentToUpdate = {
+                propertyID: addedPropertyID.current,
+                ownerID: owner.id,
+                tenantID: newTenantId,
+                // assignmentDate handled in backend
+            };
 
-                // Create property assignment
-                const propertyAssignmentToUpdate = {
-                    propertyID: addedPropertyID.current,
-                    ownerID: owner.id,
-                    tenantID: tenantID.current,
-                    // assignmentDate handled in backend
-                };
+            await axios.post(`http://localhost:8080/propertyAssignments`, propertyAssignmentToUpdate);
+            console.log("Property Assignment added successfully");
 
-                console.log("Property Assignment Payload:", propertyAssignmentToUpdate);
+            const startDate = formData.get('startDate');
+            const dueDate = formData.get('dueDate');
 
-                await axios.post(`http://localhost:8080/propertyAssignments`, propertyAssignmentToUpdate);
-                console.log("Property Assignment added successfully");
+            // Create rent assignment
+            const rentAssignmentToUpdate = {
+                startDate: startDate,
+                dueDate: dueDate,
+                propertyID: addedPropertyID.current,
+                tenantID: newTenantId,
+            };
 
-                // Create rent assignment
-                const rentAssignmentToUpdate = {
-                    startDate: startDate,
-                    dueDate: dueDate,
-                    propertyID: addedPropertyID.current,
-                    tenantID: tenantID.current,
-                };
+            await axios.post(`http://localhost:8080/rentAssignments`, rentAssignmentToUpdate);
+            console.log("Rent Assignment added successfully");
+            setRentAssignments(prev => [...prev, rentAssignmentToUpdate]);
+            setRentAssignmentToUp(rentAssignmentToUpdate);
 
-                await axios.post(`http://localhost:8080/rentAssignments`, rentAssignmentToUpdate);
-                console.log("Rent Assignment added successfully");
-                setRentAssignments(prev => [...prev, rentAssignmentToUpdate]);
-                setRentAssignmentToUp(rentAssignmentToUpdate);
-            }
 
-            // Finalize the process
-            if (isStored.current) {
-                const updatedAddedProperty = {
-                    ...addedProperty,
-                    propertyID: addedPropertyID.current, // Add the property ID to the object
-                };
+            const updatedAddedProperty = {
+                ...addedProperty,
+                propertyID: addedPropertyID.current, // Add the property ID to the object
+            };
 
-                setIsSubmitting(false);
-                setViewedProperty(updatedAddedProperty); // Use the updated object here
-                setAddProperty(false);
-                setEditMode(false);
-                setFormErrors({});
-            }
+            setIsSubmitting(false);
+            setViewedProperty(updatedAddedProperty); // Use the updated object here
+            setAddProperty(false);
+            setEditMode(false);
+            setFormErrors({});
+            setTenantValid(null);
         } catch (error) {
             console.error("Error during property or assignment creation:", error);
-            isStored.current = false;
             setIsSubmitting(false);
         }
     };
 
     const PropertyBox = ({ label, name, value }) => {
-        const isReadOnly = (name || "") === "propertyID" || (name || "") === "ownerName";
+        const inputRef = useRef(null);
+        const isReadOnly = [
+            "propertyID",
+            "ownerName",
+        ].includes(name);
         const isError = formErrors[name];
         const isNumeric = ['numOfRooms', 'numOfBedRooms', 'numOfBaths', 'fixedRent'].includes(name);
         const isDateField = ['startDate', 'dueDate'].includes(name);
@@ -373,12 +409,24 @@ const OwnerMngProperties = () => {
 
         useEffect(() => {
             setLocalValue(value || "");
-        }, [value]);
+        }, [value, name]);
+
 
         const handleChange = async (e) => {
             const newValue = e.target.value;
             setLocalValue(newValue);
-
+            if (name == "assignedTennat") {
+                await setAssignedTennatLocal(localValue);
+            }
+            // Update parent state for dates
+            if (name === 'startDate' || name === 'dueDate') {
+                if (rentAssignmentToUp) {
+                    setRentAssignmentToUp(prev => ({
+                        ...prev,
+                        [name]: newValue
+                    }));
+                }
+            }
             if (isError) {
                 setFormErrors(prev => {
                     const newErrors = { ...prev };
@@ -386,70 +434,25 @@ const OwnerMngProperties = () => {
                     return newErrors;
                 });
             }
-            // if (name === 'tenantName') {
-            //     if (newValue.trim() === "") {
-            //         setTenantValid(null);
-            //         return;
-            //     }
-            //     try {
-            //         const response = await axios.get(`http://localhost:8080/tenants/checkUsername/${newValue}`);
-            //         if (response.data.exists) {
-            //             setTenantValid(true);
-            //         } else {
-            //             setTenantValid(false);
-            //         }
-            //     } catch (error) {
-            //         console.error("Error checking tenant username:", error);
-            //         setTenantValid(false);
-            //     }
-            // }
         };
-        const getBorderColor = () => {
-            if (name === "tenantName") {
-                if (tenantValid === true) return "border-green-500";
-                if (tenantValid === false) return "border-red-500";
-            }
-            return isError ? "border-red-500" : "border-gray-300";
-        };
-
-        // const handleBlur = () => {
-        //     if (name === 'startDate' || name === 'dueDate') {
-        //         // Trigger validation when date fields lose focus
-        //         validateForm();
-        //     }
-
-        //     if (viewedProperty) {
-        //         if (name in viewedProperty) {
-        //             setViewedProperty(prev => ({
-        //                 ...prev,
-        //                 [name]: localValue
-        //             }));
-        //         } else if (rentAssignmentToUp && name in rentAssignmentToUp) {
-        //             setRentAssignmentToUp(prev => ({
-        //                 ...prev,
-        //                 [name]: localValue
-        //             }));
-        //         }
-        //     }
-        // };
-
         return (
             <div className="flex flex-col w-[230px]">
                 <label className="text-[14px] font-semibold text-gray-600 mb-1">{label}</label>
                 {editMode ? (
                     <>
                         <input
+                            ref={inputRef}
                             name={name}
                             type={isDateField ? "date" : (isNumeric ? "number" : "text")}
                             value={localValue}
                             onChange={handleChange}
-                            // onBlur={handleBlur}
-                            className={`px-4 py-2 rounded w-full text-[15px] text-gray-800 bg-[#F2F2F2] focus:outline-none border ${(!tenantValid && name === "tenantName") ? 'border-red-500' : ''}  ${isError ? 'border-red-500' : 'border-gray-300 border'} '}`}
+                            className={`px-4 py-2 rounded w-full text-[15px] text-gray-800 bg-[#F2F2F2] focus:outline-none border ${(name === 'tenantName' && tenantValid === false) ? 'border-red-500' :
+                                isError ? 'border-red-500' : 'border-gray-300'
+                                }`}
                             readOnly={isReadOnly}
                             tabIndex={isReadOnly ? -1 : 0}
                             min={isNumeric ? "1" : undefined}
                         />
-
                         {isError && !isDateField && (
                             <p className="text-red-500 text-xs mt-1">{formErrors[name]}</p>
                         )}
@@ -463,6 +466,18 @@ const OwnerMngProperties = () => {
         );
     };
 
+
+    const filteredProperties = properties.filter((prop) => {
+        const value = prop[filterBy];
+        if (typeof value === "string") {
+            return value.toLowerCase().includes(searchTerm.toLowerCase());
+        } else if (typeof value === "number") {
+            return value.toString().includes(searchTerm);
+        }
+        return false;
+    });
+
+
     return (
         <div className="flex font-[Lexend] relative">
             <Sidebar />
@@ -472,22 +487,50 @@ const OwnerMngProperties = () => {
                         <h1 className="text-[#081E4A] text-[54px] font-bold">Manage Properties</h1>
                         <p className="text-[15px] text-[#4D4D4D] font-light">View, add, edit, or delete properties.</p>
                     </div>
-                    <div className="relative w-[300px]">
-                        <input
-                            type="text"
-                            placeholder="Search properties..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="border border-gray-400 rounded px-10 py-2 w-full"
-                        />
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-black" />
+                    <div className="flex flex-col gap-3 mt-8 mr-6">
+                        <div className="relative w-[300px]">
+                            <input
+                                type="text"
+                                placeholder="Search properties..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="border border-gray-400 rounded px-10 py-2 w-full"
+                            />
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-black" />
+                        </div>
+                        <div className="mb-4">
+                            <div className="flex gap-6">
+                                {[
+                                    { label: "Name", value: "propertyName" },
+                                    { label: "Area", value: "area" },
+                                    { label: "Location", value: "location" },
+                                    { label: "Bedrooms", value: "numOfBedRooms" },
+                                ].map(({ label, value }) => (
+                                    <label key={value} className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="filter"
+                                            value={value}
+                                            checked={filterBy === value}
+                                            onChange={(e) => setFilterBy(e.target.value)}
+                                            className="text-cyan-500 focus:ring-cyan-500"
+                                        />
+                                        <span className={filterBy === value ? "text-cyan-600 font-medium" : ""}>
+                                            {label}
+                                        </span>
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
                     </div>
+
+
                 </div>
 
                 <div className="mx-[80px] mt-8 bg-white rounded-lg shadow-md relative w-[70vw] h-[50vh]">
                     {viewedProperty && (
                         <div className="absolute top-0 bg-white bg-opacity-90 z-50 flex rounded-lg items-center justify-center px-6 w-[70vw] h-[50vh]">
-                            <form ref={formRef} className="p-6 rounded-lg w-full max-w-[1000px] space-y-8 relative">
+                            <form ref={formRef} autoComplete="off" className="p-6 rounded-lg w-full space-y-8 relative">
                                 <div className="flex justify-between items-center absolute top-4 left-4 w-full pr-[40px]">
                                     <div
                                         onClick={handleBack}
@@ -539,14 +582,14 @@ const OwnerMngProperties = () => {
                                             value={rentAssignmentToUp?.dueDate}
                                         />
                                         <PropertyBox label="FIXED RENT AMOUNT" name="fixedRent" value={viewedProperty.fixedRent} />
-                                        <PropertyBox label="ASSIGNED TENANT" name="tenantName" value={viewedProperty.tenantName} />
+                                        <PropertyBox label="ASSIGNED TENANT" name="tenantName" value={assignedTenantLocal} />
                                     </div>
                                 </div>
                             </form>
                         </div>
                     )}
 
-                    {properties.length === 0 ? (
+                    {filteredProperties.length === 0 ? (
                         <div className="flex justify-center items-center h-full text-[#081E4A] text-[28px] font-medium">
                             No Properties Found
                         </div>
@@ -564,7 +607,7 @@ const OwnerMngProperties = () => {
                             </div>
 
                             <div className="overflow-y-auto max-h-[324px]">
-                                {properties.map((property) => (
+                                {filteredProperties.map((property) => (
                                     <div key={property.propertyID} className="grid grid-cols-12 p-4 border-b border-gray-200 items-center">
                                         <div className="col-span-2 font-medium">{property.propertyID}</div>
                                         <div className="col-span-3">{property.propertyName}</div>
@@ -608,7 +651,7 @@ const OwnerMngProperties = () => {
                     </>)}
                     {addProperty && (
                         <div className="absolute top-0 bg-white bg-opacity-90 z-50 flex rounded-lg items-center justify-center px-6 w-[70vw] h-[50vh]">
-                            <form ref={formRef} className="p-6 rounded-lg w-full max-w-[1000px] space-y-8 relative">
+                            <form ref={formRef} autoComplete="off" className="p-6 rounded-lg w-full space-y-8 relative">
                                 <div className="flex justify-between items-center absolute top-4 left-4 w-full pr-[40px]">
                                     <div
                                         onClick={handleBack}

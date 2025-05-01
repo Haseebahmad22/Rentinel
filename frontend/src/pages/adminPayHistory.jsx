@@ -11,6 +11,7 @@ const AdminMngPayments = () => {
     const formRef = useRef(null);
     const [paymentToDelete, setPaymentToDelete] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [property, setProperty] = useState([]);
 
     useEffect(() => {
         axios.get("http://localhost:8080/payments")
@@ -23,6 +24,13 @@ const AdminMngPayments = () => {
     }, []);
 
     const handleView = (payment) => {
+        axios.get(`http://localhost:8080/properties/${payment.propertyID}`)
+            .then(response => {
+                setProperty(response.data);
+            })
+            .catch(error => {
+                console.error("Error fetching property:", error);
+            });
         setViewedPayment(payment);
         setEditMode(false);
         setFormErrors({});
@@ -48,6 +56,13 @@ const AdminMngPayments = () => {
     };
 
     const handleEdit = (payment) => {
+        axios.get(`http://localhost:8080/properties/${payment.propertyID}`)
+        .then(response => {
+            setProperty(response.data);
+        })
+        .catch(error => {
+            console.error("Error fetching property:", error);
+        });
         setViewedPayment(payment);
         setEditMode(true);
         setFormErrors({});
@@ -171,7 +186,7 @@ const AdminMngPayments = () => {
                 <div className="mx-[80px] mt-8 bg-white rounded-lg shadow-md overflow-hidden relative w-[70vw] h-[50vh]">
                     {viewedPayment && (
                         <div className="absolute top-0 bg-white bg-opacity-90 z-50 flex rounded-lg items-center justify-center px-6 w-[70vw] h-[50vh]">
-                            <form ref={formRef} className="p-6 rounded-lg w-full max-w-[1000px] space-y-8 relative">
+                            <form ref={formRef} className="p-6 rounded-lg w-full space-y-8 relative">
                                 <div className="flex justify-between items-center absolute top-4 left-4 w-full pr-[40px]">
                                     <div
                                         onClick={handleBack}
@@ -201,7 +216,7 @@ const AdminMngPayments = () => {
                                     </div>
                                     <div className="flex flex-wrap gap-[35px]">
                                         <PaymentBox label="PROPERTY ID" name="propertyID" value={viewedPayment?.propertyID} />
-                                        <PaymentBox label="PROPERTY NAME" name="propertyName" value={viewedPayment?.propertyName} />
+                                        <PaymentBox label="PROPERTY NAME" name="propertyName" value={property?.propertyName} />
                                     </div>
                                     <div className="flex flex-wrap gap-[35px]">
                                         <PaymentBox label="TENANT USERNAME" name="tenantUserName" value={viewedPayment?.tenantUserName} />
@@ -232,7 +247,7 @@ const AdminMngPayments = () => {
                                 </div>
                             </div>
 
-                            <div className="overflow-y-auto max-h-[322px]">
+                            <div className="overflow-y-auto max-h-[40vh]">
                                 {payments.map((payment) => (
                                     <div key={payment.paymentID} className="grid grid-cols-12 p-4 border-b border-gray-200 items-center">
                                         <div className="col-span-2 font-medium">{payment.paymentID}</div>
