@@ -2,11 +2,23 @@ import { useState, useEffect, useRef } from "react";
 import Sidebar from "../utility/ownerSidebar";
 import axios from "axios";
 import { Pencil, Trash2, Eye, ChevronLeft, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const OwnerNotifications = () => {
     const [notifications, setNotifications] = useState([]);
     const [viewedNotification, setViewedNotification] = useState(null);
     const [userId, setUserId] = useState("1");
+
+    const navigate = useNavigate();
+    useEffect(() => {
+        const storedId = localStorage.getItem('userID');
+        if (storedId !== null && storedId !== "null") {
+            setUserId(storedId);
+        } else {
+            console.error('No userId found in localStorage');
+            navigate("/signin")
+        }
+    }, []);
 
     useEffect(() => {
         const storedId = localStorage.getItem('userID');

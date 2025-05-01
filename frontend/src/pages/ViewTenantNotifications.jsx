@@ -9,14 +9,21 @@ const ViewTenantNotifications = () => {
   const [notification, setNotification] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
 
-  const tenantUsername = 'rachelbrown'; // Can be dynamic based on current user
+  const navigate = useNavigate(); // initialize navigation
 
+    const userName = localStorage.getItem("userName");
+
+    useEffect(() => {
+        if (!userName) {
+            navigate("/signin");
+        }
+    }, [userName, navigate]);
+    
   useEffect(() => {
     const fetchNotification = async () => {
       try {
-        const data = await fetchNotificationByID(tenantUsername, notificationID);
+        const data = await fetchNotificationByID(userName, notificationID);
         setNotification(data);
       } catch (err) {
         setError('Failed to load notification details');

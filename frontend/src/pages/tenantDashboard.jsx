@@ -3,23 +3,41 @@ import tenantDashboardService from '../services/tenantdashboardservice';
 import { FaHome, FaCalendar, FaDollarSign, FaUserAlt } from 'react-icons/fa';
 import Histogram from "../utility/Histogram";
 import Sidebar from '../components/Tenantsidebar';
-//import Sidebar from "../utility/tenantSidebar";
 import { useNavigate, Link } from 'react-router-dom';
+import axios from 'axios';
 
 const TenantDashboard = () => {
-  const userName = 'rachelbrown'; // Hardcoded username
-
   const navigate = useNavigate();
 
   const [totalOwners, setTotalOwners] = useState(0);
   const [totalRentedProperties, setTotalRentedProperties] = useState(0);
   const [totalRentPaid, setTotalRentPaid] = useState(0);
   const [upcomingDueDate, setUpcomingDueDate] = useState('N/A');
-  const [loading, setLoading] = useState(true); // Loading state
+  const [loading, setLoading] = useState(true);
+  const [userID, setUserID] = useState(null);
+  const [currentTenant, setCurrentTenant] = useState(null);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const storedId = localStorage.getItem('userID');
+    if (storedId && storedId !== "null") {
+      setUserID(storedId);
+    } else {
+      console.error('No userID found in localStorage');
+      navigate("/signin");
+    }
+  }, [navigate]);
+
+  useEffect(() => {
+    if (!userID) return;
+
+    const fetchTenantAndDashboard = async () => {
       try {
+        const res = await axios.get(`http://localhost:8080/tenants/userName/${userID}`);
+        const tenant = res.data;
+        setCurrentTenant(tenant);
+
+        const userName = tenant.userName;
+        localStorage.setItem("userName", userName); // or whatever key you use
         const owners = await tenantDashboardService.getTotalOwners(userName);
         const rentedProperties = await tenantDashboardService.getRentedProperties(userName);
         const rentPaid = await tenantDashboardService.getTotalRentPaid(userName);
@@ -30,14 +48,16 @@ const TenantDashboard = () => {
         setTotalRentPaid(rentPaid);
         setUpcomingDueDate(dueDate);
       } catch (error) {
-        console.error('Error fetching tenant data:', error);
+        console.error('Error loading tenant dashboard data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
-  }, [userName]);
+    fetchTenantAndDashboard();
+  }, [userID]);
+
+  const userName = currentTenant?.userName || '...';
 
   return (
     <div className="flex font-[Lexend]">

@@ -4,10 +4,9 @@ import Histogram from "../utility/Histogram"; // Adjust path as necessary
 import { FaHome, FaCalendar, FaCreditCard, FaDollarSign, FaUserAlt } from "react-icons/fa";
 import tenantStatsService from '../services/tenantstatsservice';  // Adjust path as necessary
 import Sidebar from "../components/Tenantsidebar";
+import { useNavigate } from "react-router-dom";
 
 const TenantStats = () => {
-    const userName = 'rachelbrown';  // Replace with dynamic userName if necessary
-
     const [rentedProperties, setRentedProperties] = useState(0);
     const [lastPaymentDate, setLastPaymentDate] = useState('N/A');
     const [upcomingDueDate, setUpcomingDueDate] = useState('N/A');
@@ -18,6 +17,15 @@ const TenantStats = () => {
     const [totalOwners, setTotalOwners] = useState(0);
     const [loading, setLoading] = useState(true);
 
+    const navigate = useNavigate(); // initialize navigation
+
+    const userName = localStorage.getItem("userName");
+
+    useEffect(() => {
+        if (!userName) {
+            navigate("/signin");
+        }
+    }, [userName, navigate]);
     useEffect(() => {
         const fetchStats = async () => {
             setLoading(true);  // Start loading

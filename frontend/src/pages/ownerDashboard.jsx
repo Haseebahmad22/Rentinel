@@ -2,25 +2,25 @@ import { useState, useEffect } from "react";
 import Sidebar from "../utility/ownerSidebar";
 import Histogram from "../utility/ownerHistogram";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const OwnerDashboard = () => {
     const [tenantCount, setTenantCount] = useState(0);
     const [propertyCount, setPropertyCount] = useState(0);
     const [paymentCount, setPaymentCount] = useState(0);
     const [occupancyRate, setOccupancyRate] = useState(0);
-    const [userId, setUserId] = useState("1");
     const [owner, setOwner] = useState(null)
-
+    const [userId, setUserId] = useState();
+    const navigate = useNavigate();
     useEffect(() => {
         const storedId = localStorage.getItem('userID');
         if (storedId !== null && storedId !== "null") {
             setUserId(storedId);
         } else {
             console.error('No userId found in localStorage');
+            navigate("/signin")
         }
     }, []);
-
 
     useEffect(() => {
         if (userId) {

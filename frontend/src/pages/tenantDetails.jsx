@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { PencilIcon } from "@heroicons/react/24/outline";
 import Sidebar from "../components/Tenantsidebar";
+import { useNavigate } from "react-router-dom"; // add at the top
 
 const TenantDetails = () => {
     const [tenant, setTenant] = useState({});
@@ -12,8 +13,17 @@ const TenantDetails = () => {
     const [editedTenant, setEditedTenant] = useState({});
     const [cnicError, setCnicError] = useState("");
     const [emailError, setEmailError] = useState("");
-    const userName = 'rachelbrown';
 
+    const navigate = useNavigate(); // initialize navigation
+
+    const userName = localStorage.getItem("userName");
+
+    useEffect(() => {
+        if (!userName) {
+            navigate("/signin");
+        }
+    }, [userName, navigate]);
+      
     useEffect(() => {
         const fetchTenantData = async () => {
             try {

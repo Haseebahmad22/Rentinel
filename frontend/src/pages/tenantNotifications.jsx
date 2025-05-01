@@ -9,12 +9,21 @@ const TenantNotifications = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [viewedNotification, setViewedNotification] = useState(null);
-  const navigate = useNavigate();
+
+  const navigate = useNavigate(); // initialize navigation
+
+  const userName = localStorage.getItem("userName");
+
+  useEffect(() => {
+      if (!userName) {
+          navigate("/signin");
+      }
+  }, [userName, navigate]);
 
   useEffect(() => {
     const loadNotifications = async () => {
       try {
-        const data = await fetchAllNotifications('rachelbrown');
+        const data = await fetchAllNotifications(userName);
         setNotifications(data);
       } catch (err) {
         setError('Failed to load notifications');

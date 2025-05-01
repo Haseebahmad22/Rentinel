@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import Sidebar from "../utility/adminSidebar";
 import axios from "axios";
 import { Pencil, Trash2, Eye, ChevronLeft, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const AdminMngProperties = () => {
     const [properties, setProperties] = useState([]);
@@ -17,6 +18,18 @@ const AdminMngProperties = () => {
     const [assignedTennatLocal, setAssignedTennatLocal] = useState(null);
     const [propertyAssignmentToUp, setPropertyAssignmentToUp] = useState(null);
     const [assignedTennat, setAssignedTennat] = useState([]);
+
+    const [userID, setUserId] = useState();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const storedId = localStorage.getItem('userID');
+        if (storedId !== null && storedId !== "null") {
+            setUserId(storedId);
+        } else {
+            navigate("/signin");
+        }
+    }, [navigate]);
 
     useEffect(() => {
         fetchProperties();

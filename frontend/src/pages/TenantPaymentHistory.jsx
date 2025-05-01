@@ -1,19 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Tenantsidebar';
 import { fetchTenantPaymentHistory } from '../services/tenantpaymenthistoryservice';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Eye } from 'lucide-react';
 
 const TenantPaymentHistory = () => {
   const [paymentHistory, setPaymentHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const username = 'rachelbrown'; // Hardcoded username (or get from auth context)
+  const navigate = useNavigate(); // initialize navigation
 
+  const userName = localStorage.getItem("userName");
+
+  useEffect(() => {
+      if (!userName) {
+          navigate("/signin");
+      }
+  }, [userName, navigate]);
   useEffect(() => {
     const loadPaymentHistory = async () => {
       try {
-        const data = await fetchTenantPaymentHistory(username);
+        const data = await fetchTenantPaymentHistory(userName);
         setPaymentHistory(data);
       } catch (err) {
         setError('Failed to load payment history');
@@ -24,7 +31,7 @@ const TenantPaymentHistory = () => {
     };
 
     loadPaymentHistory();
-  }, [username]); // Add username to dependency array
+  }, [userName]); // Add userName to dependency array
 
   const handleViewClick = (paymentID) => {
     console.log('View clicked for Payment ID:', paymentID);

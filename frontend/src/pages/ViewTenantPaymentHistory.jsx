@@ -9,13 +9,19 @@ const ViewTenantPaymentHistory = () => {
   const [payment, setPayment] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const username = 'rachelbrown'; // Hardcoded username (or get from auth context)
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // initialize navigation
 
+  const userName = localStorage.getItem("userName");
+
+  useEffect(() => {
+      if (!userName) {
+          navigate("/signin");
+      }
+  }, [userName, navigate]);
   useEffect(() => {
     const loadPayment = async () => {
       try {
-        const data = await fetchPaymentById(paymentID, username);
+        const data = await fetchPaymentById(paymentID, userName);
         setPayment(data);
       } catch (err) {
         setError('Failed to load payment details');
@@ -26,7 +32,7 @@ const ViewTenantPaymentHistory = () => {
     };
 
     loadPayment();
-  }, [paymentID, username]);
+  }, [paymentID, userName]);
 
   const handleBack = () => {
     navigate('/tenantpaymenthistory');

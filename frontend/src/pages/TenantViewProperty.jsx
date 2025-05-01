@@ -10,7 +10,6 @@ import { ChevronLeft } from 'lucide-react';
 
 const TenantViewProperty = () => {
   const { propertyID } = useParams();
-  const navigate = useNavigate();
   const [rentAssignment, setRentAssignment] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -19,13 +18,20 @@ const TenantViewProperty = () => {
   const [isBlurred, setIsBlurred] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
-  const username = 'rachelbrown'; // hardcoded for now
+  const navigate = useNavigate(); // initialize navigation
 
+    const userName = localStorage.getItem("userName");
+
+    useEffect(() => {
+        if (!userName) {
+            navigate("/signin");
+        }
+    }, [userName, navigate]);
   useEffect(() => {
     const loadDetails = async () => {
       try {
-        console.log('Fetching rent assignment for username:', username, 'and propertyID:', propertyID);
-        const rentAssignmentData = await fetchRentAssignmentsByTenantUsername(username, propertyID);
+        console.log('Fetching rent assignment for userName:', userName, 'and propertyID:', propertyID);
+        const rentAssignmentData = await fetchRentAssignmentsByTenantUsername(userName, propertyID);
         console.log('Rent assignment fetched:', rentAssignmentData);
         setRentAssignment(rentAssignmentData[0]);
       } catch (err) {
@@ -36,7 +42,7 @@ const TenantViewProperty = () => {
       }
     };
     loadDetails();
-  }, [propertyID, username]);
+  }, [propertyID, userName]);
 
   useEffect(() => {
     if (showPaymentForm && rentAssignment?.property?.fixedRent) {
@@ -78,7 +84,7 @@ const TenantViewProperty = () => {
 
       await savePayment(
         paymentData,
-        username,
+        userName,
         rentAssignment.property.owner?.userName,
         rentAssignment.property.propertyID
       );

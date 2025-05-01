@@ -1,19 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Tenantsidebar';
 import { fetchAllTenantManageProperties } from '../services/tenantmanagepropertiesservice';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Eye } from 'lucide-react';
 
 const TenantManageProperties = () => {
   const [assignments, setAssignments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const username = 'rachelbrown'; // Hardcoded 
+
+  const navigate = useNavigate(); // initialize navigation
+
+  const userName = localStorage.getItem("userName");
+
+  useEffect(() => {
+      if (!userName) {
+          navigate("/signin");
+      }
+  }, [userName, navigate]);
 
   useEffect(() => {
     const loadProperties = async () => {
       try {
-        const data = await fetchAllTenantManageProperties(username);
+        const data = await fetchAllTenantManageProperties(userName);
         setAssignments(data);
       } catch (err) {
         setError('Failed to load properties');
@@ -24,7 +33,7 @@ const TenantManageProperties = () => {
     };
 
     loadProperties();
-  }, [username]);
+  }, [userName]);
 
   return (
     <div className="flex font-[Lexend]">
