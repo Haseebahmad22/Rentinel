@@ -20,6 +20,16 @@ import OwnerNotifications from './pages/ownerNotifications';
 import OwnerDetails from './pages/ownerDetails';
 import OwnerStats from './pages/ownerStats';
 
+import TenantDashboard from './pages/tenantDashboard';
+import TenantNotifications from './pages/tenantnotifications';
+import ViewTenantNotifications from './pages/ViewTenantNotifications';
+import TenantPaymentHistory from './pages/TenantPaymentHistory';
+import ViewTenantPaymentHistory from './pages/ViewTenantPaymentHistory';
+import TenantManageProperties from './pages/TenantManageProperties';
+import TenantViewProperty from './pages/TenantViewProperty';
+import TenantDetails from './pages/tenantDetails';
+import TenantStats from './pages/tenantStats';
+
 const router = createBrowserRouter([
   {
     path: "/",
@@ -149,7 +159,78 @@ const router = createBrowserRouter([
       </>
     ),
   },
-
+  {
+    path: "/tenantDashboard",
+    element: (
+      <>
+        <TenantDashboard />
+      </>
+    ),
+  },
+  {
+    path: "/tenantDetails",
+    element: (
+      <>
+        <TenantDetails />
+      </>
+    ),
+  },
+  {
+    path: "/tenantStats",
+    element: (
+      <>
+        <TenantStats />
+      </>
+    ),
+  },
+  {
+    path: "/tenantPaymentHistory",
+    element: (
+      <>
+        <TenantPaymentHistory />
+      </>
+    ),
+  },
+  {
+    path: "/viewtenantPaymentHistory/:paymentID",
+    element: (
+      <>
+        <ViewTenantPaymentHistory />
+      </>
+    ),
+  },
+  {
+    path: "/tenantMngProperties",
+    element: (
+      <>
+        <TenantManageProperties />
+      </>
+    ),
+  },
+  {
+    path: "/tenantNotifications",
+    element: (
+      <>
+        <TenantNotifications />
+      </>
+    ),
+  },
+  {
+    path: "/viewTenantProperty/:propertyID",
+    element: (
+      <>
+        <TenantViewProperty />
+      </>
+    ),
+  },
+  {
+    path: "/viewTenantNotifications/:notificationID",
+    element: (
+      <>
+        <ViewTenantNotifications />
+      </>
+    ),
+  },
 ]);
 
 ReactDOM.createRoot(document.getElementById('root')).render(
