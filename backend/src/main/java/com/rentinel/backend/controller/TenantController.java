@@ -98,8 +98,8 @@ public class TenantController {
 
     @PostMapping("/login")
     public ResponseEntity<?> loginTenant(@RequestBody LoginRequest loginRequest) {
-        Optional<Tenant> tenant = tenantRepository.findByEmailAndPassword(
-                loginRequest.getEmail(),
+        Optional<Tenant> tenant = tenantRepository.findByUserNameAndPassword(
+                loginRequest.getUsername(),
                 loginRequest.getPassword());
 
         LoginResponse response;

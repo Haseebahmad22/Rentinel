@@ -26,5 +26,6 @@ public interface OwnerRepository extends JpaRepository<Owner, Integer> {
             "ORDER BY MONTH(accountCreationDate)", nativeQuery = true)
     List<Object[]> getUserRegistrationStats();
 
-    Optional<Owner> findByEmailAndPassword(String email, String password); // Match the lowercase field name
+    @Query(value = "SELECT * FROM Owner WHERE userName = :userName AND Password = :Password", nativeQuery = true)
+    Optional<Owner> findByUserNameAndPassword(String userName, String Password); // Match the lowercase field name
 }

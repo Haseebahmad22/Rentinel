@@ -14,7 +14,7 @@ const AdminMngOwners = () => {
     const [formErrors, setFormErrors] = useState({});
     const formRef = useRef(null);
     const [searchTerm, setSearchTerm] = useState("");
-    const [userID, setUserId] = useState();
+    const [userID, setUserId] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -44,6 +44,12 @@ const AdminMngOwners = () => {
                 if (viewedOwner?.id === owner.id) {
                     setViewedOwner(null);
                 }
+                axios.post("http://localhost:8080/blacklist", {
+                    cnic: owner.cnic
+                })
+                    .catch(error => {
+                        console.error("Error creating blacklist:", error);
+                    });
             })
             .catch(error => {
                 console.error("Error deleting owner:", error);
@@ -89,26 +95,26 @@ const AdminMngOwners = () => {
         setFormErrors({});
 
         axios.get(`http://localhost:8080/properties/owner/${owner.userName}`)
-        .then(response => {
-            const properties = response.data;
-            setOwnerProperties(properties);
+            .then(response => {
+                const properties = response.data;
+                setOwnerProperties(properties);
 
-            const tenantRequests = properties.map((property) =>
-                axios.get(`http://localhost:8080/tenants/id/${property.tenantName}`)
-            );
+                const tenantRequests = properties.map((property) =>
+                    axios.get(`http://localhost:8080/tenants/id/${property.tenantName}`)
+                );
 
-            Promise.all(tenantRequests)
-                .then(tenantResponses => {
-                    const propertiesWithTenantDetails = properties.map((property, index) => ({
-                        ...property,
-                        tenantID: tenantResponses[index].data,
-                    }));
-                    setOwnerProperties(propertiesWithTenantDetails);
-                });
-        })
-        .catch(error => {
-            console.error("Error fetching owner properties:", error);
-        });
+                Promise.all(tenantRequests)
+                    .then(tenantResponses => {
+                        const propertiesWithTenantDetails = properties.map((property, index) => ({
+                            ...property,
+                            tenantID: tenantResponses[index].data,
+                        }));
+                        setOwnerProperties(propertiesWithTenantDetails);
+                    });
+            })
+            .catch(error => {
+                console.error("Error fetching owner properties:", error);
+            });
     };
 
     const handleBack = () => {

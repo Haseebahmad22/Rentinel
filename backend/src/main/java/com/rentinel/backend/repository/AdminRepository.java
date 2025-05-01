@@ -15,5 +15,5 @@ public interface AdminRepository extends JpaRepository<Admin, Integer> {
     // Find an admin by CNIC
     Admin findByCnic(String cnic);
 
-    Optional<Admin> findByEmailAndPassword(String email, String password); // Match the lowercase field name
+    Optional<Admin> findByuserNameAndPassword(String userName, String password); // Match the lowercase field name
 }

@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 const AdminDetails = () => {
     const [admin, setAdmin] = useState(null);
-    const [userID, setUserId] = useState();
+    const [userID, setUserId] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {

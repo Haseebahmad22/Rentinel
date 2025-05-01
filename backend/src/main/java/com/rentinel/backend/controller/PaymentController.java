@@ -84,8 +84,13 @@ public class PaymentController {
 
     @GetMapping("/count/by-owner/{ownerId}")
     public long getPayCountByOwner(@PathVariable Integer ownerId) {
+        System.out.println(ownerId);
         String ownerName = ownerRepository.findById(ownerId).get().getUserName();
-        return paymentRepository.getTotalPaymentsByOwnerUserName(ownerName);
+        System.out.println(ownerName);
+        System.out.println(ownerRepository.findById(ownerId).get());
+
+        Long totalPayments = paymentRepository.getTotalPaymentsByOwnerUserName(ownerName);
+        return totalPayments != null ? totalPayments : 0L;
     }
 
     @GetMapping("/monthlyRents/{ownerId}")

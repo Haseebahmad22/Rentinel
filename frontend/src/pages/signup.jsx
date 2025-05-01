@@ -2,8 +2,11 @@ import { useState, useRef, useEffect } from "react";
 import { Eye, EyeClosed, ChevronDown } from "lucide-react";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export default function Signup() {
+    const navigate = useNavigate();
+
     const [formData, setFormData] = useState({
         fullName: "",
         userName: "",
@@ -41,7 +44,13 @@ export default function Signup() {
         }
     };
 
-    const validateField = (name, value) => {
+    const checkBlacklistCNIC = async (value) => {
+        const response = await axios.get(`http://localhost:8080/blacklist/${value}`)
+        console.log(response);
+        return response.data
+    }
+
+    const validateField = async (name, value) => {
         switch (name) {
             case "fullName":
                 if (!/^[a-zA-Z\s]+$/.test(value)) {
@@ -70,6 +79,10 @@ export default function Signup() {
                 if (!/^\d{13}$/.test(value)) {
                     return "CNIC must be 13 digits";
                 }
+                const isBlacklisted = await checkBlacklistCNIC(value);
+                if (isBlacklisted) {
+                    return "CNIC is Blacklisted";
+                }
                 break;
             default:
                 return "";
@@ -77,29 +90,33 @@ export default function Signup() {
         return "";
     };
 
-    const validateForm = () => {
+
+    const validateForm = async () => {
         const newErrors = {};
         let isValid = true;
 
-        Object.keys(formData).forEach(key => {
+        for (const key of Object.keys(formData)) {
             if (key !== "role") {
-                const error = validateField(key, formData[key]);
+                const error = await validateField(key, formData[key]);
                 if (error) {
                     newErrors[key] = error;
                     isValid = false;
                 }
             }
-        });
+        }
 
-        setErrors(newErrors);
-        return isValid;
+        setErrors(newErrors); // still update state for UI
+        return { isValid, newErrors }; // return for immediate use
     };
+
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!validateForm()) {
-            const firstError = Object.keys(errors)[0];
+        const { isValid, newErrors } = await validateForm();
+        if (!isValid) {
+            const firstError = Object.keys(newErrors)[0];
             if (firstError && inputRefs.current[firstError]) {
                 inputRefs.current[firstError].focus();
             }
@@ -123,7 +140,7 @@ export default function Signup() {
 
             const response = await axios.post(apiUrl, newUser);
             console.log("User registered successfully:", response.data);
-            // Redirect or show success message
+            navigate("/signin");
         } catch (error) {
             console.error("Error during registration:", error);
             if (error.response?.data?.includes("userName")) {
@@ -186,8 +203,8 @@ export default function Signup() {
                                         placeholder={field.label}
                                         value={formData[field.name]}
                                         onChange={handleChange}
-                                        onBlur={() => {
-                                            const error = validateField(field.name, formData[field.name]);
+                                        onBlur={async () => {
+                                            const error = await validateField(field.name, formData[field.name]);
                                             if (error) {
                                                 setErrors(prev => ({ ...prev, [field.name]: error }));
                                             }

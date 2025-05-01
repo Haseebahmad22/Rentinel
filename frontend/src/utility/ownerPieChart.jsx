@@ -5,7 +5,7 @@ const COLORS = ["#3C21F7", "#1B0C83", "#7E5BFF"];
 
 const OwnerPieChart = () => {
     const [pieData, setPieData] = useState([]);
-    const [userId, setUserId] = useState("1");
+    const [userId, setUserId] = useState(null);
 
     const CustomTooltip = ({ active, payload }) => {
         if (active && payload && payload.length) {

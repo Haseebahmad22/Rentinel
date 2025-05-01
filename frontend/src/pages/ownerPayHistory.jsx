@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 const OwnerMngPayments = () => {
     const [payments, setPayments] = useState([]);
     const [viewedPayment, setViewedPayment] = useState(null);
-    const [userId, setUserId] = useState("1");
+    const [userId, setUserId] = useState(null);
     const [property, setProperty] = useState(null);
 
     const navigate = useNavigate();

@@ -14,17 +14,17 @@ const AdminMngPayments = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [property, setProperty] = useState([]);
 
-     const [userID, setUserId] = useState();
-        const navigate = useNavigate();
-    
-        useEffect(() => {
-            const storedId = localStorage.getItem('userID');
-            if (storedId !== null && storedId !== "null") {
-                setUserId(storedId);
-            } else {
-                navigate("/signin");
-            }
-        }, [navigate]);
+    const [userID, setUserId] = useState(null);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const storedId = localStorage.getItem('userID');
+        if (storedId !== null && storedId !== "null") {
+            setUserId(storedId);
+        } else {
+            navigate("/signin");
+        }
+    }, [navigate]);
     useEffect(() => {
         axios.get("http://localhost:8080/payments")
             .then(response => {
@@ -69,12 +69,12 @@ const AdminMngPayments = () => {
 
     const handleEdit = (payment) => {
         axios.get(`http://localhost:8080/properties/${payment.propertyID}`)
-        .then(response => {
-            setProperty(response.data);
-        })
-        .catch(error => {
-            console.error("Error fetching property:", error);
-        });
+            .then(response => {
+                setProperty(response.data);
+            })
+            .catch(error => {
+                console.error("Error fetching property:", error);
+            });
         setViewedPayment(payment);
         setEditMode(true);
         setFormErrors({});
@@ -265,8 +265,8 @@ const AdminMngPayments = () => {
                                         <div className="col-span-2 font-medium">{payment.paymentID}</div>
                                         <div className="col-span-2">${payment.amount}</div>
                                         <div className={`col-span-2 ${payment.paymentStatus === 'Completed' ? 'text-green-600' :
-                                                payment.paymentStatus === 'Pending' ? 'text-yellow-600' :
-                                                    'text-red-600'
+                                            payment.paymentStatus === 'Pending' ? 'text-yellow-600' :
+                                                'text-red-600'
                                             }`}>
                                             {payment.paymentStatus}
                                         </div>

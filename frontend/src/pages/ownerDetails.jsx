@@ -8,7 +8,7 @@ const OwnerDetails = () => {
     const [owner, setOwner] = useState(null);
     const [editMode, setEditMode] = useState(false);
 
-    const [userId, setUserId] = useState();
+    const [userId, setUserId] = useState(null);
     const navigate = useNavigate();
     useEffect(() => {
         const storedId = localStorage.getItem('userID');

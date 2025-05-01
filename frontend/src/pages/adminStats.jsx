@@ -15,7 +15,7 @@ const AdminStats = () => {
     const [avgRent, setavgRent] = useState(0);
     const [occupancyRate, setOccupancyRate] = useState(0);
     const [yearlyRent, setYearlyRent] = useState(0);
-    const [userID, setUserId] = useState();
+    const [userID, setUserId] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {

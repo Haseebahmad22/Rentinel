@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 const OwnerNotifications = () => {
     const [notifications, setNotifications] = useState([]);
     const [viewedNotification, setViewedNotification] = useState(null);
-    const [userId, setUserId] = useState("1");
+    const [userId, setUserId] = useState(null);
 
     const navigate = useNavigate();
     useEffect(() => {

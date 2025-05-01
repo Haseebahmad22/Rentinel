@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { ChevronDown } from "lucide-react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const monthsTemplate = [
   { month: "Jan", rent: 0 },
@@ -33,7 +34,16 @@ export default function Histogram() {
   const [data, setData] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState("Aug");
   const [open, setOpen] = useState(false);
-  const userName = 'rachelbrown';  // Hardcoded username here
+
+  const navigate = useNavigate(); // initialize navigation
+
+  const userName = localStorage.getItem("userName");
+
+  useEffect(() => {
+    if (!userName) {
+      navigate("/signin");
+    }
+  }, [userName, navigate]);
 
   useEffect(() => {
     async function fetchData() {

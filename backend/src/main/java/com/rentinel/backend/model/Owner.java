@@ -22,7 +22,7 @@ public class Owner {
     @Column(name = "userName", nullable = false, unique = true, length = 50)
     private String userName;
 
-    @Column(name = "password", nullable = false, length = 30) // Changed to lowercase
+    @Column(name = "Password", nullable = false, length = 30) // Changed to lowercase
     private String password; // Changed to lowercase
 
     @Column(name = "email", nullable = false, length = 30)

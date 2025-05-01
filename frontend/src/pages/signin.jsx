@@ -6,7 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 export default function Signin() {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
-        email: "",
+        username: "",
         password: "",
         role: "Tenant",
     });
@@ -27,11 +27,8 @@ export default function Signin() {
 
     const validateField = (name, value) => {
         switch (name) {
-            case "email":
-                if (!value) return "Email is required";
-                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-                    return "Invalid email format";
-                }
+            case "username":
+                if (!value) return "Username is required";
                 break;
             case "password":
                 if (!value) return "Password is required";
@@ -91,10 +88,13 @@ export default function Signin() {
                     throw new Error("Invalid role selected");
             }
 
+            console.log(formData.username, formData.password, endpoint);
+
             const response = await axios.post(endpoint, {
-                email: formData.email,
+                username: formData.username,
                 password: formData.password
             });
+
 
             if (response.data.success) {
                 localStorage.setItem('userID', response.data.userId);
@@ -145,7 +145,7 @@ export default function Signin() {
 
                     <form onSubmit={handleSubmit} className="flex flex-col space-y-2">
                         {[
-                            { label: "Your Email", name: "email", type: "email" },
+                            { label: "Username", name: "username", type: "text" },
                             { label: "Password", name: "password", type: showPassword ? "text" : "password" }
                         ].map((field) => (
                             <div key={field.name} className=" w-full h-fit relative p-1">
@@ -173,9 +173,8 @@ export default function Signin() {
                                                 setErrors(prev => ({ ...prev, [field.name]: "" }));
                                             }
                                         }}
-                                        className={`bg-gray-700 placeholder:text-gray-500 text-white rounded p-3 w-full focus:outline-none pr-10 ${
-                                            errors[field.name] ? "border border-red-500" : ""
-                                        }`}
+                                        className={`bg-gray-700 placeholder:text-gray-500 text-white rounded p-3 w-full focus:outline-none pr-10 ${errors[field.name] ? "border border-red-500" : ""
+                                            }`}
                                         required
                                     />
                                     {field.name === "password" && (
@@ -195,9 +194,8 @@ export default function Signin() {
                         <div className="relative">
                             <p className="bg-[#111822] text-sm text-gray-400 px-1">Role</p>
                             <div
-                                className={`bg-gray-700 text-white rounded p-3 w-full relative cursor-pointer ${
-                                    dropdownOpen ? "rounded-b-none" : ""
-                                }`}
+                                className={`bg-gray-700 text-white rounded p-3 w-full relative cursor-pointer ${dropdownOpen ? "rounded-b-none" : ""
+                                    }`}
                                 onClick={toggleDropdown}
                             >
                                 <p>{formData.role}</p>

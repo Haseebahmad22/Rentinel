@@ -35,8 +35,8 @@ public interface PaymentRepository extends JpaRepository<Payment, Integer> {
     @Query(value = "DELETE FROM Payment WHERE propertyID = :propertyId", nativeQuery = true)
     void deletePaymentsForProperty(@Param("propertyId") Integer propertyId);
 
-    @Query("SELECT SUM(p.amount) FROM Payment p WHERE p.ownerUserName = :ownerUserName")
-    Integer getTotalPaymentsByOwnerUserName(@Param("ownerUserName") String ownerUserName);
+    @Query(value = "SELECT SUM(p.amount) FROM Payment p WHERE p.ownerUserName = :ownerUserName", nativeQuery = true)
+    Long getTotalPaymentsByOwnerUserName(@Param("ownerUserName") String ownerUserName);
 
     List<Payment> findByOwnerUserName(String ownerUserName);
 

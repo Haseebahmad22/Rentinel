@@ -15,7 +15,7 @@ const AdminMngTenants = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
 
-    const [userID, setUserId] = useState();
+    const [userID, setUserId] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -44,6 +44,12 @@ const AdminMngTenants = () => {
                 if (viewedTenant?.id === tenant.id) {
                     setViewedTenant(null);
                 }
+                axios.post("http://localhost:8080/blacklist", {
+                    cnic: tenant.cnic
+                })
+                    .catch(error => {
+                        console.error("Error creating blacklist:", error);
+                    });
             })
             .catch(error => {
                 console.error("Error deleting tenant:", error);
@@ -55,31 +61,31 @@ const AdminMngTenants = () => {
         setEditMode(true);
         setFormErrors({}); // Clear previous errors when entering edit mode
         axios.get(`http://localhost:8080/propertyAssignments/tenant/${tenant.id}`)
-        .then(response => {
-            const propertyAssignments = response.data;
-            const propertyRequests = propertyAssignments.map(property =>
-                axios.get(`http://localhost:8080/properties/${property.propertyID}`)
-            );
+            .then(response => {
+                const propertyAssignments = response.data;
+                const propertyRequests = propertyAssignments.map(property =>
+                    axios.get(`http://localhost:8080/properties/${property.propertyID}`)
+                );
 
-            Promise.all(propertyRequests)
-                .then(responses => {
-                    const propertiesWithDetails = responses.map((response, index) => {
-                        const property = response.data;
-                        return {
-                            ...propertyAssignments[index],
-                            propertyName: property.propertyName,
-                            ownerName: property.ownerName
-                        };
+                Promise.all(propertyRequests)
+                    .then(responses => {
+                        const propertiesWithDetails = responses.map((response, index) => {
+                            const property = response.data;
+                            return {
+                                ...propertyAssignments[index],
+                                propertyName: property.propertyName,
+                                ownerName: property.ownerName
+                            };
+                        });
+                        setTenantProperties(propertiesWithDetails);
+                    })
+                    .catch(error => {
+                        console.error("Error fetching property details:", error);
                     });
-                    setTenantProperties(propertiesWithDetails);
-                })
-                .catch(error => {
-                    console.error("Error fetching property details:", error);
-                });
-        })
-        .catch(error => {
-            console.error("Error fetching tenant properties:", error);
-        });
+            })
+            .catch(error => {
+                console.error("Error fetching tenant properties:", error);
+            });
     };
 
     const handleView = (tenant) => {
@@ -174,7 +180,7 @@ const AdminMngTenants = () => {
         tenant.userName.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    
+
     const TenantBox = ({ label, name, value }) => {
         const isReadOnly = name === "id" || name === "userName";
         const isError = formErrors[name];

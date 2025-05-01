@@ -44,8 +44,8 @@ public class AdminController {
 
     @PostMapping("/login")
     public ResponseEntity<?> loginAdmin(@RequestBody LoginRequest loginRequest) {
-        Optional<Admin> admin = adminRepository.findByEmailAndPassword(
-                loginRequest.getEmail(),
+        Optional<Admin> admin = adminRepository.findByuserNameAndPassword(
+                loginRequest.getUsername(),
                 loginRequest.getPassword());
 
         LoginResponse response;

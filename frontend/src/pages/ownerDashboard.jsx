@@ -10,7 +10,7 @@ const OwnerDashboard = () => {
     const [paymentCount, setPaymentCount] = useState(0);
     const [occupancyRate, setOccupancyRate] = useState(0);
     const [owner, setOwner] = useState(null)
-    const [userId, setUserId] = useState();
+    const [userId, setUserId] = useState(null);
     const navigate = useNavigate();
     useEffect(() => {
         const storedId = localStorage.getItem('userID');

@@ -19,7 +19,7 @@ const AdminMngProperties = () => {
     const [propertyAssignmentToUp, setPropertyAssignmentToUp] = useState(null);
     const [assignedTennat, setAssignedTennat] = useState([]);
 
-    const [userID, setUserId] = useState();
+    const [userID, setUserId] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {

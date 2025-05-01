@@ -11,7 +11,7 @@ const AdminDashboard = () => {
     const [paymentCount, setPaymentCount] = useState(0);
     const [admin, setAdmin] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [userId, setUserId] = useState();
+    const [userId, setUserId] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -31,7 +31,7 @@ const AdminDashboard = () => {
                 .then(res => setAdmin(res.data))
                 .catch(err => console.error(err));
         }
-    }, [userId]); 
+    }, [userId]);
 
 
     useEffect(() => {

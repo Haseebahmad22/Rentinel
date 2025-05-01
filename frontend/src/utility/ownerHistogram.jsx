@@ -41,7 +41,7 @@ export default function Histogram() {
     const [data, setData] = useState([]);
     const [selectedMonth, setSelectedMonth] = useState("Aug");
     const [open, setOpen] = useState(false);
-    const [userId, setUserId] = useState("1");
+    const [userId, setUserId] = useState(null);
 
     useEffect(() => {
         const storedId = localStorage.getItem('userID');

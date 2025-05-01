@@ -15,7 +15,7 @@ const OwnerStats = () => {
     const [yearlyRent, setYearlyRent] = useState(0);
     const [avgRent, setavgRent] = useState(0);
     const [totalPaymentAmount, setTotalPaymetAmount] = useState(0);
-    const [userId, setUserId] = useState("1");
+    const [userId, setUserId] = useState(null);
 
     const navigate = useNavigate();
     useEffect(() => {

@@ -24,7 +24,7 @@ const OwnerMngProperties = () => {
     const addedPropertyID = useRef(null);
     const [filterBy, setFilterBy] = useState("propertyName"); // Default to "Name"
 
-    const [userId, setUserId] = useState();
+    const [userId, setUserId] = useState(null);
     const navigate = useNavigate();
     useEffect(() => {
         const storedId = localStorage.getItem('userID');
