@@ -100,13 +100,12 @@ const TenantDetails = () => {
     return (
         <div className="flex font-[Lexend] min-h-screen">
             <Sidebar />
-            <div className="w-[80vw] bg-[#E6E6E6] px-[80px] pt-[40px]">
-                <div className="mb-6">
+            <div className="w-[80vw] bg-[#E6E6E6] px-[80px]">
+                <div className=" pr-[50px] mt-[10px]">
                     <h1 className="text-[#081E4A] text-[54px] font-bold">Account Details</h1>
                     <p className="text-[15px] text-[#4D4D4D] font-light">View and edit your account details.</p>
                 </div>
-
-                <div className="bg-white rounded-md p-8 w-[1060px] h-[400px] text-[#202224] relative">
+                <div className="mt-8 bg-white rounded-lg shadow-md relative w-[70vw] h-[50vh]">
                     <div className="absolute top-4 right-4">
                         {isEditing ? (
                             <button
@@ -126,7 +125,7 @@ const TenantDetails = () => {
                         )}
                     </div>
 
-                    <div className="flex mb-6 mt-[30px]">
+                    <div className="flex mb-6 mt-[30px] w-[70vw] p-4">
                         <div className="mr-20 w-[260px]">
                             <h2 className="text-[18px] font-semibold text-gray-600 mb-1">FULL NAME</h2>
                             {isEditing ? (
@@ -158,7 +157,7 @@ const TenantDetails = () => {
 
                     <div className="border-t border-gray-300 my-6 mt-[50px]" />
 
-                    <div className="flex mt-[50px]">
+                    <div className="flex mb-6 mt-[30px] w-[70vw] p-4">
                         <div className="mr-20 w-[260px]">
                             <h2 className="text-[18px] font-semibold text-gray-600 mb-1">EMAIL</h2>
                             {isEditing ? (

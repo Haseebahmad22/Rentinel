@@ -58,7 +58,7 @@ const TenantViewProperty = () => {
   }, [showPaymentForm, rentAssignment]);
 
   const handleBack = () => {
-    navigate('/tenantmanageproperties');
+    navigate('/tenantMngProperties');
   };
 
   const handlePayRent = () => {
@@ -100,7 +100,7 @@ const TenantViewProperty = () => {
   const options = { clientSecret, appearance };
 
   return (
-    <div className="flex font-[Lexend] min-h-screen relative">
+    <div className="flex font-[Lexend] min-h-screen bg-[#E6E6E6] relative">
       <Sidebar /> {/* Sidebar stays fixed */}
 
       {/* Blurred background when payment modal is visible */}
@@ -109,15 +109,15 @@ const TenantViewProperty = () => {
       )}
 
       {/* Main content layout */}
-      <div className="flex-1 bg-[#E6E6E6] flex flex-col items-center pt-5 relative z-10">
+      <div className="flex-1 bg-[#E6E6E6] flex flex-col items-center relative z-10">
         {/* Header */}
-        <div className="w-full max-w-5xl px-6">
-          <h1 className="text-[#081E4A] text-[32px] font-bold">Property Details</h1>
-          <p className="text-[14px] text-[#4D4D4D] font-light">View the property details and make payments.</p>
+        
+        <div className="pl-[80px] pr-[50px] mt-[10px] w-full">
+          <h1 className="text-[#081E4A] text-[54px] font-bold">Property Details</h1>
+          <p className="text-[15px] text-[#4D4D4D] font-light">View the property details and make payments.</p>
         </div>
-
         {/* White Card Layout */}
-        <div className="relative bg-white w-full max-w-4xl mt-8 rounded-lg shadow-md overflow-hidden min-h-[300px]">
+        <div className="relative bg-white w-[70vw] h-[60vh] mt-8 rounded-lg shadow-md overflow-hidden">
           {loading ? (
             <div className="flex justify-center items-center h-full p-10 text-gray-700">
               Loading property details...
