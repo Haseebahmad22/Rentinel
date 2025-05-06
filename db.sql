@@ -13,7 +13,7 @@ go
 --DROP TABLE Admin;
 --DROP TABLE Tenant;
 --DROP TABLE Owner;
---DROP PaymentReminder
+--drop table PaymentReminder
 
 	CREATE TABLE Owner
 (
@@ -104,6 +104,10 @@ FOREIGN KEY (propertyID) REFERENCES Property(propertyID) ON UPDATE NO ACTION ON 
 )
 
 go
+CREATE TABLE blackListedUsers(
+	CNIC varchar(13) PRIMARY KEY
+)
+go
 CREATE TABLE PaymentReminder
 (
     reminderID INT IDENTITY(1,1) PRIMARY KEY,
@@ -111,10 +115,6 @@ CREATE TABLE PaymentReminder
     emailSentDate DATE NOT NULL,
     FOREIGN KEY (paymentID) REFERENCES Payment(paymentID) ON DELETE CASCADE
 );
-go
-CREATE TABLE blackListedUsers(
-	CNIC varchar(13) PRIMARY KEY
-)
 go
 CREATE TABLE ownerNotifications
 (
@@ -145,7 +145,7 @@ USE Rentinel
 -- Insert Original Owners (account creation dates in early 2025)
 INSERT INTO Owner (fullName, userName, Password, email, CNIC, accountCreationDate)
 VALUES 
-('Ali Khan', 'alikhan', 'SecurePass123', 'ali.khan@gmail.com', '4220112345671', '2025-01-15'),
+('Ali Khan', 'alikhan', 'SecurePass123', 'ali.khan@gmail.com', '4220112345671', '2025-02-15'),
 ('Fatima Ahmed', 'fatimaahmed', 'FatimaPass456', 'fatima.ahmed@gmail.com', '4220112345672', '2025-02-20'),
 ('Usman Malik', 'usmanmalik', 'UsmanPass789', 'usman.malik@gmail.com', '4220112345673', '2025-03-10'),
 ('Ayesha Raza', 'ayeshaza', 'AyeshaPass101', 'ayesha.raza@gmail.com', '4220112345674', '2025-04-05'),
@@ -154,8 +154,8 @@ VALUES
 -- Additional Owners
 ('Raza Shah', 'razashah', 'RazaPass123', 'raza.shah@gmail.com', '4220112345676', '2025-01-10'),
 ('Nadia Akhtar', 'nadiaakhtar', 'NadiaPass456', 'nadia.akhtar@gmail.com', '4220112345677', '2025-02-18'),
-('Kamran Siddiqui', 'kamransiddiqui', 'KamranPass789', 'kamran.siddiqui@gmail.com', '4220112345678', '2025-03-15'),
-('Sadia Khan', 'sadiakhan', 'SadiaPass101', 'sadia.khan@gmail.com', '4220112345679', '2025-04-08'),
+('Kamran Siddiqui', 'kamransiddiqui', 'KamranPass789', 'kamran.siddiqui@gmail.com', '4220112345678', '2025-05-15'),
+('Sadia Khan', 'sadiakhan', 'SadiaPass101', 'sadia.khan@gmail.com', '4220112345679', '2025-05-08'),
 ('Farhan Iqbal', 'farhaniqbal', 'FarhanPass112', 'farhan.iqbal@gmail.com', '4220112345680', '2025-05-02');
 
 -- Insert Original Tenants (account creation dates in early 2025)
@@ -164,12 +164,12 @@ VALUES
 ('Sara Khan', 'sarakhan', 'SaraPass123', 'sara.khan@gmail.com', '4220112345681', '2025-01-25'),
 ('Ahmed Raza', 'ahmedraza', 'AhmedPass456', 'ahmed.raza@gmail.com', '4220112345682', '2025-02-15'),
 ('Zainab Malik', 'zainabmalik', 'ZainabPass789', 'zainab.malik@gmail.com', '4220112345683', '2025-03-20'),
-('Hassan Ali', 'hassanali', 'HassanPass101', 'hassan.ali@gmail.com', '4220112345684', '2025-04-10'),
+('Hassan Ali', 'hassanali', 'HassanPass101', 'hassan.ali@gmail.com', '4220112345684', '2025-05-10'),
 ('Amina Shah', 'aminashah', 'AminaPass112', 'amina.shah@gmail.com', '4220112345685', '2025-05-03'),
 
 -- Additional Tenants
 ('Imran Sheikh', 'imransheikh', 'ImranPass123', 'imran.sheikh@gmail.com', '4220112345686', '2025-01-20'),
-('Sana Javed', 'sanajaved', 'SanaPass456', 'sana.javed@gmail.com', '4220112345687', '2025-02-10'),
+('Sana Javed', 'sanajaved', 'SanaPass456', 'sana.javed@gmail.com', '4220112345687', '2025-01-10'),
 ('Tariq Mahmood', 'tariqmahmood', 'TariqPass789', 'tariq.mahmood@gmail.com', '4220112345688', '2025-03-25'),
 ('Lubna Farooq', 'lubnafarooq', 'LubnaPass101', 'lubna.farooq@gmail.com', '4220112345689', '2025-04-15'),
 ('Waqar Ahmed', 'waqarahmed', 'WaqarPass112', 'waqar.ahmed@gmail.com', '4220112345690', '2025-05-04');
@@ -201,15 +201,11 @@ INSERT INTO Payment (paymentStatus, paymentDate, amount, propertyID, tenantUserN
 VALUES
 ('Paid', '2025-05-01', 75000, 1, 'sarakhan', 'alikhan'),
 ('Paid', '2025-05-05', 55000, 2, 'ahmedraza', 'fatimaahmed'),
-('Pending', '2025-05-10', 85000, 3, 'zainabmalik', 'usmanmalik'),
 ('Paid', '2025-05-15', 65000, 4, 'hassanali', 'ayeshaza'),
-('Pending', '2025-05-20', 95000, 5, 'aminashah', 'bilalhussain'),
 
 -- Additional Payments
 ('Paid', '2025-05-03', 120000, 6, 'imransheikh', 'razashah'),
-('Pending', '2025-05-08', 45000, 7, 'sanajaved', 'nadiaakhtar'),
 ('Paid', '2025-05-12', 110000, 8, 'tariqmahmood', 'kamransiddiqui'),
-('Pending', '2025-05-18', 80000, 9, 'lubnafarooq', 'sadiakhan'),
 ('Paid', '2025-05-22', 60000, 10, 'waqarahmed', 'farhaniqbal');
 
 -- Insert Original Property Assignments (April-May 2025 dates)
@@ -283,9 +279,12 @@ VALUES
 (10, 'Payment Confirmation', '2025-05-23', 'Downtown Loft', 'farhaniqbal', 'Your rent payment for May 2025 has been received');
 
 -- Insert Payment Reminders (May 2025 dates, before current date)
-INSERT INTO PaymentReminder (paymentID, emailSentDate)
-VALUES
-(3, '2025-05-25'),
-(5, '2025-05-25'),
-(7, '2025-05-25'),
-(9, '2025-05-25');
+--INSERT INTO PaymentReminder (paymentID, emailSentDate)
+--VALUES
+--(3, '2025-05-25'),
+--(5, '2025-05-25'),
+--(7, '2025-05-25'),
+--(9, '2025-05-25');
+
+
+select * from Owner
