@@ -13,7 +13,7 @@ go
 --DROP TABLE Admin;
 --DROP TABLE Tenant;
 --DROP TABLE Owner;
-
+--DROP PaymentReminder
 
 	CREATE TABLE Owner
 (
@@ -104,6 +104,14 @@ FOREIGN KEY (propertyID) REFERENCES Property(propertyID) ON UPDATE NO ACTION ON 
 )
 
 go
+CREATE TABLE PaymentReminder
+(
+    reminderID INT IDENTITY(1,1) PRIMARY KEY,
+    paymentID INT NOT NULL,
+    emailSentDate DATE NOT NULL,
+    FOREIGN KEY (paymentID) REFERENCES Payment(paymentID) ON DELETE CASCADE
+);
+go
 CREATE TABLE blackListedUsers(
 	CNIC varchar(13) PRIMARY KEY
 )
@@ -132,85 +140,152 @@ content varchar(255) NOT NULL,
 FOREIGN KEY (tenantID) references Tenant(ID) ON UPDATE CASCADE ON DELETE CASCADE
 )
 go
+USE Rentinel
 
---inserts
-INSERT INTO Owner (fullName, userName, Password, email, CNIC, accountCreationDate) VALUES
-('Adam Grey', 'adamgrey', 'pass123', 'adam@rentinel.com', '1234567890123', '2025-01-15'),
-('Brian White', 'brianwhite', 'pass123', 'brian@rentinel.com', '1234567890124', '2025-01-22'),
-('Chris Black', 'chrisblack', 'pass123', 'chris@rentinel.com', '1234567890125', '2025-03-03'),
-('David Blue', 'davidblue', 'pass123', 'david@rentinel.com', '1234567890126', '2025-03-17'),
-('Evan Red', 'evanred', 'pass123', 'evan@rentinel.com', '1234567890127', '2025-03-25'),
-('Frank Green', 'frankgreen', 'pass123', 'frank@rentinel.com', '1234567890128', '2025-04-05'),
-('George Yellow', 'georgeyellow', 'pass123', 'george@rentinel.com', '1234567890129', '2025-04-11'),
-('Henry Violet', 'henryviolet', 'pass123', 'henry@rentinel.com', '1234567890130', '2025-04-20'),
-('Ian Orange', 'ianorange', 'pass123', 'ian@rentinel.com', '1234567890131', '2025-04-27'),
-('Jack Brown', 'jackbrown', 'pass123', 'jack@rentinel.com', '1234567890132', '2025-06-01'),
-('Kevin Grey', 'kevingrey', 'pass123', 'kevin@rentinel.com', '1234567890133', '2025-07-02'),
-('Liam Stone', 'liamstone', 'pass123', 'liam@rentinel.com', '1234567890134', '2025-07-06'),
-('Mike Sky', 'mikesky', 'pass123', 'mike@rentinel.com', '1234567890135', '2025-07-09'),
-('Nathan Snow', 'nathansnow', 'pass123', 'nathan@rentinel.com', '1234567890136', '2025-07-12');
+-- Insert Original Owners (account creation dates in early 2025)
+INSERT INTO Owner (fullName, userName, Password, email, CNIC, accountCreationDate)
+VALUES 
+('Ali Khan', 'alikhan', 'SecurePass123', 'ali.khan@gmail.com', '4220112345671', '2025-01-15'),
+('Fatima Ahmed', 'fatimaahmed', 'FatimaPass456', 'fatima.ahmed@gmail.com', '4220112345672', '2025-02-20'),
+('Usman Malik', 'usmanmalik', 'UsmanPass789', 'usman.malik@gmail.com', '4220112345673', '2025-03-10'),
+('Ayesha Raza', 'ayeshaza', 'AyeshaPass101', 'ayesha.raza@gmail.com', '4220112345674', '2025-04-05'),
+('Bilal Hussain', 'bilalhussain', 'BilalPass112', 'bilal.hussain@gmail.com', '4220112345675', '2025-05-01'),
 
+-- Additional Owners
+('Raza Shah', 'razashah', 'RazaPass123', 'raza.shah@gmail.com', '4220112345676', '2025-01-10'),
+('Nadia Akhtar', 'nadiaakhtar', 'NadiaPass456', 'nadia.akhtar@gmail.com', '4220112345677', '2025-02-18'),
+('Kamran Siddiqui', 'kamransiddiqui', 'KamranPass789', 'kamran.siddiqui@gmail.com', '4220112345678', '2025-03-15'),
+('Sadia Khan', 'sadiakhan', 'SadiaPass101', 'sadia.khan@gmail.com', '4220112345679', '2025-04-08'),
+('Farhan Iqbal', 'farhaniqbal', 'FarhanPass112', 'farhan.iqbal@gmail.com', '4220112345680', '2025-05-02');
 
-INSERT INTO Tenant (fullName, userName, Password, email, CNIC, accountCreationDate) VALUES
-('Olivia Smith', 'oliviasmith', 'pass123', 'olivia@rentinel.com', '2234567890123', '2025-01-10'),
-('Peter Johnson', 'peterjohnson', 'pass123', 'peter@rentinel.com', '2234567890124', '2025-01-20'),
-('Quinn Davis', 'quinndavis', 'pass123', 'quinn@rentinel.com', '2234567890125', '2025-03-07'),
-('Rachel Brown', 'rachelbrown', 'pass123', 'rachel@rentinel.com', '2234567890126', '2025-03-19'),
-('Steve Wilson', 'stevewilson', 'pass123', 'steve@rentinel.com', '2234567890127', '2025-03-28'),
-('Tina Moore', 'tinamoore', 'pass123', 'tina@rentinel.com', '2234567890128', '2025-04-03'),
-('Uma Taylor', 'umataylor', 'pass123', 'uma@rentinel.com', '2234567890129', '2025-04-15'),
-('Victor Anderson', 'victoranderson', 'pass123', 'victor@rentinel.com', '2234567890130', '2025-04-23'),
-('Wendy Thomas', 'wendythomas', 'pass123', 'wendy@rentinel.com', '2234567890131', '2025-04-29'),
-('Xavier Lee', 'xavierlee', 'pass123', 'xavier@rentinel.com', '2234567890132', '2025-06-05'),
-('Yvonne Harris', 'yvonneharris', 'pass123', 'yvonne@rentinel.com', '2234567890133', '2025-07-01'),
-('Zach Young', 'zachyoung', 'pass123', 'zach@rentinel.com', '2234567890134', '2025-07-04'),
-('Abby King', 'abbyking', 'pass123', 'abby@rentinel.com', '2234567890135', '2025-07-07'),
-('Ben Scott', 'benscott', 'pass123', 'ben@rentinel.com', '2234567890136', '2025-07-10');
+-- Insert Original Tenants (account creation dates in early 2025)
+INSERT INTO Tenant (fullName, userName, Password, email, CNIC, accountCreationDate)
+VALUES 
+('Sara Khan', 'sarakhan', 'SaraPass123', 'sara.khan@gmail.com', '4220112345681', '2025-01-25'),
+('Ahmed Raza', 'ahmedraza', 'AhmedPass456', 'ahmed.raza@gmail.com', '4220112345682', '2025-02-15'),
+('Zainab Malik', 'zainabmalik', 'ZainabPass789', 'zainab.malik@gmail.com', '4220112345683', '2025-03-20'),
+('Hassan Ali', 'hassanali', 'HassanPass101', 'hassan.ali@gmail.com', '4220112345684', '2025-04-10'),
+('Amina Shah', 'aminashah', 'AminaPass112', 'amina.shah@gmail.com', '4220112345685', '2025-05-03'),
 
+-- Additional Tenants
+('Imran Sheikh', 'imransheikh', 'ImranPass123', 'imran.sheikh@gmail.com', '4220112345686', '2025-01-20'),
+('Sana Javed', 'sanajaved', 'SanaPass456', 'sana.javed@gmail.com', '4220112345687', '2025-02-10'),
+('Tariq Mahmood', 'tariqmahmood', 'TariqPass789', 'tariq.mahmood@gmail.com', '4220112345688', '2025-03-25'),
+('Lubna Farooq', 'lubnafarooq', 'LubnaPass101', 'lubna.farooq@gmail.com', '4220112345689', '2025-04-15'),
+('Waqar Ahmed', 'waqarahmed', 'WaqarPass112', 'waqar.ahmed@gmail.com', '4220112345690', '2025-05-04');
 
-INSERT INTO Admin (fullName, userName, Password, email, CNIC, accountCreationDate) VALUES
-('Admin One', 'adminone', 'adminpass', 'admin1@rentinel.com', '3234567890123', '2025-01-01');
+-- Insert Admins (account creation dates in early 2025)
+INSERT INTO Admin (fullName, userName, Password, email, CNIC, accountCreationDate)
+VALUES 
+('Admin One', 'admin1', 'admin123', 'admin.one@gmail.com', '4220112345691', '2025-01-01'),
+('Admin Two', 'admin2', 'admin456', 'admin.two@gmail.com', '4220112345692', '2025-01-01');
 
-INSERT INTO Property (propertyName, Area, location, fixedRent, ownerName, tenantName, numOfBedRooms, numOfRooms, numOfBaths) VALUES
-('Sunrise Villa', '1 Kanal', 'Downtown City', 1200.00, 'adamgrey', 'oliviasmith', 3, 5, 2),
-('Maple House', '2 Kanal', 'Lakeview Area', 950.00, 'brianwhite', 'peterjohnson', 2, 4, 2),
-('Hilltop Mansion', '3000 sqft', 'Green Hills', 2000.00, 'chrisblack', 'quinndavis', 5, 8, 4),
-('City Apartment', '4 Marla', 'Metro Heights', 800.00, 'davidblue', 'rachelbrown', 2, 3, 2),
-('Riverfront Condo', '2 Kanal', 'River Side', 1100.00, 'evanred', 'stevewilson', 2, 4, 2),
-('Ocean Breeze', '1 Kanal', 'Beach Area', 1500.00, 'frankgreen', 'tinamoore', 3, 5, 3);
+-- Insert Original Properties
+INSERT INTO Property (propertyName, Area, location, fixedRent, ownerName, tenantName, numOfBedRooms, numOfRooms, numOfBaths)
+VALUES
+('Sunny Villa', '1 Kanal', '123 Main Street, Lahore', 75000.00, 'alikhan', 'sarakhan', 3, 5, 3),
+('Garden View', '10 Marla', '456 Park Avenue, Karachi', 55000.00, 'fatimaahmed', 'ahmedraza', 2, 3, 2),
+('Hilltop Apartment', '2 Kanal', '789 Hillside Road, Islamabad', 85000.00, 'usmanmalik', 'zainabmalik', 4, 6, 4),
+('City Heights', '8 Marla', '321 Downtown Plaza, Lahore', 65000.00, 'ayeshaza', 'hassanali', 3, 4, 2),
+('Lakeview House', '1.5 Kanal', '654 Lakeside Drive, Karachi', 95000.00, 'bilalhussain', 'aminashah', 5, 7, 5),
 
-INSERT INTO Payment (paymentStatus, paymentDate, amount, propertyID, tenantUserName, ownerUserName) VALUES
-('Paid', '2025-04-05', 1200, 1, 'oliviasmith', 'adamgrey'),
-('Pending', '2025-04-10', 950, 2, 'peterjohnson', 'brianwhite'),
-('Paid', '2025-04-15', 2000, 3, 'quinndavis', 'chrisblack'),
-('Paid', '2025-04-20', 800, 4, 'rachelbrown', 'davidblue'),
-('Pending', '2025-04-25', 1100, 5, 'stevewilson', 'evanred');
+-- Additional Properties
+('Royal Residency', '2 Kanal', '12 The Mall, Lahore', 120000.00, 'razashah', 'imransheikh', 6, 8, 5),
+('Green Valley', '5 Marla', '34 Garden Road, Islamabad', 45000.00, 'nadiaakhtar', 'sanajaved', 2, 3, 2),
+('Ocean Breeze', '1 Kanal', '78 Beach View, Karachi', 110000.00, 'kamransiddiqui', 'tariqmahmood', 4, 6, 4),
+('Mountain View', '12 Marla', '56 Hill Street, Murree', 80000.00, 'sadiakhan', 'lubnafarooq', 3, 5, 3),
+('Downtown Loft', '7 Marla', '90 Commercial Area, Lahore', 60000.00, 'farhaniqbal', 'waqarahmed', 2, 3, 2);
 
+-- Insert Original Payments (all in May 2025, before current date)
+INSERT INTO Payment (paymentStatus, paymentDate, amount, propertyID, tenantUserName, ownerUserName)
+VALUES
+('Paid', '2025-05-01', 75000, 1, 'sarakhan', 'alikhan'),
+('Paid', '2025-05-05', 55000, 2, 'ahmedraza', 'fatimaahmed'),
+('Pending', '2025-05-10', 85000, 3, 'zainabmalik', 'usmanmalik'),
+('Paid', '2025-05-15', 65000, 4, 'hassanali', 'ayeshaza'),
+('Pending', '2025-05-20', 95000, 5, 'aminashah', 'bilalhussain'),
 
-INSERT INTO propertyAssignment (propertyID, ownerID, tenantID, assignmentDate) VALUES
-(1, 1, 1, '2025-04-02'),
+-- Additional Payments
+('Paid', '2025-05-03', 120000, 6, 'imransheikh', 'razashah'),
+('Pending', '2025-05-08', 45000, 7, 'sanajaved', 'nadiaakhtar'),
+('Paid', '2025-05-12', 110000, 8, 'tariqmahmood', 'kamransiddiqui'),
+('Pending', '2025-05-18', 80000, 9, 'lubnafarooq', 'sadiakhan'),
+('Paid', '2025-05-22', 60000, 10, 'waqarahmed', 'farhaniqbal');
+
+-- Insert Original Property Assignments (April-May 2025 dates)
+INSERT INTO propertyAssignment (propertyID, ownerID, tenantID, assignmentDate)
+VALUES
+(1, 1, 1, '2025-04-01'),
 (2, 2, 2, '2025-04-05'),
 (3, 3, 3, '2025-04-10'),
-(4, 4, 4, '2025-04-12'),
-(5, 5, 5, '2025-04-17');
+(4, 4, 4, '2025-04-15'),
+(5, 5, 5, '2025-04-20'),
 
+-- Additional Property Assignments
+(6, 6, 6, '2025-04-03'),
+(7, 7, 7, '2025-04-08'),
+(8, 8, 8, '2025-04-12'),
+(9, 9, 9, '2025-04-18'),
+(10, 10, 10, '2025-04-22');
 
-INSERT INTO rentAssignment (propertyID, tenantID, startDate, dueDate) VALUES
-(1, 1, '2025-04-01', '2025-04-30'),
-(2, 2, '2025-04-01', '2025-04-30'),
-(3, 3, '2025-04-01', '2025-04-30'),
-(4, 4, '2025-04-01', '2025-04-30'),
-(5, 5, '2025-04-01', '2025-04-30');
+-- Insert Original Rent Assignments (May 2025 dates, ending before current date)
+INSERT INTO rentAssignment (propertyID, tenantID, startDate, dueDate)
+VALUES
+(1, 1, '2025-05-01', '2025-05-31'),
+(2, 2, '2025-05-01', '2025-05-31'),
+(3, 3, '2025-05-01', '2025-05-31'),
+(4, 4, '2025-05-01', '2025-05-31'),
+(5, 5, '2025-05-01', '2025-05-31'),
 
-INSERT INTO blackListedUsers (CNIC) VALUES
-('2234567890137'),
-('2234567890138');
+-- Additional Rent Assignments
+(6, 6, '2025-05-01', '2025-05-31'),
+(7, 7, '2025-05-01', '2025-05-31'),
+(8, 8, '2025-05-01', '2025-05-31'),
+(9, 9, '2025-05-01', '2025-05-31'),
+(10, 10, '2025-05-01', '2025-05-31');
 
+-- Insert Blacklisted Users
+INSERT INTO blackListedUsers (CNIC)
+VALUES
+('4220112340001'),
+('4220112340002');
 
-INSERT INTO ownerNotifications (ownerID, subject, sentDate, propertyName, tenantUserName, content) VALUES
-(1, 'Payment Received', '2025-04-06', 'Sunrise Villa', 'oliviasmith', 'Payment for April received.'),
-(2, 'Pending Payment', '2025-04-11', 'Maple House', 'peterjohnson', 'Payment overdue for April.');
+-- Insert Original Owner Notifications (May 2025 dates, before current date)
+INSERT INTO ownerNotifications (ownerID, subject, sentDate, propertyName, tenantUserName, content)
+VALUES
+(1, 'Rent Paid', '2025-05-02', 'Sunny Villa', 'sarakhan', 'Tenant Sara Khan has paid the rent for May 2025'),
+(2, 'Rent Paid', '2025-05-06', 'Garden View', 'ahmedraza', 'Tenant Ahmed Raza has paid the rent for May 2025'),
+(3, 'Rent Due', '2025-05-25', 'Hilltop Apartment', 'zainabmalik', 'Reminder: Rent for May 2025 is still pending'),
+(4, 'Rent Paid', '2025-05-16', 'City Heights', 'hassanali', 'Tenant Hassan Ali has paid the rent for May 2025'),
+(5, 'Rent Due', '2025-05-25', 'Lakeview House', 'aminashah', 'Reminder: Rent for May 2025 is still pending'),
 
-INSERT INTO tenantNotifications (tenantID, subject, sentDate, propertyName, ownerUserName, content) VALUES
-(1, 'Payment Confirmation', '2025-04-06', 'Sunrise Villa', 'adamgrey', 'Your payment has been recorded.'),
-(2, 'Payment Reminder', '2025-04-11', 'Maple House', 'brianwhite', 'Please clear your pending dues.');
+-- Additional Owner Notifications
+(6, 'Rent Paid', '2025-05-04', 'Royal Residency', 'imransheikh', 'Tenant Imran Sheikh has paid the rent for May 2025'),
+(7, 'Rent Due', '2025-05-25', 'Green Valley', 'sanajaved', 'Reminder: Rent for May 2025 is still pending'),
+(8, 'Rent Paid', '2025-05-13', 'Ocean Breeze', 'tariqmahmood', 'Tenant Tariq Mahmood has paid the rent for May 2025'),
+(9, 'Rent Due', '2025-05-25', 'Mountain View', 'lubnafarooq', 'Reminder: Rent for May 2025 is still pending'),
+(10, 'Rent Paid', '2025-05-23', 'Downtown Loft', 'waqarahmed', 'Tenant Waqar Ahmed has paid the rent for May 2025');
+
+-- Insert Original Tenant Notifications (May 2025 dates, before current date)
+INSERT INTO tenantNotifications (tenantID, subject, sentDate, propertyName, ownerUserName, content)
+VALUES
+(1, 'Payment Confirmation', '2025-05-02', 'Sunny Villa', 'alikhan', 'Your rent payment for May 2025 has been received'),
+(2, 'Payment Confirmation', '2025-05-06', 'Garden View', 'fatimaahmed', 'Your rent payment for May 2025 has been received'),
+(3, 'Payment Reminder', '2025-05-25', 'Hilltop Apartment', 'usmanmalik', 'Friendly reminder: Your rent for May 2025 is due'),
+(4, 'Payment Confirmation', '2025-05-16', 'City Heights', 'ayeshaza', 'Your rent payment for May 2025 has been received'),
+(5, 'Payment Reminder', '2025-05-25', 'Lakeview House', 'bilalhussain', 'Friendly reminder: Your rent for May 2025 is due'),
+
+-- Additional Tenant Notifications
+(6, 'Payment Confirmation', '2025-05-04', 'Royal Residency', 'razashah', 'Your rent payment for May 2025 has been received'),
+(7, 'Payment Reminder', '2025-05-25', 'Green Valley', 'nadiaakhtar', 'Friendly reminder: Your rent for May 2025 is due'),
+(8, 'Payment Confirmation', '2025-05-13', 'Ocean Breeze', 'kamransiddiqui', 'Your rent payment for May 2025 has been received'),
+(9, 'Payment Reminder', '2025-05-25', 'Mountain View', 'sadiakhan', 'Friendly reminder: Your rent for May 2025 is due'),
+(10, 'Payment Confirmation', '2025-05-23', 'Downtown Loft', 'farhaniqbal', 'Your rent payment for May 2025 has been received');
+
+-- Insert Payment Reminders (May 2025 dates, before current date)
+INSERT INTO PaymentReminder (paymentID, emailSentDate)
+VALUES
+(3, '2025-05-25'),
+(5, '2025-05-25'),
+(7, '2025-05-25'),
+(9, '2025-05-25');
